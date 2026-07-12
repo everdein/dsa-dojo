@@ -1,3 +1,6 @@
+// Exercise: Find the largest value in an array.
+// Goal: Scan the array once and keep track of the maximum value seen so far.
+
 const numbers = [1, 2, 3, 4, 5];
 
 function findLargest(values) {
