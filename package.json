@@ -1,21 +1,20 @@
 {
-  "name": "dsa",
+  "name": "dsa-dojo",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "description": "JavaScript data structures and algorithms study repository with field guides, implementations, complexity analysis, and interview-pattern practice.",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/everdein/dsa.git"
+    "url": "git+https://github.com/everdein/dsa-dojo.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
-    "url": "https://github.com/everdein/dsa/issues"
+    "url": "https://github.com/everdein/dsa-dojo/issues"
   },
-  "homepage": "https://github.com/everdein/dsa#readme"
+  "homepage": "https://github.com/everdein/dsa-dojo#readme"
 }
