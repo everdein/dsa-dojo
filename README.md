@@ -4,18 +4,19 @@ This repository is a personal study space for building strong foundations in dat
 
 ## What This Repo Is
 
-The goal of this dojo is to turn abstract concepts into practical experience. Each topic folder contains:
+The goal of this dojo is to turn abstract concepts into practical experience. Each topic folder includes:
 
 - a field guide in the form of a README
-- practice problems and implementation files
+- exercises and practice prompts
 - notes about when to use a structure or algorithm
+
+Implementation files are added as the study progresses.
 
 ## How to Use It
 
 Run JavaScript files with Node.js:
 
 ```bash
-node index.js
 node arrays/find-largest.js
 ```
 
