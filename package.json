@@ -2,8 +2,12 @@
   "name": "dsa-dojo",
   "version": "1.0.0",
   "description": "JavaScript data structures and algorithms study repository with field guides, implementations, complexity analysis, and interview-pattern practice.",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "studio": "node studio/server.mjs",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
