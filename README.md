@@ -2,15 +2,20 @@
 
 This repository is a personal study space for building strong foundations in data structures and algorithms with JavaScript.
 
-## Interactive Studio Direction
+## Interactive Studio
 
-**Status: Planned. The interactive studio is not implemented yet.**
+**Status: Working arrays foundation with two interactive lessons.**
 
-DSA Dojo is intended to grow into an interactive algorithm studio where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside an original guide companion.
+DSA Dojo includes a dependency-free browser studio where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside Pip, an original guide companion.
 
-The written field guides and runnable JavaScript exercises remain the foundation. The interactive experience will be built alongside the learning process, beginning with arrays and expanding one proven topic at a time.
+The current catalog includes:
 
-Read the [interactive studio product vision](docs/product-vision.md) for the arrays-first concept, learning model, companion direction, acceptance criteria, and expansion roadmap.
+- **Find Largest** for scalar state and a linear scan
+- **Sliding Window** for a moving range and reusable aggregate state
+
+The written field guides and runnable JavaScript exercises remain the foundation. Interactive lessons expand alongside the learning process, one proven visual capability at a time.
+
+Read the [product vision](docs/product-vision.md) for the learning model and roadmap, and the [studio architecture guide](docs/studio-architecture.md) for the implementation, lesson contract, and extension workflow.
 
 ## What This Repo Is
 
@@ -24,10 +29,27 @@ Implementation files are added as the study progresses.
 
 ## How to Use It
 
+Use Node.js 18 or newer.
+
 Run JavaScript files with Node.js:
 
 ```bash
 node arrays/find-largest.js
+```
+
+Run the interactive studio locally:
+
+```bash
+npm install
+npm run studio
+```
+
+Then open `http://127.0.0.1:4173` in a browser. The studio currently includes Find Largest and fixed-size Sliding Window lessons in an arrays catalog. The existing Node.js exercises remain runnable independently.
+
+Run the automated checks:
+
+```bash
+npm test
 ```
 
 When you solve a problem, try to answer these questions:

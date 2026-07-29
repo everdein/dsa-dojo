@@ -141,13 +141,20 @@ The visualization should consume deterministic trace data rather than embedding 
 ```javascript
 {
   step: 5,
+  phase: "compare",
   activeIndex: 4,
   comparedValue: 5,
   previousBestValue: 4,
   bestValue: 5,
   bestIndex: 4,
-  activeCodeStep: "update-largest",
-  message: "5 becomes the new largest value because it is greater than 4."
+  codeSteps: ["compare", "update-largest"],
+  view: {
+    values: [1, 2, 3, 4, 5],
+    activeIndices: [4],
+    ranges: [],
+    markers: [{ index: 4, kind: "best", label: "best" }]
+  },
+  narration: "5 becomes the new largest value because it is greater than 4."
 }
 ```
 
@@ -173,12 +180,12 @@ The first lesson is complete when:
 
 ### Arrays Expansion Order
 
-After Find Largest proves the model and each underlying standalone exercise is correctly implemented and tested:
+After Find Largest establishes scalar state and a linear scan:
 
-1. **Reverse Array** or **Move Zeros** adds mutation and multiple pointers.
-2. **Pair Sum** introduces lookup or two-pointer decisions.
-3. **Frequency Count** introduces derived state.
-4. **Sliding Window** introduces a moving range and aggregate state.
+1. **Sliding Window** validates the shared player with a moving range and aggregate state.
+2. **Reverse Array** or **Move Zeros** adds mutation and multiple pointers.
+3. **Pair Sum** introduces lookup or two-pointer decisions.
+4. **Frequency Count** introduces derived state.
 5. The remaining array exercises become lessons only when they add learning value rather than duplicate an existing interaction.
 
 ## Reusable Product Model
@@ -236,3 +243,17 @@ The arrays vertical slice does not need:
 - a recreation of Phantom's visual identity
 
 The first release exists to prove that one algorithm can be made genuinely easier to understand. Everything else builds from that evidence.
+
+## Foundation checkpoint
+
+The studio now has a framework-free player state machine, a validated lesson
+registry, deterministic trace contracts, an array view model, and automated
+tests for algorithms, traces, input rules, rendering state, and player
+transitions. Find Largest remains the reference scalar-state lesson. Sliding
+Window is the second lesson and validates range highlighting, entering and
+leaving markers, aggregate state, and catalog switching.
+
+The next checkpoint is evaluation rather than immediate catalog expansion.
+After the two-lesson foundation is exercised, Reverse Linked List can become
+the first deliberate renderer stress test. This sequence gives us evidence
+before adding tree, graph, or dynamic-programming-specific infrastructure.
