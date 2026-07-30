@@ -1,104 +1,108 @@
 # DSA Dojo
 
-DSA Dojo is an interactive learning product for making data structures and algorithms visible, inspectable, and explainable with JavaScript.
+**See the algorithm think.**
 
-## Interactive Studio
+DSA Dojo is a framework-free learning product that makes data structures and
+algorithms visible, inspectable, and explainable with JavaScript. Learners can
+move through an execution one decision at a time, connect each state change to
+the code that caused it, and use Pip, an original guide companion, to reinforce
+the underlying pattern.
 
-**Status: Working visual learning experience with an introductory story and seven interactive lessons across arrays and linked lists.**
+**Current status:** A working introductory experience and seven interactive
+lessons spanning arrays and linked lists.
 
-DSA Dojo includes a dependency-free browser experience where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside Pip, an original guide companion.
+## Try It Locally
 
-The landing story introduces the learning model with small, synchronized Find Largest and Sliding Window demonstrations. The studio then gives the learner full control over the real execution trace: editable input, Previous, Next, Play/Pause, Reset, speed, source highlighting, explanations, and complexity.
-
-The current catalog includes:
-
-- **Find Largest** for scalar state and a linear scan
-- **Sliding Window** for a moving range and reusable aggregate state
-- **Reverse Array** for mirrored swaps and converging pointers
-- **Move Zeros** for stable compaction with coordinated read and write pointers
-- **Traverse a Linked List** for following references and recognizing null termination
-- **Reverse a Linked List** for protecting, redirecting, and advancing pointers
-- **Detect a Cycle** for Floyd's fast-and-slow pointer technique
-
-The written field guides and runnable JavaScript exercises support the product, while each interactive lesson adds a distinct pattern or reusable visual capability.
-
-Read the [product vision](docs/product-vision.md) for the learning model and roadmap, and the [studio architecture guide](docs/studio-architecture.md) for the implementation, lesson contract, and extension workflow.
-
-## What This Repo Is
-
-The goal of this dojo is to turn abstract concepts into practical, guided experiences. Each topic folder can include:
-
-- a field guide in the form of a README
-- exercises and practice prompts
-- notes about when to use a structure or algorithm
-
-Implementations become lesson sources of truth when they are validated, tested, and connected to deterministic traces.
-
-## How to Use It
-
-Use Node.js 18 or newer.
-
-Run JavaScript files with Node.js:
-
-```bash
-node arrays/find-largest.js
-```
-
-Run the interactive studio locally:
+DSA Dojo requires Node.js 18 or newer.
 
 ```bash
 npm install
 npm run studio
 ```
 
-Then open:
+Open:
 
 - `http://127.0.0.1:4173/` for the animated introduction
 - `http://127.0.0.1:4173/studio` for the lesson catalog and player
 
-The studio currently includes four array lessons and three linked-list lessons. Direct lesson links use the URL hash, such as `/studio#lesson=arrays%2Fmove-zeros` or `/studio#lesson=linked-lists%2Fdetect-cycle`. The existing Node.js exercises remain runnable independently.
+If port `4173` is already in use, choose another port:
 
-Run the automated checks:
+```bash
+node studio/server.mjs 4180
+```
+
+Run all automated checks with:
 
 ```bash
 npm test
 ```
 
-When you solve a problem, try to answer these questions:
+## Interactive Lessons
 
-1. What is the core idea?
-2. What is the time complexity?
-3. What is the space complexity?
-4. When would this approach fail or become inefficient?
-5. What pattern does this problem follow?
+| Category | Lesson | Core idea |
+| --- | --- | --- |
+| Arrays | Find Largest | Track scalar state during a linear scan |
+| Arrays | Sliding Window | Reuse a fixed-size range and running aggregate |
+| Arrays | Reverse Array | Swap mirrored values with converging pointers |
+| Arrays | Move Zeros | Compact values with coordinated read and write pointers |
+| Linked lists | Traverse a Linked List | Follow references until null |
+| Linked lists | Reverse a Linked List | Protect, redirect, and advance pointers |
+| Linked lists | Detect a Cycle | Use Floyd's fast-and-slow pointer technique |
 
-## Curriculum
+Each lesson supports editable input, Previous, Next, Play/Pause, Reset, playback
+speed, source highlighting, plain-language explanations, and time and space
+complexity.
 
-The repository covers:
+## How It Works
 
-- arrays and strings
-- matrices
-- hash maps and sets
-- linked lists
-- stacks and queues
-- heaps and priority queues
-- trees and tries
-- graphs and disjoint sets
-- searching and sorting
-- recursion, backtracking, greedy, and dynamic programming
-- bit manipulation and complexity analysis
+Every lesson uses the same product model:
 
-## Learning Approach
+1. A pure algorithm computes the answer.
+2. A trace builder records a deterministic execution history.
+3. A framework-free player controls stepping, playback, speed, and reset.
+4. A renderer projects each trace step into an accessible visual state.
+5. Lesson content keeps the code, narration, complexity, and Pip guidance in
+   sync.
 
-Each topic README explains:
+This separation makes execution reversible without mixing animation concerns
+into the algorithm itself. The current array and linked-list renderers share
+the same lesson contract, player, navigation, and accessibility model.
 
-- what the structure or pattern is
-- how it works
-- why it matters
-- common operations and complexity
-- common use cases
-- interview patterns
-- a basic JavaScript example
-- exercises to practice
+## Tech Stack
 
-The code files are where the real learning happens. The README files are the guideposts.
+| Layer | Technology |
+| --- | --- |
+| Interface | Semantic HTML, modern CSS, and browser-native JavaScript |
+| Modules | Native ES modules |
+| Runtime | Node.js 18+ |
+| Local server | Small Node.js static-file server |
+| Testing | Node.js built-in test runner |
+| Architecture | Pure algorithms, deterministic traces, validated lesson registry, and renderer-specific view models |
+| Dependencies | No frontend framework or runtime packages |
+
+The intentionally small stack keeps the learning code visible and lets the
+project prove its interaction model before adopting additional infrastructure.
+
+## Repository Guide
+
+- Topic folders contain field guides and runnable JavaScript exercises.
+- `studio/` contains the introduction, lesson application, shared player,
+  renderers, lesson definitions, and Pip.
+- `test/` verifies algorithms, trace contracts, rendering state, navigation,
+  input rules, and player transitions.
+- [`docs/product-vision.md`](docs/product-vision.md) explains the learning
+  model, experience principles, and roadmap.
+- [`docs/studio-architecture.md`](docs/studio-architecture.md) documents the
+  implementation, lesson contract, verification standard, and extension
+  workflow.
+
+## Broader Curriculum
+
+The written field guides cover arrays, strings, matrices, hash maps and sets,
+linked lists, stacks, queues, heaps, trees, tries, graphs, searching, sorting,
+recursion, backtracking, greedy algorithms, dynamic programming, bit
+manipulation, and common problem-solving patterns.
+
+Interactive lessons are added when a topic contributes a meaningful learning
+pattern or reusable visualization capability—not simply to increase the lesson
+count.
