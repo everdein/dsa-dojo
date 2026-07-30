@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const studioRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const projectRoot = path.resolve(studioRoot, "..");
 const arraysRoot = path.resolve(projectRoot, "arrays");
+const linkedListsRoot = path.resolve(projectRoot, "linked-lists");
 const srcRoot = path.resolve(studioRoot, "src");
 const port = Number(process.env.PORT ?? process.argv[2] ?? 4173);
 const contentTypes = {
@@ -33,6 +34,9 @@ export function resolveRequest(requestUrl) {
   }
   if (pathname.startsWith("/arrays/")) {
     return resolveInside(arraysRoot, `.${pathname.slice("/arrays".length)}`);
+  }
+  if (pathname.startsWith("/linked-lists/")) {
+    return resolveInside(linkedListsRoot, `.${pathname.slice("/linked-lists".length)}`);
   }
   return null;
 }

@@ -1,5 +1,6 @@
 import { buildValidatedTrace } from "./lesson-contract.mjs";
 import { projectArrayView } from "./array-renderer.mjs";
+import { projectLinkedListView } from "./linked-list-renderer.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
@@ -9,10 +10,17 @@ import {
   setPipState
 } from "./pip.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
+import {
+  controlValueToPlaybackDelay,
+  playbackDelayToControlValue,
+  playbackSpeedLabel
+} from "./speed.mjs";
 
 const lessons = listLessons();
 const lessonIds = lessons.map((item) => item.id);
-const initialLessonId = readLessonIdFromHash(window.location.hash, lessonIds) ?? lessons[0].id;
+const topicCount = new Set(lessons.map((item) => item.topic)).size;
+const initialLessonIdFromHash = readLessonIdFromHash(window.location.hash, lessonIds);
+const initialLessonId = initialLessonIdFromHash ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
 let player = createPlayerState({
   lessonId: lesson.id,
@@ -24,6 +32,7 @@ let timerId = null;
 const elements = {
   headerStatus: document.querySelector("#header-status"),
   lessonList: document.querySelector("#lesson-list"),
+  lessonSection: document.querySelector("#lesson"),
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
   lessonTitle: document.querySelector("#lesson-title"),
   lessonSummary: document.querySelector("#lesson-summary"),
@@ -32,8 +41,9 @@ const elements = {
   sample: document.querySelector("#sample-button"),
   help: document.querySelector("#input-help"),
   error: document.querySelector("#input-error"),
-  cells: document.querySelector("#array-cells"),
-  legend: document.querySelector("#array-legend"),
+  inputTitle: document.querySelector("#input-title"),
+  visualizationRoot: document.querySelector("#visualization-root"),
+  legend: document.querySelector("#visualization-legend"),
   stats: document.querySelector("#stat-grid"),
   previous: document.querySelector("#previous-button"),
   next: document.querySelector("#next-button"),
@@ -53,6 +63,7 @@ const elements = {
   complexityChip: document.querySelector("#complexity-chip"),
   timeComplexity: document.querySelector("#time-complexity"),
   spaceComplexity: document.querySelector("#space-complexity"),
+  spaceComplexityLabel: document.querySelector("#space-complexity-label"),
   complexityExplanation: document.querySelector("#complexity-explanation"),
   reflectionEyebrow: document.querySelector("#reflection-eyebrow"),
   reflectionTitle: document.querySelector("#reflection-title"),
@@ -99,10 +110,11 @@ function renderCatalogState() {
 }
 
 function renderLessonChrome() {
-  elements.headerStatus.textContent = `${lesson.topic.toUpperCase()} · ${lessons.length} LESSONS`;
+  elements.headerStatus.textContent = `${topicCount} DATA STRUCTURES · ${lessons.length} LESSONS`;
   elements.lessonEyebrow.textContent = `${lesson.topic.toUpperCase()} / LESSON ${String(lesson.order).padStart(2, "0")}`;
   elements.lessonTitle.textContent = lesson.title;
   elements.lessonSummary.textContent = lesson.summary;
+  elements.inputTitle.textContent = lesson.input.heading ?? (lesson.renderer === "array" ? "Your array" : "Your linked list");
   elements.help.textContent = lesson.input.help;
   elements.pipHeading.textContent = lesson.guide.heading;
   elements.codeTitle.textContent = lesson.code.title;
@@ -110,6 +122,7 @@ function renderLessonChrome() {
   elements.complexityChip.textContent = lesson.complexity.chip;
   elements.timeComplexity.textContent = lesson.complexity.time;
   elements.spaceComplexity.textContent = lesson.complexity.space;
+  elements.spaceComplexityLabel.textContent = lesson.complexity.spaceLabel ?? "auxiliary space";
   elements.complexityExplanation.textContent = lesson.complexity.explanation;
   elements.reflectionEyebrow.textContent = lesson.reflection.eyebrow;
   elements.reflectionTitle.textContent = lesson.reflection.title;
@@ -134,9 +147,12 @@ function renderFields() {
     input.inputMode = field.inputMode;
     input.autocomplete = "off";
     input.spellcheck = false;
+    input.setAttribute("aria-describedby", "input-help input-error");
+    input.setAttribute("aria-invalid", "false");
     input.value = serialized[field.id] ?? "";
     if (field.placeholder) input.placeholder = field.placeholder;
     if (field.min !== undefined) input.min = String(field.min);
+    if (field.max !== undefined) input.max = String(field.max);
     input.addEventListener("keydown", (event) => {
       if (event.key === "Enter") applyCurrentInput();
     });
@@ -170,12 +186,15 @@ function renderCode() {
 function render() {
   const step = player.trace[player.index];
   renderCatalogState();
-  renderArray(step);
+  renderVisualization(step);
   renderStats(step);
   renderCodeState(step);
   renderPip(step);
 
   elements.error.textContent = player.error;
+  elements.fields.querySelectorAll("[data-field-id]").forEach((input) => {
+    input.setAttribute("aria-invalid", player.error ? "true" : "false");
+  });
   elements.stepLabel.textContent = player.status.toUpperCase();
   elements.stepCount.textContent = `${player.index} / ${player.trace.length - 1}`;
   elements.previous.disabled = player.index === 0;
@@ -183,20 +202,39 @@ function render() {
   const playing = player.status === "playing";
   elements.play.innerHTML = playing ? "Ⅱ <span>Pause</span>" : "▶ <span>Play</span>";
   elements.play.setAttribute("aria-label", playing ? "Pause lesson" : "Play lesson");
-  elements.speed.value = String(player.speed);
-  elements.speedLabel.textContent = speedLabel(player.speed);
+  const speedText = playbackSpeedLabel(player.speed);
+  elements.speed.value = String(playbackDelayToControlValue(player.speed));
+  elements.speedLabel.textContent = speedText;
+  elements.speed.setAttribute("aria-valuetext", `${speedText} speed`);
   elements.pipCard.classList.toggle("is-minimized", player.guideMinimized);
   elements.pipToggle.textContent = player.guideMinimized ? "+" : "−";
   elements.pipToggle.setAttribute("aria-label", player.guideMinimized ? "Expand Pip" : "Minimize Pip");
   elements.live.textContent = `${lesson.title}. Step ${player.index} of ${player.trace.length - 1}. ${step.narration}`;
 }
 
+function renderVisualization(step) {
+  if (lesson.renderer === "array") {
+    renderArray(step);
+    return;
+  }
+  if (lesson.renderer === "linked-list") {
+    renderLinkedList(step);
+    return;
+  }
+  throw new Error(`Unsupported renderer: ${lesson.renderer}`);
+}
+
 function renderArray(step) {
   const cells = projectArrayView(step.view);
   const { values } = step.view;
-  elements.cells.style.setProperty("--array-count", values.length);
-  elements.cells.style.minWidth = `${Math.max(values.length * 66, 280)}px`;
-  elements.cells.replaceChildren(...cells.map((model) => {
+  const scroll = document.createElement("div");
+  scroll.className = "array-scroll";
+  const cellList = document.createElement("div");
+  cellList.className = "array-cells";
+  cellList.setAttribute("role", "list");
+  cellList.style.setProperty("--array-count", values.length);
+  cellList.style.minWidth = `${Math.max(values.length * 66, 280)}px`;
+  cellList.replaceChildren(...cells.map((model) => {
     const cell = document.createElement("div");
     cell.className = "array-cell";
     cell.dataset.index = String(model.index);
@@ -205,21 +243,38 @@ function renderArray(step) {
     if (model.active) {
       cell.classList.add("array-cell--active");
     }
+    if (model.changed) {
+      cell.classList.add("array-cell--changed");
+    }
     for (const range of model.ranges) {
       cell.classList.add(`array-cell--range-${range.kind}`);
       if (range.isStart) cell.classList.add("array-cell--range-start");
       if (range.isEnd) cell.classList.add("array-cell--range-end");
     }
-    for (const marker of model.markers) {
-      cell.classList.add(`array-cell--marker-${marker.kind}`);
-      cell.dataset.marker = marker.label;
+    if (model.markers.length > 0) {
+      const markerList = document.createElement("span");
+      markerList.className = "array-markers";
+      markerList.setAttribute("aria-hidden", "true");
+      for (const marker of model.markers) {
+        cell.classList.add(`array-cell--marker-${marker.kind}`);
+        const markerLabel = document.createElement("span");
+        markerLabel.className = `array-marker array-marker--${marker.kind}`;
+        markerLabel.textContent = marker.label;
+        markerList.append(markerLabel);
+      }
+      cell.append(markerList);
     }
-    const annotation = model.annotations[0];
-    if (annotation) {
-      const note = document.createElement("span");
-      note.className = "array-annotation";
-      note.textContent = annotation.label;
-      cell.append(note);
+    if (model.annotations.length > 0) {
+      const annotationList = document.createElement("span");
+      annotationList.className = "array-annotations";
+      annotationList.setAttribute("aria-hidden", "true");
+      for (const annotation of model.annotations) {
+        const note = document.createElement("span");
+        note.className = "array-annotation";
+        note.textContent = annotation.label;
+        annotationList.append(note);
+      }
+      cell.append(annotationList);
     }
     const valueLabel = document.createElement("span");
     valueLabel.textContent = model.formattedValue;
@@ -227,6 +282,142 @@ function renderArray(step) {
     cell.setAttribute("aria-label", model.ariaLabel);
     return cell;
   }));
+  scroll.append(cellList);
+  elements.visualizationRoot.replaceChildren(scroll);
+  keepActiveItemsVisible(scroll, cellList.querySelectorAll(".array-cell--active"));
+}
+
+function renderLinkedList(step) {
+  const model = projectLinkedListView(step.view);
+  const scroll = document.createElement("div");
+  scroll.className = "linked-list-scroll";
+  const canvas = document.createElement("div");
+  canvas.className = "linked-list-canvas";
+  canvas.style.minWidth = `${Math.max(model.nodes.length * 142 + 38, 320)}px`;
+  canvas.setAttribute("role", "list");
+  canvas.setAttribute("aria-label", model.ariaLabel);
+
+  if (model.nodes.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "linked-list-empty";
+    empty.textContent = "Empty list · head → null";
+    canvas.append(empty);
+  }
+
+  for (const link of model.links.filter((item) => !item.pointsToNull)) {
+    const linkElement = document.createElement("span");
+    linkElement.className = `linked-list-link linked-list-link--${link.direction}`;
+    if (link.changed) linkElement.classList.add("linked-list-link--changed");
+    linkElement.style.setProperty("--from-index", String(link.fromIndex));
+    linkElement.style.setProperty("--to-index", String(link.toIndex));
+    linkElement.setAttribute("aria-hidden", "true");
+    canvas.append(linkElement);
+  }
+
+  for (const node of model.nodes) {
+    const item = document.createElement("div");
+    item.className = "linked-list-item";
+    item.dataset.nodeId = node.id;
+    item.style.setProperty("--node-index", String(node.index));
+    item.setAttribute("role", "listitem");
+    item.setAttribute("aria-label", node.ariaLabel);
+    if (node.active) item.classList.add("linked-list-item--active");
+    if (node.changed) item.classList.add("linked-list-item--changed");
+    node.states.forEach((state) => item.classList.add(`linked-list-item--state-${state.kind}`));
+
+    if (node.pointers.length > 0) {
+      const pointerList = document.createElement("span");
+      pointerList.className = "linked-list-pointers";
+      pointerList.setAttribute("aria-hidden", "true");
+      for (const pointer of node.pointers) {
+        const pointerLabel = document.createElement("span");
+        pointerLabel.className = `linked-list-pointer linked-list-pointer--${pointer.kind}`;
+        pointerLabel.textContent = pointer.label;
+        pointerList.append(pointerLabel);
+      }
+      item.append(pointerList);
+    }
+
+    const nodeElement = document.createElement("div");
+    nodeElement.className = "linked-list-node";
+    nodeElement.dataset.index = String(node.index);
+    const value = document.createElement("span");
+    value.textContent = node.formattedValue;
+    nodeElement.append(value);
+
+    const nextLabel = document.createElement("span");
+    nextLabel.className = "linked-list-next-label";
+    nextLabel.textContent = node.pointsToNull ? "next: null" : `next: ${node.nextIndex}`;
+
+    const annotations = document.createElement("span");
+    annotations.className = "linked-list-annotations";
+    annotations.setAttribute("aria-hidden", "true");
+    for (const annotation of [...node.states, ...node.annotations]) {
+      const annotationLabel = document.createElement("span");
+      annotationLabel.className = "linked-list-annotation";
+      annotationLabel.textContent = annotation.label;
+      annotations.append(annotationLabel);
+    }
+    item.append(nodeElement, nextLabel, annotations);
+    canvas.append(item);
+  }
+
+  scroll.append(canvas);
+  const nullPointers = document.createElement("div");
+  nullPointers.className = "linked-list-null-pointers";
+  nullPointers.replaceChildren(...model.nullPointers.map((pointer) => {
+    const label = document.createElement("span");
+    label.className = "linked-list-null-pointer";
+    label.textContent = `${pointer.label} → null`;
+    label.setAttribute("aria-label", pointer.ariaLabel);
+    return label;
+  }));
+  elements.visualizationRoot.replaceChildren(scroll, nullPointers);
+  const activeItems = canvas.querySelectorAll(".linked-list-item--active");
+  const fastItem = canvas.querySelector(".linked-list-pointer--fast")?.closest(".linked-list-item");
+  keepActiveItemsVisible(scroll, activeItems, fastItem);
+}
+
+function keepActiveItemsVisible(scroll, activeItems, preferredItem = null) {
+  const items = [...activeItems];
+  if (items.length === 0) return;
+
+  window.requestAnimationFrame(() => {
+    if (items.some((item) => !item.isConnected)) return;
+    const padding = 12;
+    const visibleLeft = scroll.scrollLeft;
+    const visibleRight = visibleLeft + scroll.clientWidth;
+    const activeLeft = Math.min(...items.map((item) => item.offsetLeft));
+    const activeRight = Math.max(...items.map((item) => item.offsetLeft + item.offsetWidth));
+    const activeWidth = activeRight - activeLeft;
+    const availableWidth = Math.max(0, scroll.clientWidth - (padding * 2));
+    let nextScrollLeft = null;
+
+    if (activeWidth <= availableWidth) {
+      if (activeLeft < visibleLeft + padding) {
+        nextScrollLeft = Math.max(0, activeLeft - padding);
+      } else if (activeRight > visibleRight - padding) {
+        nextScrollLeft = Math.max(0, activeRight - scroll.clientWidth + padding);
+      }
+    } else {
+      const focus = preferredItem?.isConnected ? preferredItem : items.at(-1);
+      const focusLeft = focus.offsetLeft;
+      const focusRight = focusLeft + focus.offsetWidth;
+      if (focusLeft < visibleLeft + padding) {
+        nextScrollLeft = Math.max(0, focusLeft - padding);
+      } else if (focusRight > visibleRight - padding) {
+        nextScrollLeft = Math.max(0, focusRight - scroll.clientWidth + padding);
+      }
+    }
+
+    if (nextScrollLeft !== null) {
+      const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      scroll.scrollTo({
+        left: nextScrollLeft,
+        behavior: reduceMotion ? "auto" : "smooth"
+      });
+    }
+  });
 }
 
 function renderStats(step) {
@@ -261,16 +452,27 @@ function renderPip(step) {
   elements.pipPrompt.textContent = step.prompt;
 }
 
-function loadLesson(id) {
-  if (id === lesson.id) return;
-  stopTimer();
-  lesson = getLesson(id);
-  const input = structuredClone(lesson.input.defaultValue);
-  const trace = buildValidatedTrace(lesson, input);
-  player = playerReducer(player, { type: "LOAD_LESSON", lessonId: lesson.id, trace, input });
-  window.history.replaceState(null, "", lessonHash(lesson.id));
-  renderLessonChrome();
-  render();
+function loadLesson(id, { enter = true } = {}) {
+  if (id !== lesson.id) {
+    stopTimer();
+    lesson = getLesson(id);
+    const input = structuredClone(lesson.input.defaultValue);
+    const trace = buildValidatedTrace(lesson, input);
+    player = playerReducer(player, { type: "LOAD_LESSON", lessonId: lesson.id, trace, input });
+    window.history.replaceState(null, "", lessonHash(lesson.id));
+    renderLessonChrome();
+    render();
+  }
+  if (enter) enterLesson();
+}
+
+function enterLesson() {
+  const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  elements.lessonSection.scrollIntoView({
+    behavior: reduceMotion ? "auto" : "smooth",
+    block: "start"
+  });
+  elements.lessonTitle.focus({ preventScroll: true });
 }
 
 function collectFields() {
@@ -341,12 +543,6 @@ function move(action) {
   render();
 }
 
-function speedLabel(speed) {
-  if (speed <= 500) return "1.5×";
-  if (speed >= 1100) return "0.75×";
-  return "1×";
-}
-
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
 elements.previous.addEventListener("click", () => move({ type: "PREVIOUS" }));
@@ -358,7 +554,10 @@ elements.play.addEventListener("click", () => {
 elements.reset.addEventListener("click", () => move({ type: "RESET" }));
 elements.speed.addEventListener("input", () => {
   const wasPlaying = player.status === "playing";
-  player = playerReducer(player, { type: "SET_SPEED", speed: Number(elements.speed.value) });
+  player = playerReducer(player, {
+    type: "SET_SPEED",
+    speed: controlValueToPlaybackDelay(Number(elements.speed.value))
+  });
   if (wasPlaying) restartTimer();
   render();
 });
@@ -387,3 +586,6 @@ observePipVisibility();
 initializeCatalog();
 renderLessonChrome();
 render();
+if (initialLessonIdFromHash) {
+  window.requestAnimationFrame(enterLesson);
+}

@@ -10,8 +10,10 @@ export function projectArrayView(view) {
     const markers = view.markers.filter((marker) => marker.index === index);
     const annotations = (view.annotations ?? []).filter((annotation) => annotation.index === index);
     const active = view.activeIndices.includes(index);
+    const changed = (view.changedIndices ?? []).includes(index);
     const descriptions = [
       ...(active ? ["active"] : []),
+      ...(changed ? ["changed this step"] : []),
       ...ranges.map((range) => range.label),
       ...markers.map((marker) => marker.label),
       ...annotations.map((annotation) => annotation.label)
@@ -22,6 +24,7 @@ export function projectArrayView(view) {
       value,
       formattedValue: formatNumber(value),
       active,
+      changed,
       ranges: ranges.map((range) => ({
         ...range,
         isStart: index === range.start,

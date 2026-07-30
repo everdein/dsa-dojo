@@ -1,8 +1,21 @@
 import { assertLesson, buildValidatedTrace } from "../lesson-contract.mjs";
+import { detectCycleLesson } from "./detect-cycle.mjs";
 import { findLargestLesson } from "./find-largest.mjs";
+import { moveZerosLesson } from "./move-zeros.mjs";
+import { reverseArrayLesson } from "./reverse-array.mjs";
+import { reverseLinkedListLesson } from "./reverse-linked-list.mjs";
 import { slidingWindowLesson } from "./sliding-window.mjs";
+import { traverseLinkedListLesson } from "./traverse-linked-list.mjs";
 
-const lessons = [findLargestLesson, slidingWindowLesson]
+const lessons = [
+  findLargestLesson,
+  slidingWindowLesson,
+  reverseArrayLesson,
+  moveZerosLesson,
+  traverseLinkedListLesson,
+  reverseLinkedListLesson,
+  detectCycleLesson
+]
   .sort((left, right) => left.order - right.order)
   .map(assertLesson);
 

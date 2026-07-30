@@ -1,7 +1,7 @@
 {
   "name": "dsa-dojo",
   "version": "1.0.0",
-  "description": "JavaScript data structures and algorithms study repository with field guides, implementations, complexity analysis, and interview-pattern practice.",
+  "description": "Interactive JavaScript data structures and algorithms lessons with deterministic traces, visual state, and guided explanations.",
   "engines": {
     "node": ">=18"
   },

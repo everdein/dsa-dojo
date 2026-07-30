@@ -38,5 +38,21 @@ numbers.push(40);
 
 - Find the largest value
 - Reverse an array
+- Move zeros to the end while preserving non-zero order
+- Find the maximum sum in a fixed-size window
 - Remove duplicates
 - Find two numbers that sum to a target
+
+## Interactive Lessons
+
+The DSA Dojo studio currently uses four array lessons to establish reusable
+visual patterns:
+
+1. **Find Largest** - linear scan and scalar best-so-far state
+2. **Sliding Window** - moving range and reusable aggregate state
+3. **Reverse Array** - mirrored swaps and converging pointers
+4. **Move Zeros** - stable compaction with read and write pointers
+
+Each lesson keeps the public algorithm input immutable, records deterministic
+array snapshots for exact rewind, and explains the difference between the
+algorithm's working space and the studio's visualization history.

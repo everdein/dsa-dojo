@@ -1,10 +1,10 @@
 # DSA Dojo
 
-This repository is a personal study space for building strong foundations in data structures and algorithms with JavaScript.
+DSA Dojo is an interactive learning product for making data structures and algorithms visible, inspectable, and explainable with JavaScript.
 
 ## Interactive Studio
 
-**Status: Working visual learning experience with an introductory story and two interactive array lessons.**
+**Status: Working visual learning experience with an introductory story and seven interactive lessons across arrays and linked lists.**
 
 DSA Dojo includes a dependency-free browser experience where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside Pip, an original guide companion.
 
@@ -14,20 +14,25 @@ The current catalog includes:
 
 - **Find Largest** for scalar state and a linear scan
 - **Sliding Window** for a moving range and reusable aggregate state
+- **Reverse Array** for mirrored swaps and converging pointers
+- **Move Zeros** for stable compaction with coordinated read and write pointers
+- **Traverse a Linked List** for following references and recognizing null termination
+- **Reverse a Linked List** for protecting, redirecting, and advancing pointers
+- **Detect a Cycle** for Floyd's fast-and-slow pointer technique
 
-The written field guides and runnable JavaScript exercises remain the foundation. Interactive lessons expand alongside the learning process, one proven visual capability at a time.
+The written field guides and runnable JavaScript exercises support the product, while each interactive lesson adds a distinct pattern or reusable visual capability.
 
 Read the [product vision](docs/product-vision.md) for the learning model and roadmap, and the [studio architecture guide](docs/studio-architecture.md) for the implementation, lesson contract, and extension workflow.
 
 ## What This Repo Is
 
-The goal of this dojo is to turn abstract concepts into practical experience. Each topic folder includes:
+The goal of this dojo is to turn abstract concepts into practical, guided experiences. Each topic folder can include:
 
 - a field guide in the form of a README
 - exercises and practice prompts
 - notes about when to use a structure or algorithm
 
-Implementation files are added as the study progresses.
+Implementations become lesson sources of truth when they are validated, tested, and connected to deterministic traces.
 
 ## How to Use It
 
@@ -51,7 +56,7 @@ Then open:
 - `http://127.0.0.1:4173/` for the animated introduction
 - `http://127.0.0.1:4173/studio` for the lesson catalog and player
 
-The studio currently includes Find Largest and fixed-size Sliding Window lessons in an arrays catalog. Direct lesson links use the URL hash, such as `/studio#lesson=arrays%2Fsliding-window`. The existing Node.js exercises remain runnable independently.
+The studio currently includes four array lessons and three linked-list lessons. Direct lesson links use the URL hash, such as `/studio#lesson=arrays%2Fmove-zeros` or `/studio#lesson=linked-lists%2Fdetect-cycle`. The existing Node.js exercises remain runnable independently.
 
 Run the automated checks:
 

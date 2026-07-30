@@ -10,7 +10,7 @@ DSA Dojo will grow from a collection of field guides and runnable JavaScript exe
 
 The studio should help learners understand what changes during an algorithm, why it changes, and how that behavior connects to the code. It complements the existing study material rather than replacing it.
 
-The product will evolve alongside the learning journey. Arrays establish the interaction model first. Each later data structure, algorithm, or pattern should add only the visualization capabilities it genuinely needs.
+The product will evolve according to learner value, pattern coverage, and proven renderer needs. Arrays establish the interaction model first. Each later data structure, algorithm, or pattern should add only the visualization capabilities it genuinely needs.
 
 ## Who It Is For
 
@@ -183,10 +183,11 @@ The first lesson is complete when:
 After Find Largest establishes scalar state and a linear scan:
 
 1. **Sliding Window** validates the shared player with a moving range and aggregate state.
-2. **Reverse Array** or **Move Zeros** adds mutation and multiple pointers.
-3. **Pair Sum** introduces lookup or two-pointer decisions.
-4. **Frequency Count** introduces derived state.
-5. The remaining array exercises become lessons only when they add learning value rather than duplicate an existing interaction.
+2. **Reverse Array** adds mirrored mutation and converging pointers.
+3. **Move Zeros** adds stable compaction and coordinated read/write pointers.
+4. **Pair Sum** can introduce lookup decisions when the catalog returns to arrays.
+5. **Frequency Count** can introduce derived state.
+6. The remaining array exercises become lessons only when they add learning value rather than duplicate an existing interaction.
 
 ## Reusable Product Model
 
@@ -203,12 +204,12 @@ The first implementation begins by extracting `findLargest(values)` into a pure 
 
 ## Iterative Roadmap
 
-Expansion follows actual study progress:
+Expansion follows learner value and reusable product capability:
 
 1. Arrays vertical slice with the minimum lesson player
 2. Extract and harden the reusable player, then add more array lessons
-3. Strings, matrices, hash maps, sets, and common array/string patterns
-4. Linked lists, stacks, and queues
+3. Linked lists as the first connected-node renderer and pattern progression
+4. Strings, matrices, hash maps, sets, stacks, queues, and common array/string patterns
 5. Trees, tries, heaps, and priority queues
 6. Graphs and disjoint sets
 7. Searching, sorting, recursion, backtracking, greedy algorithms, dynamic programming, and bit manipulation
@@ -246,17 +247,24 @@ The first release exists to prove that one algorithm can be made genuinely easie
 
 ## Foundation checkpoint
 
-The studio now has a framework-free player state machine, a validated lesson
-registry, deterministic trace contracts, an array view model, and automated
-tests for algorithms, traces, input rules, rendering state, and player
-transitions. Find Largest remains the reference scalar-state lesson. Sliding
-Window is the second lesson and validates range highlighting, entering and
-leaving markers, aggregate state, and catalog switching.
+The studio now has a framework-free player state machine, a validated
+renderer-aware lesson registry, deterministic trace contracts, array and
+linked-list view models, and automated tests for algorithms, traces, input
+rules, rendering state, and player transitions. Four array lessons cover a
+scalar scan, a moving range, mirrored swaps, and stable compaction.
 
-The next checkpoint is evaluation rather than immediate catalog expansion.
-After the two-lesson foundation is exercised, Reverse Linked List can become
-the first deliberate renderer stress test. This sequence gives us evidence
-before adding tree, graph, or dynamic-programming-specific infrastructure.
+Three linked-list lessons form the first complete cross-category progression:
+traversal establishes references and null termination, reversal changes
+topology one protected link at a time, and cycle detection adds overlapping
+pointer speeds, return links, and self-loops. Stable node identity and fresh
+topology snapshots keep pointer mutation reversible and accessible.
+
+The next checkpoint is showcase readiness before catalog breadth: deliver the
+experience publicly, explain the reusable trace-and-renderer architecture
+concisely, and validate the two-category experience as a product. Narrow
+categories should still contain two or three distinct lessons; broad
+structures may grow to three to five. This avoids both a shallow one-lesson
+sampler and a large catalog of repetitive exercises.
 
 ## Introductory story checkpoint
 
