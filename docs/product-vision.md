@@ -1,14 +1,18 @@
-# DSA Dojo Interactive Studio
+# DSA Dojo Product Vision
 
-- **Status:** Product direction
-- **Starting point:** Arrays
+- **Status:** Living product direction
+- **Implemented foundation:** Seven lessons across arrays and linked lists
+- **Current checkpoint:** Showcase readiness before broader catalog expansion
 - **Core promise:** See the algorithm think.
 
 ## Vision
 
-DSA Dojo will grow from a collection of field guides and runnable JavaScript exercises into an interactive algorithm-learning studio.
+DSA Dojo combines field guides and runnable JavaScript exercises with an
+interactive algorithm-learning studio.
 
-The studio should help learners understand what changes during an algorithm, why it changes, and how that behavior connects to the code. It complements the existing study material rather than replacing it.
+The studio helps learners understand what changes during an algorithm, why it
+changes, and how that behavior connects to the code. It complements the
+existing study material rather than replacing it.
 
 The product will evolve according to learner value, pattern coverage, and proven renderer needs. Arrays establish the interaction model first. Each later data structure, algorithm, or pattern should add only the visualization capabilities it genuinely needs.
 
@@ -99,9 +103,10 @@ The studio can use an expressive product-storytelling style while developing its
 
 Long empty scroll sequences, decorative motion, and oversized type should not delay the lesson or reduce usability. The studio entry point remains visible in the landing-page header and first viewport.
 
-## Arrays-First Vertical Slice
+## Arrays-First Vertical Slice (Implemented)
 
-The first complete lesson will visualize `arrays/find-largest.js`.
+The first complete lesson visualizes the reusable implementation in
+`arrays/find-largest.mjs`.
 
 ### Why Find Largest Comes First
 
@@ -243,7 +248,9 @@ The arrays vertical slice does not need:
 - motion or marketing polish that is disconnected from the learning interaction
 - a recreation of Phantom's visual identity
 
-The first release exists to prove that one algorithm can be made genuinely easier to understand. Everything else builds from that evidence.
+The first release proved that an algorithm can be made easier to understand
+through synchronized state, code, narration, and learner-controlled playback.
+Everything else builds from that evidence.
 
 ## Foundation checkpoint
 
