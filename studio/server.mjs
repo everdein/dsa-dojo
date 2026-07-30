@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const studioRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const projectRoot = path.resolve(studioRoot, "..");
 const arraysRoot = path.resolve(projectRoot, "arrays");
+const srcRoot = path.resolve(studioRoot, "src");
 const port = Number(process.env.PORT ?? process.argv[2] ?? 4173);
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -15,11 +16,20 @@ const contentTypes = {
 };
 
 export function resolveRequest(requestUrl) {
-  const pathname = decodeURIComponent(new URL(requestUrl, "http://localhost").pathname);
-  if (pathname === "/") return path.resolve(studioRoot, "index.html");
+  let pathname;
+  try {
+    pathname = decodeURIComponent(new URL(requestUrl, "http://localhost").pathname);
+  } catch {
+    return null;
+  }
+
+  if (pathname === "/" || pathname === "/index.html") return path.resolve(studioRoot, "home.html");
+  if (pathname === "/studio" || pathname === "/studio/") return path.resolve(studioRoot, "index.html");
+  if (pathname === "/home.css") return path.resolve(studioRoot, "home.css");
   if (pathname === "/styles.css") return path.resolve(studioRoot, "styles.css");
+  if (pathname === "/pip.css") return path.resolve(studioRoot, "pip.css");
   if (pathname.startsWith("/src/")) {
-    return resolveInside(studioRoot, `.${pathname}`);
+    return resolveInside(srcRoot, `.${pathname.slice("/src".length)}`);
   }
   if (pathname.startsWith("/arrays/")) {
     return resolveInside(arraysRoot, `.${pathname.slice("/arrays".length)}`);

@@ -44,14 +44,20 @@ arrays/
   sliding-window.mjs        Pure fixed-size Sliding Window implementation
 
 studio/
-  index.html                Semantic application shell
-  styles.css                Responsive visual system
+  home.html                 Scroll-driven introductory story
+  home.css                  Landing-page visual system and responsive story layout
+  index.html                Semantic lesson-studio shell
+  styles.css                Responsive lesson-studio visual system
+  pip.css                   Shared Pip silhouette, expressions, and motion states
   server.mjs                Local static-file server
   src/
     app.mjs                 Browser adapter and event wiring
     array-renderer.mjs      Pure trace-view to array-cell projection
+    home.mjs                Scroll reveals and compact landing demonstrations
     input.mjs               Shared input parsing and formatting
     lesson-contract.mjs     Lesson and deterministic trace validation
+    navigation.mjs          Safe lesson-hash parsing and serialization
+    pip.mjs                 Shared Pip component and player-state mapping
     player.mjs              Framework-free player state machine
     find-largest.mjs        Find Largest trace builder
     sliding-window.mjs      Sliding Window trace builder
@@ -80,6 +86,47 @@ lesson registry
 The browser controller does not contain algorithm-specific branches. It reads
 the selected lesson definition and renders its inputs, source mapping,
 complexity, statistics, guide content, trace, and reflection.
+
+The local server keeps the two product surfaces explicit:
+
+- `/` serves the introductory story
+- `/studio` serves the interactive lesson application
+
+Shared CSS and browser modules are allowlisted without exposing the rest of the
+repository. Malformed URLs and directory traversal attempts resolve to no file.
+
+## Introductory Story
+
+The landing page explains the learning model before asking a visitor to operate
+the full studio. Its Find Largest and Sliding Window demonstrations are small,
+representative visual sequences rather than alternate algorithm
+implementations. They communicate the core ideas while direct lesson links hand
+off to the validated trace system.
+
+Normal document scrolling remains in control. `IntersectionObserver` activates
+one-time content reveals, updates Pip's current story note, and starts a compact
+demonstration only while it is visible. Each demonstration runs one finite pass
+in under five seconds and then stops; a visible Replay control restarts it on
+request. If browser scripting or the observer is unavailable, the content
+remains visible and the page still links directly to the studio.
+
+## Pip Motion System
+
+Pip is a shared, code-native companion with six states:
+
+- `idle`
+- `curious`
+- `thinking`
+- `guiding`
+- `celebrating`
+- `caution`
+
+The studio maps player behavior to those states: ready is curious, paused is
+thinking, playing is guiding, complete is celebrating, and an input error is
+caution. Pip remains decorative; narration, prompts, and player status are
+always available as semantic text. An observer pauses Pip whenever it leaves
+the viewport. Reduced-motion preferences remove travel, bouncing, and
+continuous motion while preserving each visible state.
 
 ## Separation of Responsibilities
 
@@ -205,6 +252,9 @@ Before publishing user-interface changes, also verify:
 - no document-level horizontal overflow at desktop or mobile widths
 - long array rows scroll only inside the array stage
 - browser console contains no warnings or errors
+- `/` and `/studio` both load without document-level horizontal overflow
+- Pip reacts to ready, playing, paused, complete, and error states
+- reduced-motion users receive the same content without reveal travel or looping motion
 
 ## Deliberate Boundaries
 
@@ -213,7 +263,7 @@ The studio currently has no accounts, saved progress, backend, analytics, or
 framework dependency. Those concerns should only be introduced when a proven
 learning requirement needs them.
 
-The next product checkpoint is evaluation of the two-lesson foundation. A
-connection-based lesson such as Reverse Linked List is the likely first test
-of a second renderer, but it should follow evidence from using the current
-array experience.
+The next product checkpoint is evaluation of the two-lesson foundation and its
+new introductory story. A connection-based lesson such as Reverse Linked List
+is the likely first test of a second renderer, but it should follow evidence
+from using the current array experience.
