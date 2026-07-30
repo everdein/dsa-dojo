@@ -41,7 +41,15 @@ node studio/server.mjs 4180
 ```text
 arrays/
   find-largest.mjs          Pure Find Largest implementation
+  move-zeros.mjs            Pure stable Move Zeros implementation
+  reverse-array.mjs         Pure two-pointer Reverse Array implementation
   sliding-window.mjs        Pure fixed-size Sliding Window implementation
+
+linked-lists/
+  model.mjs                 Shared node creation, validation, and cloning
+  traverse-linked-list.mjs  Pure traversal implementation
+  reverse-linked-list.mjs   Pure in-place reversal implementation
+  detect-cycle.mjs          Pure Floyd cycle-detection implementation
 
 studio/
   home.html                 Scroll-driven introductory story
@@ -53,6 +61,8 @@ studio/
   src/
     app.mjs                 Browser adapter and event wiring
     array-renderer.mjs      Pure trace-view to array-cell projection
+    linked-list-renderer.mjs Pure trace-view to node/link projection
+    linked-list-view.mjs    Stable linked-list snapshot helpers
     home.mjs                Scroll reveals and compact landing demonstrations
     input.mjs               Shared input parsing and formatting
     lesson-contract.mjs     Lesson and deterministic trace validation
@@ -60,11 +70,21 @@ studio/
     pip.mjs                 Shared Pip component and player-state mapping
     player.mjs              Framework-free player state machine
     find-largest.mjs        Find Largest trace builder
+    move-zeros.mjs          Move Zeros trace builder
+    reverse-array.mjs       Reverse Array trace builder
     sliding-window.mjs      Sliding Window trace builder
+    traverse-linked-list.mjs Linked List Traversal trace builder
+    reverse-linked-list.mjs Linked List Reversal trace builder
+    detect-cycle.mjs        Detect Cycle trace builder
     lessons/
       index.mjs             Validated lesson registry
       find-largest.mjs      Find Largest lesson definition
+      move-zeros.mjs        Move Zeros lesson definition
+      reverse-array.mjs     Reverse Array lesson definition
       sliding-window.mjs    Sliding Window lesson definition
+      traverse-linked-list.mjs Linked List Traversal lesson definition
+      reverse-linked-list.mjs Linked List Reversal lesson definition
+      detect-cycle.mjs      Detect Cycle lesson definition
 
 test/
   studio.test.mjs           Algorithms, contracts, traces, renderer, and player tests
@@ -79,13 +99,14 @@ lesson registry
   -> pure algorithm + deterministic trace builder
   -> validated trace
   -> player state machine
-  -> array view model
+  -> renderer-specific view model
   -> semantic DOM, code highlighting, Pip narration, and live announcements
 ```
 
 The browser controller does not contain algorithm-specific branches. It reads
 the selected lesson definition and renders its inputs, source mapping,
-complexity, statistics, guide content, trace, and reflection.
+complexity, statistics, guide content, trace, and reflection. Its only visual
+dispatch is by renderer type, currently `array` or `linked-list`.
 
 The local server keeps the two product surfaces explicit:
 
@@ -132,7 +153,7 @@ continuous motion while preserving each visible state.
 
 ### Pure algorithm
 
-The implementation in `arrays/*.mjs` owns the actual result and complexity.
+The implementation in `arrays/*.mjs` or `linked-lists/*.mjs` owns the actual result and complexity.
 It must not know about animation, the browser, Pip, or playback history.
 Runnable `.js` files remain thin Node.js entry points for independent study.
 
@@ -167,14 +188,19 @@ contains:
     values: [3, 5, 2],
     activeIndices: [1],
     ranges: [],
-    markers: [{ index: 1, kind: "best", label: "best" }]
+    markers: [{ index: 1, kind: "best", label: "best" }],
+    annotations: [],
+    changedIndices: []
   }
 }
 ```
 
 The final step must use the `complete` phase and provide a `result` that
-matches the pure solver. Values are copied into each view so future mutating
-lessons can still rewind deterministically.
+matches the pure solver. Every view owns a fresh snapshot so mutating lessons
+can still rewind deterministically. Array views validate values, ranges,
+markers, annotations, and changed indices. Linked-list views validate stable
+node ids, next references, pointers, states, annotations, and changed nodes.
+Dangling topology and shared snapshots fail before the browser renders them.
 
 ### Player
 
@@ -196,13 +222,29 @@ The pure array projection supports:
 
 - one or more active indices
 - inclusive highlighted ranges
-- labeled markers such as best, entering, and leaving
+- one or more labeled markers per cell, including overlapping pointers
 - optional per-index annotations
-- complete value snapshots for future mutation
+- explicit changed indices for mutation feedback
+- complete value snapshots for deterministic mutation and rewind
 
 The browser renders these models as semantic list items with text alternatives.
 Long arrays stay on one logical row and scroll inside the visualization instead
 of widening the document.
+
+### Linked-list renderer
+
+The pure linked-list projection supports:
+
+- stable node positions while connections change
+- forward, backward, return, jump, and self-loop connections
+- one or more labeled pointers per node, including overlapping fast and slow pointers
+- explicit null pointers and null-ending links
+- semantic node states, annotations, and changed-link feedback
+- accessible descriptions of each value, next target, pointer, and state
+
+The browser keeps the node track on one logical row and scrolls it inside the
+visualization. Connection shape is derived from stable node indices, so reverse
+and cycle lessons can change topology without moving the nodes themselves.
 
 ## Adding a Lesson
 
@@ -231,6 +273,41 @@ Introduces a contiguous range, entering and leaving values, a reusable running
 sum, and result ownership across multiple candidate windows. It demonstrates
 why reusing previous work keeps the algorithm at `O(n)` time.
 
+### Reverse Array
+
+Introduces two inward-moving pointers, mirrored swaps, changed cells, settled
+regions, and the pointer-meeting stopping rule. Its immutable public API makes
+the returned copy's `O(n)` space explicit while separating the swap technique's
+`O(1)` working space.
+
+### Move Zeros
+
+Introduces coordinated read and write pointers, stable compaction, overlapping
+markers, and a growing invariant: every value before write is a correctly
+ordered non-zero value. The visual trace distinguishes a skipped zero, a value
+already in place, and a value moved into the stable prefix.
+
+### Traverse a Linked List
+
+Introduces node identity, next references, null termination, and a growing
+visited set. It makes the difference between following a reference and
+incrementing an array index explicit.
+
+### Reverse a Linked List
+
+Introduces three-pointer reasoning: save next, redirect current, then advance
+previous and current. Nodes remain in stable visual positions while their links
+change, so rewind restores the exact earlier topology. The executable core is
+the canonical in-place `O(n)` time, `O(1)` auxiliary-space algorithm; the
+studio supplies disposable nodes and records snapshots outside that core. A
+constant-space Floyd preflight rejects cyclic inputs before mutation begins.
+
+### Detect a Cycle
+
+Introduces Floyd's fast-and-slow pointer technique, overlapping pointers,
+cycle-entry versus meeting-node identity, return links, and self-loops. It
+demonstrates that repeated values do not imply a cycle; node identity does.
+
 ## Verification Standard
 
 The current automated suite checks:
@@ -241,7 +318,10 @@ The current automated suite checks:
 - input parsing and validation
 - algorithm correctness and input immutability
 - trace decision branches and range invariants
+- mutation snapshots, changed indices, pointer convergence, and stable order
 - array view-model projection and accessible descriptions
+- linked-list topology validation, snapshot ownership, and accessible projection
+- traversal, reversal, null termination, return connections, and cycle meetings
 - player loading, stepping, playback, reset, speed, guide, and error transitions
 
 Before publishing user-interface changes, also verify:
@@ -250,7 +330,7 @@ Before publishing user-interface changes, also verify:
 - invalid input preserves the last valid visualization
 - code highlighting agrees with the executed transition
 - no document-level horizontal overflow at desktop or mobile widths
-- long array rows scroll only inside the array stage
+- long array and linked-list rows scroll only inside the visualization stage
 - browser console contains no warnings or errors
 - `/` and `/studio` both load without document-level horizontal overflow
 - Pip reacts to ready, playing, paused, complete, and error states
@@ -263,7 +343,9 @@ The studio currently has no accounts, saved progress, backend, analytics, or
 framework dependency. Those concerns should only be introduced when a proven
 learning requirement needs them.
 
-The next product checkpoint is evaluation of the two-lesson foundation and its
-new introductory story. A connection-based lesson such as Reverse Linked List
-is the likely first test of a second renderer, but it should follow evidence
-from using the current array experience.
+The seven-lesson foundation now covers four array patterns and a complete
+three-lesson linked-list progression. Two renderer families share the same
+validated lesson registry, deterministic traces, player, code mapping, Pip
+guidance, and accessibility model. The next checkpoint should emphasize
+showcase readiness: public delivery, concise architecture evidence, and only
+then a third category whose visual needs genuinely extend the renderer system.

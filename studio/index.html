@@ -20,7 +20,7 @@
       </a>
       <div class="header-status">
         <span class="status-dot" aria-hidden="true"></span>
-        <span id="header-status">ARRAYS · 2 LESSONS</span>
+        <span id="header-status">2 DATA STRUCTURES · 7 LESSONS</span>
       </div>
     </header>
 
@@ -28,7 +28,7 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">LEARN BY WATCHING STATE CHANGE</p>
-          <h1 id="hero-title">See the algorithm think.</h1>
+          <h1 id="hero-title">See the algorithm <em>think.</em></h1>
           <p class="hero-lede">A calm, step-by-step space for turning data structures and algorithms into decisions you can explain.</p>
           <a class="text-link" href="#catalog">Choose a lesson <span aria-hidden="true">↓</span></a>
         </div>
@@ -45,10 +45,10 @@
       <section class="catalog" id="catalog" aria-labelledby="catalog-title">
         <div class="catalog-heading">
           <div>
-            <p class="eyebrow">ARRAYS · START HERE</p>
+            <p class="eyebrow">CURRICULUM · 2 DATA STRUCTURES</p>
             <h2 id="catalog-title">Choose a lesson</h2>
           </div>
-          <p>Each lesson introduces one reusable way to reason about state.</p>
+          <p>Seven focused lessons build from value scans to pointer-based structures, one state change at a time.</p>
         </div>
         <div class="lesson-list" id="lesson-list" aria-label="Available lessons"></div>
       </section>
@@ -57,7 +57,7 @@
         <div class="lesson-heading">
           <div>
             <p class="eyebrow" id="lesson-eyebrow"></p>
-            <h2 id="lesson-title"></h2>
+            <h2 id="lesson-title" tabindex="-1"></h2>
             <p class="lesson-summary" id="lesson-summary"></p>
           </div>
           <div class="lesson-meta">
@@ -69,11 +69,11 @@
 
         <div class="lesson-grid">
           <div class="visual-column">
-            <section class="array-card" aria-labelledby="array-title">
+            <section class="visualization-card" aria-labelledby="input-title">
               <div class="card-topline">
                 <div>
                   <p class="eyebrow">THE INPUT</p>
-                  <h3 id="array-title">Your array</h3>
+                  <h3 id="input-title">Your data</h3>
                 </div>
                 <button class="quiet-button" id="sample-button" type="button">Load sample</button>
               </div>
@@ -83,14 +83,12 @@
               <p class="field-help" id="input-help"></p>
               <p class="field-error" id="input-error" role="alert"></p>
 
-              <div class="array-stage" aria-label="Array visualization">
-                <div class="array-scroll">
-                  <div class="array-cells" id="array-cells" role="list"></div>
-                </div>
-                <div class="array-legend" id="array-legend"></div>
+              <div class="visualization-stage" id="visualization-stage" role="region" aria-labelledby="input-title">
+                <div id="visualization-root"></div>
+                <div class="visualization-legend" id="visualization-legend"></div>
               </div>
 
-              <div class="stat-grid" id="stat-grid" aria-live="polite"></div>
+              <div class="stat-grid" id="stat-grid"></div>
             </section>
 
             <div class="player-controls" aria-label="Lesson controls">
@@ -100,8 +98,17 @@
               <button class="icon-button" id="reset-button" type="button" aria-label="Reset lesson">↻</button>
               <label class="speed-control" for="speed-input">
                 Speed
-                <input id="speed-input" type="range" min="350" max="1400" step="50" value="850" />
+                <input
+                  id="speed-input"
+                  type="range"
+                  min="350"
+                  max="1400"
+                  step="50"
+                  value="900"
+                  aria-describedby="speed-direction"
+                />
                 <span id="speed-label">1×</span>
+                <span class="sr-only" id="speed-direction">Move right to play faster.</span>
               </label>
             </div>
             <p class="keyboard-help">Keyboard: ← previous · → next · Space play/pause · R reset</p>
@@ -142,7 +149,7 @@
               </div>
               <div class="complexity-values">
                 <div><strong id="time-complexity"></strong><span>time</span></div>
-                <div><strong id="space-complexity"></strong><span>auxiliary space</span></div>
+                <div><strong id="space-complexity"></strong><span id="space-complexity-label">auxiliary space</span></div>
               </div>
               <p id="complexity-explanation"></p>
             </section>

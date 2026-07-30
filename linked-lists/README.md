@@ -28,6 +28,22 @@ class Node {
 
 ## Practice Exercises
 
+- Traverse a linked list
 - Reverse a linked list
 - Detect a cycle
 - Merge two lists
+
+## Interactive Lessons
+
+The studio now includes a three-lesson linked-list progression:
+
+1. **Traverse a Linked List** establishes nodes, next references, and null as the stopping rule.
+2. **Reverse a Linked List** makes pointer mutation inspectable by separating save, redirect, and advance.
+3. **Detect a Cycle** introduces fast and slow pointers, overlapping pointer labels, self-loops, and return connections.
+
+Run `npm run studio`, then choose Linked Lists from the lesson catalog. The domain implementations remain independent of the browser in:
+
+- `model.mjs`
+- `traverse-linked-list.mjs`
+- `reverse-linked-list.mjs`
+- `detect-cycle.mjs`
