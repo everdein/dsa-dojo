@@ -1,10 +1,18 @@
 import { buildValidatedTrace } from "./lesson-contract.mjs";
 import { projectArrayView } from "./array-renderer.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
+import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
+import {
+  mountPips,
+  observePipVisibility,
+  pipStateForPlayer,
+  setPipState
+} from "./pip.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
 
 const lessons = listLessons();
-const initialLessonId = readLessonIdFromHash() ?? lessons[0].id;
+const lessonIds = lessons.map((item) => item.id);
+const initialLessonId = readLessonIdFromHash(window.location.hash, lessonIds) ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
 let player = createPlayerState({
   lessonId: lesson.id,
@@ -34,6 +42,7 @@ const elements = {
   speed: document.querySelector("#speed-input"),
   speedLabel: document.querySelector("#speed-label"),
   pipCard: document.querySelector(".pip-card"),
+  pipAvatar: document.querySelector(".pip-card .pip-avatar"),
   pipToggle: document.querySelector("#pip-toggle"),
   pipHeading: document.querySelector("#pip-heading"),
   pipMessage: document.querySelector("#pip-message"),
@@ -247,6 +256,7 @@ function renderCodeState(step) {
 }
 
 function renderPip(step) {
+  setPipState(elements.pipAvatar, pipStateForPlayer(player.status));
   elements.pipMessage.textContent = step.narration;
   elements.pipPrompt.textContent = step.prompt;
 }
@@ -258,7 +268,7 @@ function loadLesson(id) {
   const input = structuredClone(lesson.input.defaultValue);
   const trace = buildValidatedTrace(lesson, input);
   player = playerReducer(player, { type: "LOAD_LESSON", lessonId: lesson.id, trace, input });
-  window.history.replaceState(null, "", `#lesson=${lesson.id}`);
+  window.history.replaceState(null, "", lessonHash(lesson.id));
   renderLessonChrome();
   render();
 }
@@ -337,13 +347,6 @@ function speedLabel(speed) {
   return "1×";
 }
 
-function readLessonIdFromHash() {
-  const match = window.location.hash.match(/^#lesson=(.+)$/);
-  if (!match) return null;
-  const id = decodeURIComponent(match[1]);
-  return lessons.some((item) => item.id === id) ? id : null;
-}
-
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
 elements.previous.addEventListener("click", () => move({ type: "PREVIOUS" }));
@@ -375,10 +378,12 @@ document.addEventListener("keydown", (event) => {
 });
 
 window.addEventListener("hashchange", () => {
-  const id = readLessonIdFromHash();
+  const id = readLessonIdFromHash(window.location.hash, lessonIds);
   if (id && id !== lesson.id) loadLesson(id);
 });
 
+mountPips();
+observePipVisibility();
 initializeCatalog();
 renderLessonChrome();
 render();

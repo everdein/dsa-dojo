@@ -4,9 +4,11 @@ This repository is a personal study space for building strong foundations in dat
 
 ## Interactive Studio
 
-**Status: Working arrays foundation with two interactive lessons.**
+**Status: Working visual learning experience with an introductory story and two interactive array lessons.**
 
-DSA Dojo includes a dependency-free browser studio where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside Pip, an original guide companion.
+DSA Dojo includes a dependency-free browser experience where learners can see state change step by step, connect each visual transition to the code that caused it, and learn alongside Pip, an original guide companion.
+
+The landing story introduces the learning model with small, synchronized Find Largest and Sliding Window demonstrations. The studio then gives the learner full control over the real execution trace: editable input, Previous, Next, Play/Pause, Reset, speed, source highlighting, explanations, and complexity.
 
 The current catalog includes:
 
@@ -44,7 +46,12 @@ npm install
 npm run studio
 ```
 
-Then open `http://127.0.0.1:4173` in a browser. The studio currently includes Find Largest and fixed-size Sliding Window lessons in an arrays catalog. The existing Node.js exercises remain runnable independently.
+Then open:
+
+- `http://127.0.0.1:4173/` for the animated introduction
+- `http://127.0.0.1:4173/studio` for the lesson catalog and player
+
+The studio currently includes Find Largest and fixed-size Sliding Window lessons in an arrays catalog. Direct lesson links use the URL hash, such as `/studio#lesson=arrays%2Fsliding-window`. The existing Node.js exercises remain runnable independently.
 
 Run the automated checks:
 

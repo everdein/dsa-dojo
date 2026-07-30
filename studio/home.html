@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#10251f" />
+    <meta name="description" content="DSA Dojo turns algorithms into visible decisions you can pause, predict, and explain." />
+    <title>DSA Dojo — See the Algorithm Think</title>
+    <link rel="stylesheet" href="/home.css" />
+    <link rel="stylesheet" href="/pip.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to content</a>
+
+    <header class="home-header" data-home-header>
+      <a class="home-brand" href="/" aria-label="DSA Dojo home">
+        <span class="home-brand-mark" aria-hidden="true">[]</span>
+        <span>
+          <strong>DSA DOJO</strong>
+          <small>VISUAL ALGORITHM PRACTICE</small>
+        </span>
+      </a>
+      <a class="header-cta" href="/studio">Enter dojo <span aria-hidden="true">↗</span></a>
+    </header>
+
+    <main id="main-content">
+      <section class="home-hero" aria-labelledby="home-title">
+        <div class="hero-grid">
+          <div class="home-hero-copy" data-reveal>
+            <p class="home-eyebrow">DSA DOJO · LEARN BY WATCHING STATE CHANGE</p>
+            <h1 id="home-title">See the algorithm <em>think.</em></h1>
+            <p class="home-hero-lede">Turn code into visible decisions you can pause, predict, and explain.</p>
+            <div class="hero-actions">
+              <a class="home-button home-button--sun" href="#how-it-works">Meet Pip <span aria-hidden="true">↓</span></a>
+              <a class="home-button home-button--outline" href="/studio">Enter dojo</a>
+            </div>
+          </div>
+
+          <div class="hero-stage" aria-label="Pip, the DSA Dojo guide" data-reveal>
+            <div class="hero-orbit hero-orbit--one" aria-hidden="true"></div>
+            <div class="hero-orbit hero-orbit--two" aria-hidden="true"></div>
+            <div class="pip-avatar pip-avatar--hero" data-pip data-state="idle"></div>
+            <div class="hero-array" aria-hidden="true">
+              <span>3</span><span>1</span><span class="is-best">7</span><span>4</span>
+            </div>
+            <div class="hero-note">
+              <span class="hero-note-dot" aria-hidden="true"></span>
+              <strong>STATE 03</strong>
+              <span>7 becomes the best value.</span>
+            </div>
+          </div>
+        </div>
+        <a class="scroll-cue" href="#promise">
+          <span>Scroll the story</span>
+          <i aria-hidden="true"></i>
+        </a>
+      </section>
+
+      <section class="promise-section" id="promise" aria-labelledby="promise-title">
+        <div class="promise-inner" data-reveal>
+          <p class="home-eyebrow">NOT ANOTHER LIST OF ANSWERS</p>
+          <h2 id="promise-title">Algorithms feel less abstract when every decision has somewhere to go.</h2>
+          <p>DSA Dojo keeps the array, code, explanation, and result synchronized—so you can follow the reasoning, not just memorize the solution.</p>
+        </div>
+      </section>
+
+      <section class="story-section" id="how-it-works" aria-labelledby="story-title">
+        <div class="story-intro" data-reveal>
+          <p class="home-eyebrow">MEET YOUR GUIDE</p>
+          <h2 id="story-title">Pip follows the state.</h2>
+          <p>Pip gets curious before a decision, points out meaningful changes, and celebrates understanding—not speed.</p>
+        </div>
+
+        <div class="story-layout">
+          <aside class="story-guide" aria-label="Pip's current note">
+            <div class="story-guide-stage">
+              <div class="pip-avatar pip-avatar--large" data-pip data-state="curious" data-story-pip></div>
+            </div>
+            <p class="story-guide-label" data-story-label>LOOK CLOSELY</p>
+            <p class="story-guide-message" data-story-message>The answer can change one comparison at a time.</p>
+            <span class="story-progress" aria-hidden="true"><i data-story-progress></i></span>
+          </aside>
+
+          <div class="story-chapters">
+            <article
+              class="story-chapter story-chapter--mint"
+              data-story-chapter
+              data-pip-state="curious"
+              data-pip-label="LOOK CLOSELY"
+              data-pip-message="The answer can change one comparison at a time."
+              aria-labelledby="decision-title"
+            >
+              <div class="chapter-copy" data-reveal>
+                <p class="chapter-number">01 · ONE DECISION</p>
+                <h3 id="decision-title">Watch the answer change.</h3>
+                <p>Pip follows the state—not just the final answer—so you can see why each decision is made.</p>
+              </div>
+
+              <div class="demo-card scan-demo" data-scan-demo data-reveal aria-label="Animated Find Largest example">
+                <div class="demo-topline">
+                  <span>FIND LARGEST</span>
+                  <span data-scan-status>Compare 3 with the best so far</span>
+                  <button type="button" data-scan-replay aria-label="Replay Find Largest demonstration">Replay</button>
+                </div>
+                <div class="demo-array" role="img" aria-label="Array values 3, 1, 7, and 4. The active and best values change during the demonstration.">
+                  <span data-scan-cell data-value="3"><small>0</small><strong>3</strong><i></i></span>
+                  <span data-scan-cell data-value="1"><small>1</small><strong>1</strong><i></i></span>
+                  <span data-scan-cell data-value="7"><small>2</small><strong>7</strong><i></i></span>
+                  <span data-scan-cell data-value="4"><small>3</small><strong>4</strong><i></i></span>
+                </div>
+                <div class="demo-stats">
+                  <span><small>Current value</small><strong data-scan-current>3</strong></span>
+                  <span><small>Best so far</small><strong data-scan-best>3</strong></span>
+                  <span><small>Decision</small><strong data-scan-decision>Start here</strong></span>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="story-chapter story-chapter--ink"
+              data-story-chapter
+              data-pip-state="guiding"
+              data-pip-label="REUSE THE WORK"
+              data-pip-message="Move the window by subtracting one value and adding the next."
+              aria-labelledby="reuse-title"
+            >
+              <div class="chapter-copy" data-reveal>
+                <p class="chapter-number">02 · A REUSABLE PATTERN</p>
+                <h3 id="reuse-title">Move smarter, not harder.</h3>
+                <p>A sliding window reuses its previous total. You can see what leaves, what enters, and why the work stays linear.</p>
+              </div>
+
+              <div class="demo-card window-demo" data-window-demo data-reveal aria-label="Animated Sliding Window example">
+                <div class="demo-topline">
+                  <span>SLIDING WINDOW</span>
+                  <span data-window-status>Window 0–2</span>
+                  <button type="button" data-window-replay aria-label="Replay Sliding Window demonstration">Replay</button>
+                </div>
+                <div class="demo-array demo-array--window" role="img" aria-label="Array values 2, 1, 5, 1, 3, and 2 with a moving window of three values.">
+                  <span data-window-cell data-value="2"><small>0</small><strong>2</strong><i></i></span>
+                  <span data-window-cell data-value="1"><small>1</small><strong>1</strong><i></i></span>
+                  <span data-window-cell data-value="5"><small>2</small><strong>5</strong><i></i></span>
+                  <span data-window-cell data-value="1"><small>3</small><strong>1</strong><i></i></span>
+                  <span data-window-cell data-value="3"><small>4</small><strong>3</strong><i></i></span>
+                  <span data-window-cell data-value="2"><small>5</small><strong>2</strong><i></i></span>
+                </div>
+                <div class="demo-stats">
+                  <span><small>Leaves</small><strong data-window-leaves>—</strong></span>
+                  <span><small>Enters</small><strong data-window-enters>—</strong></span>
+                  <span><small>Running total</small><strong data-window-sum>8</strong></span>
+                </div>
+              </div>
+            </article>
+
+            <article
+              class="story-chapter story-chapter--paper"
+              data-story-chapter
+              data-pip-state="thinking"
+              data-pip-label="YOUR TURN"
+              data-pip-message="Pause before the next step and explain what you expect to change."
+              aria-labelledby="control-title"
+            >
+              <div class="chapter-copy" data-reveal>
+                <p class="chapter-number">03 · CONTROL THE EXECUTION</p>
+                <h3 id="control-title">Pause. Predict. Try again.</h3>
+                <p>The goal is not to watch an animation. It is to explain what happens next—then test your reasoning with a new input.</p>
+              </div>
+
+              <div class="control-stage" data-reveal>
+                <div class="control-preview">
+                  <span class="control-step">STEP 03 / 05</span>
+                  <div class="control-code" aria-hidden="true">
+                    <span><i>4</i> if (values[i] &gt; largest) {</span>
+                    <span class="is-active"><i>5</i> &nbsp; largest = values[i];</span>
+                    <span><i>6</i> }</span>
+                  </div>
+                </div>
+                <div class="control-bar" aria-label="The studio includes previous, play, next, reset, and speed controls">
+                  <span>← Previous</span>
+                  <span class="control-bar-primary">▶ Play</span>
+                  <span>Next →</span>
+                  <span>↻</span>
+                  <span class="control-speed">Speed <i></i></span>
+                </div>
+                <a class="text-arrow-link" href="/studio">Control a real trace <span aria-hidden="true">↗</span></a>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="system-section" aria-labelledby="system-title">
+        <div class="system-heading" data-reveal>
+          <p class="home-eyebrow">ONE SOURCE OF TRUTH</p>
+          <h2 id="system-title">The visual never guesses.</h2>
+          <p>A deterministic trace keeps every learning surface in agreement. Rewind to any step and the same state returns.</p>
+        </div>
+
+        <div class="system-flow" data-reveal aria-label="Algorithm to visualization flow">
+          <div><span>01</span><strong>Algorithm</strong><small>Produces the result</small></div>
+          <i aria-hidden="true">→</i>
+          <div class="system-flow-focus"><span>02</span><strong>Trace</strong><small>Records each decision</small></div>
+          <i aria-hidden="true">→</i>
+          <div><span>03</span><strong>Player</strong><small>Controls time</small></div>
+          <i aria-hidden="true">→</i>
+          <div><span>04</span><strong>Visualization</strong><small>Explains the state</small></div>
+        </div>
+
+        <div class="system-outputs" data-reveal>
+          <span>Highlighted code</span>
+          <span>Pip's explanation</span>
+          <span>Accessible announcements</span>
+          <span>Exact rewind</span>
+        </div>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="lesson-section-title">
+        <div class="lesson-section-heading" data-reveal>
+          <div>
+            <p class="home-eyebrow">ARRAYS · START HERE</p>
+            <h2 id="lesson-section-title">Choose your first pattern.</h2>
+          </div>
+          <p>Two focused lessons. One shared way to inspect state, test an idea, and explain the tradeoff.</p>
+        </div>
+
+        <div class="home-lessons">
+          <a class="home-lesson-card" href="/studio#lesson=arrays%2Ffind-largest" data-reveal>
+            <span class="lesson-index">01</span>
+            <span class="lesson-card-copy">
+              <small>LINEAR SCAN</small>
+              <strong>Find Largest</strong>
+              <span>Track one best value while visiting each element exactly once.</span>
+            </span>
+            <span class="lesson-card-arrow" aria-hidden="true">↗</span>
+          </a>
+          <a class="home-lesson-card" href="/studio#lesson=arrays%2Fsliding-window" data-reveal>
+            <span class="lesson-index">02</span>
+            <span class="lesson-card-copy">
+              <small>REUSABLE AGGREGATE</small>
+              <strong>Sliding Window</strong>
+              <span>Reuse a running total while a fixed range moves across an array.</span>
+            </span>
+            <span class="lesson-card-arrow" aria-hidden="true">↗</span>
+          </a>
+        </div>
+        <p class="lesson-footnote" data-reveal>More structures will unlock as the dojo grows.</p>
+      </section>
+
+      <section class="final-section" aria-labelledby="final-title">
+        <div class="final-pip" data-reveal>
+          <div class="pip-avatar pip-avatar--hero" data-pip data-state="celebrating"></div>
+        </div>
+        <div class="final-copy" data-reveal>
+          <p class="home-eyebrow">READY WHEN YOU ARE</p>
+          <h2 id="final-title">Don’t just run the code. Explain it.</h2>
+          <p>Pick a lesson, make a prediction, and follow the state one decision at a time.</p>
+          <a class="home-button home-button--sun" href="/studio">Enter dojo <span aria-hidden="true">↗</span></a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="home-footer">
+      <a class="home-brand" href="/" aria-label="DSA Dojo home">
+        <span class="home-brand-mark" aria-hidden="true">[]</span>
+        <span><strong>DSA DOJO</strong><small>SEE THE ALGORITHM THINK</small></span>
+      </a>
+      <p>Built as a living study practice for data structures and algorithms.</p>
+      <a href="https://github.com/everdein/dsa-dojo">View source <span aria-hidden="true">↗</span></a>
+    </footer>
+
+    <script type="module" src="/src/home.mjs"></script>
+  </body>
+</html>

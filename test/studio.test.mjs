@@ -10,6 +10,13 @@ import {
   buildValidatedTrace
 } from "../studio/src/lesson-contract.mjs";
 import { getLesson, listLessons } from "../studio/src/lessons/index.mjs";
+import { lessonHash, readLessonIdFromHash } from "../studio/src/navigation.mjs";
+import {
+  mountPips,
+  normalizePipState,
+  observePipVisibility,
+  pipStateForPlayer
+} from "../studio/src/pip.mjs";
 import { createPlayerState, playerReducer } from "../studio/src/player.mjs";
 import { resolveRequest } from "../studio/server.mjs";
 
@@ -198,14 +205,116 @@ test("player restarts after completion and normalizes speed", () => {
   assert.equal(state.speed, 250);
 });
 
-test("static server resolves only explicitly allowed directories", () => {
-  assert.match(resolveRequest("/"), /studio[\\/]index\.html$/);
+test("static server maps the landing page, studio, and shared assets", () => {
+  assert.match(resolveRequest("/"), /studio[\\/]home\.html$/);
+  assert.match(resolveRequest("/index.html"), /studio[\\/]home\.html$/);
+  assert.match(resolveRequest("/studio"), /studio[\\/]index\.html$/);
+  assert.match(resolveRequest("/studio/"), /studio[\\/]index\.html$/);
+  assert.match(resolveRequest("/home.css"), /studio[\\/]home\.css$/);
+  assert.match(resolveRequest("/styles.css"), /studio[\\/]styles\.css$/);
+  assert.match(resolveRequest("/pip.css"), /studio[\\/]pip\.css$/);
   assert.match(resolveRequest("/src/app.mjs"), /studio[\\/]src[\\/]app\.mjs$/);
+  assert.match(resolveRequest("/src/pip.mjs"), /studio[\\/]src[\\/]pip\.mjs$/);
   assert.match(resolveRequest("/arrays/find-largest.mjs"), /arrays[\\/]find-largest\.mjs$/);
+});
+
+test("static server resolves only explicitly allowed directories", () => {
   assert.equal(resolveRequest("/package.json"), null);
+  assert.equal(resolveRequest("/arrays/%2e%2e%2fpackage.json"), null);
   assert.equal(resolveRequest("/arrays/%5c..%5cpackage.json"), null);
   assert.equal(resolveRequest("/arrays/%5c..%5c.git%5cconfig"), null);
   assert.equal(resolveRequest("/src/%5c..%5c..%5cpackage.json"), null);
+  assert.equal(resolveRequest("/src/%2e%2e%2fserver.mjs"), null);
+  assert.equal(resolveRequest("/src/%5c..%5cserver.mjs"), null);
+  assert.equal(resolveRequest("/studio/../package.json"), null);
+  assert.equal(resolveRequest("/studio/%5c..%5cserver.mjs"), null);
+  assert.equal(resolveRequest("/%E0%A4%A"), null);
+});
+
+test("lesson navigation accepts safe encoded hashes and rejects malformed values", () => {
+  const ids = lessons.map((lesson) => lesson.id);
+  assert.equal(readLessonIdFromHash("#lesson=arrays/find-largest", ids), "arrays/find-largest");
+  assert.equal(readLessonIdFromHash("#lesson=arrays%2Fsliding-window", ids), "arrays/sliding-window");
+  assert.equal(readLessonIdFromHash("#lesson=missing", ids), null);
+  assert.equal(readLessonIdFromHash("#other=value", ids), null);
+  assert.equal(readLessonIdFromHash("#lesson=%E0%A4%A", ids), null);
+  assert.equal(lessonHash("arrays/find-largest"), "#lesson=arrays%2Ffind-largest");
+});
+
+test("Pip maps player states to a small, resilient motion vocabulary", () => {
+  assert.equal(pipStateForPlayer("ready"), "curious");
+  assert.equal(pipStateForPlayer("paused"), "thinking");
+  assert.equal(pipStateForPlayer("playing"), "guiding");
+  assert.equal(pipStateForPlayer("complete"), "celebrating");
+  assert.equal(pipStateForPlayer("error"), "caution");
+  assert.equal(pipStateForPlayer("unknown"), "idle");
+  assert.equal(normalizePipState("guiding"), "guiding");
+  assert.equal(normalizePipState("invented"), "idle");
+});
+
+test("Pip mounts an idempotent decorative structure and supports observer fallback", () => {
+  const document = createFakeDocument();
+  const attributes = {};
+  const element = {
+    children: [],
+    dataset: { state: "curious" },
+    ownerDocument: document,
+    replaceCount: 0,
+    replaceChildren(fragment) {
+      this.replaceCount += 1;
+      this.children = [...fragment.children];
+    },
+    setAttribute(name, value) {
+      attributes[name] = value;
+    }
+  };
+  const root = {
+    defaultView: {},
+    querySelectorAll() {
+      return [element];
+    }
+  };
+
+  assert.equal(mountPips(root)[0], element);
+  assert.equal(element.replaceCount, 1);
+  assert.equal(element.children.length, 5);
+  assert.equal(element.children[0].className, "pip-body");
+  assert.equal(attributes["aria-hidden"], "true");
+  assert.equal(element.dataset.visible, "true");
+
+  mountPips(root);
+  assert.equal(element.replaceCount, 1);
+  assert.equal(observePipVisibility(root), null);
+  assert.equal(element.dataset.visible, "true");
+});
+
+test("Pip visibility observer pauses offscreen companions", () => {
+  let callback;
+  const observed = [];
+  class FakeObserver {
+    constructor(observerCallback) {
+      callback = observerCallback;
+    }
+    observe(element) {
+      observed.push(element);
+    }
+  }
+
+  const element = { dataset: {} };
+  const root = {
+    defaultView: { IntersectionObserver: FakeObserver },
+    querySelectorAll() {
+      return [element];
+    }
+  };
+
+  assert.ok(observePipVisibility(root) instanceof FakeObserver);
+  assert.equal(observed[0], element);
+  assert.equal(element.dataset.visible, "false");
+  callback([{ target: element, isIntersecting: true }]);
+  assert.equal(element.dataset.visible, "true");
+  callback([{ target: element, isIntersecting: false }]);
+  assert.equal(element.dataset.visible, "false");
 });
 
 function createState() {
@@ -214,4 +323,21 @@ function createState() {
     trace: [{ step: 0 }, { step: 1 }, { step: 2 }],
     input: { values: [1, 2, 3] }
   });
+}
+
+function createFakeDocument() {
+  return {
+    createDocumentFragment: createFakeNode,
+    createElement: createFakeNode
+  };
+}
+
+function createFakeNode() {
+  return {
+    children: [],
+    className: "",
+    append(...children) {
+      this.children.push(...children);
+    }
+  };
 }

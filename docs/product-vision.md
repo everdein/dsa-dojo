@@ -97,7 +97,7 @@ The studio can use an expressive product-storytelling style while developing its
 - restrained scroll reveals and meaningful microinteractions
 - a distinct DSA Dojo palette rather than borrowed brand colors
 
-Long empty scroll sequences, decorative motion, and oversized type should not delay the lesson or reduce usability.
+Long empty scroll sequences, decorative motion, and oversized type should not delay the lesson or reduce usability. The studio entry point remains visible in the landing-page header and first viewport.
 
 ## Arrays-First Vertical Slice
 
@@ -239,7 +239,7 @@ The arrays vertical slice does not need:
 - a large lesson catalog
 - an AI tutor
 - complex Canvas rendering when semantic HTML and CSS are sufficient
-- a polished marketing page before the learning interaction works
+- motion or marketing polish that is disconnected from the learning interaction
 - a recreation of Phantom's visual identity
 
 The first release exists to prove that one algorithm can be made genuinely easier to understand. Everything else builds from that evidence.
@@ -257,3 +257,28 @@ The next checkpoint is evaluation rather than immediate catalog expansion.
 After the two-lesson foundation is exercised, Reverse Linked List can become
 the first deliberate renderer stress test. This sequence gives us evidence
 before adding tree, graph, or dynamic-programming-specific infrastructure.
+
+## Introductory story checkpoint
+
+The product now has a dedicated introductory route that demonstrates the
+learning model before handing control to the studio. It uses the same visual
+language, array concepts, and Pip companion as the lessons instead of creating
+a separate marketing identity.
+
+The story proves five ideas in order:
+
+1. state changes one decision at a time
+2. patterns such as Sliding Window reuse previous work
+3. the learner controls playback and prediction
+4. one deterministic trace synchronizes every explanation surface
+5. direct lesson links preserve a short path into practice
+
+Pip now has a reusable motion vocabulary across the landing page and studio.
+The states communicate curiosity, thinking, guidance, completion, and caution
+without carrying essential information on their own. Ordinary scrolling,
+observer fallbacks, reduced-motion behavior, and mobile-specific layout rules
+keep the storytelling layer subordinate to learning.
+
+The compact landing demonstrations run one finite pass, stop, and provide a
+Replay control. They are previews of the interaction model rather than passive,
+continuously looping decoration.
