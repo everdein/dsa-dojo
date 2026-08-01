@@ -5,7 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#10251f" />
     <meta name="description" content="DSA Dojo turns algorithms into visible decisions you can pause, predict, and explain." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DSA Dojo" />
+    <meta property="og:title" content="DSA Dojo — See the Algorithm Think" />
+    <meta property="og:description" content="Interactive JavaScript lessons that synchronize algorithm state, source code, and explanation." />
+    <meta property="og:image" content="https://raw.githubusercontent.com/everdein/dsa-dojo/main/studio/social-preview.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DSA Dojo — See the Algorithm Think" />
+    <meta name="twitter:description" content="Pause, predict, and explain data structures and algorithms one decision at a time." />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/everdein/dsa-dojo/main/studio/social-preview.jpg" />
     <title>DSA Dojo — See the Algorithm Think</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/home.css" />
     <link rel="stylesheet" href="/pip.css" />
   </head>
@@ -20,7 +30,7 @@
           <small>VISUAL ALGORITHM PRACTICE</small>
         </span>
       </a>
-      <a class="header-cta" href="/studio">Enter dojo <span aria-hidden="true">↗</span></a>
+      <a class="header-cta" href="/studio#lesson=arrays%2Ffind-largest">Enter dojo <span aria-hidden="true">↗</span></a>
     </header>
 
     <main id="main-content">
@@ -32,14 +42,14 @@
             <p class="home-hero-lede">Turn code into visible decisions you can pause, predict, and explain.</p>
             <div class="hero-actions">
               <a class="home-button home-button--sun" href="#how-it-works">Meet Pip <span aria-hidden="true">↓</span></a>
-              <a class="home-button home-button--outline" href="/studio">Enter dojo</a>
+              <a class="home-button home-button--outline" href="/studio#lesson=arrays%2Ffind-largest">Start first lesson</a>
             </div>
           </div>
 
           <div class="hero-stage" aria-label="Pip, the DSA Dojo guide" data-reveal>
             <div class="hero-orbit hero-orbit--one" aria-hidden="true"></div>
             <div class="hero-orbit hero-orbit--two" aria-hidden="true"></div>
-            <div class="pip-avatar pip-avatar--hero" data-pip data-state="idle"></div>
+            <div class="pip-avatar pip-avatar--hero" data-pip data-pip-pose="welcome" data-state="idle"></div>
             <div class="hero-array" aria-hidden="true">
               <span>3</span><span>1</span><span class="is-best">7</span><span>4</span>
             </div>
@@ -74,7 +84,7 @@
         <div class="story-layout">
           <aside class="story-guide" aria-label="Pip's current note">
             <div class="story-guide-stage">
-              <div class="pip-avatar pip-avatar--large" data-pip data-state="curious" data-story-pip></div>
+              <div class="pip-avatar pip-avatar--large" data-pip data-pip-pose="story" data-state="curious" data-story-pip></div>
             </div>
             <p class="story-guide-label" data-story-label>LOOK CLOSELY</p>
             <p class="story-guide-message" data-story-message>The answer can change one comparison at a time.</p>
@@ -102,7 +112,7 @@
                   <span data-scan-status>Compare 3 with the best so far</span>
                   <button type="button" data-scan-replay aria-label="Replay Find Largest demonstration">Replay</button>
                 </div>
-                <div class="demo-array" role="img" aria-label="Array values 3, 1, 7, and 4. The active and best values change during the demonstration.">
+                <div class="demo-array" role="img" tabindex="0" aria-label="Array values 3, 1, 7, and 4. The active and best values change during the demonstration.">
                   <span data-scan-cell data-value="3"><small>0</small><strong>3</strong><i></i></span>
                   <span data-scan-cell data-value="1"><small>1</small><strong>1</strong><i></i></span>
                   <span data-scan-cell data-value="7"><small>2</small><strong>7</strong><i></i></span>
@@ -136,7 +146,7 @@
                   <span data-window-status>Window 0–2</span>
                   <button type="button" data-window-replay aria-label="Replay Sliding Window demonstration">Replay</button>
                 </div>
-                <div class="demo-array demo-array--window" role="img" aria-label="Array values 2, 1, 5, 1, 3, and 2 with a moving window of three values.">
+                <div class="demo-array demo-array--window" role="img" tabindex="0" aria-label="Array values 2, 1, 5, 1, 3, and 2 with a moving window of three values.">
                   <span data-window-cell data-value="2"><small>0</small><strong>2</strong><i></i></span>
                   <span data-window-cell data-value="1"><small>1</small><strong>1</strong><i></i></span>
                   <span data-window-cell data-value="5"><small>2</small><strong>5</strong><i></i></span>
@@ -182,7 +192,7 @@
                   <span>↻</span>
                   <span class="control-speed">Speed <i></i></span>
                 </div>
-                <a class="text-arrow-link" href="/studio">Control a real trace <span aria-hidden="true">↗</span></a>
+                <a class="text-arrow-link" href="/studio#lesson=arrays%2Ffind-largest">Control a real trace <span aria-hidden="true">↗</span></a>
               </div>
             </article>
           </div>
@@ -295,13 +305,13 @@
 
       <section class="final-section" aria-labelledby="final-title">
         <div class="final-pip" data-reveal>
-          <div class="pip-avatar pip-avatar--hero" data-pip data-state="celebrating"></div>
+          <div class="pip-avatar pip-avatar--hero" data-pip data-pip-pose="victory" data-state="celebrating"></div>
         </div>
         <div class="final-copy" data-reveal>
           <p class="home-eyebrow">READY WHEN YOU ARE</p>
           <h2 id="final-title">Don’t just run the code. Explain it.</h2>
           <p>Pick a lesson, make a prediction, and follow the state one decision at a time.</p>
-          <a class="home-button home-button--sun" href="/studio">Enter dojo <span aria-hidden="true">↗</span></a>
+          <a class="home-button home-button--sun" href="/studio#lesson=arrays%2Ffind-largest">Enter dojo <span aria-hidden="true">↗</span></a>
         </div>
       </section>
     </main>

@@ -25,5 +25,8 @@ export function parsePositiveInteger(raw, label) {
 }
 
 export function formatNumber(value) {
-  return Number.isInteger(value) ? String(value) : String(Number(value.toFixed(3)));
+  if (!Number.isFinite(value)) {
+    throw new Error("Only finite numbers can be formatted.");
+  }
+  return Object.is(value, -0) ? "-0" : String(value);
 }

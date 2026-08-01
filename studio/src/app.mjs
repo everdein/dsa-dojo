@@ -28,6 +28,7 @@ let player = createPlayerState({
   input: structuredClone(lesson.input.defaultValue)
 });
 let timerId = null;
+let prediction = createPredictionState(lesson.id);
 
 const elements = {
   headerStatus: document.querySelector("#header-status"),
@@ -51,12 +52,27 @@ const elements = {
   reset: document.querySelector("#reset-button"),
   speed: document.querySelector("#speed-input"),
   speedLabel: document.querySelector("#speed-label"),
+  mobileCodeLocation: document.querySelector("#mobile-code-location"),
+  mobileCodeLine: document.querySelector("#mobile-code-line"),
+  completion: document.querySelector("#lesson-complete"),
+  completionTitle: document.querySelector("#lesson-complete-title"),
+  completionSample: document.querySelector("#completion-sample-button"),
+  replay: document.querySelector("#replay-button"),
+  nextLesson: document.querySelector("#next-lesson-button"),
   pipCard: document.querySelector(".pip-card"),
   pipAvatar: document.querySelector(".pip-card .pip-avatar"),
   pipToggle: document.querySelector("#pip-toggle"),
   pipHeading: document.querySelector("#pip-heading"),
   pipMessage: document.querySelector("#pip-message"),
   pipPrompt: document.querySelector("#pip-prompt"),
+  prediction: document.querySelector("#prediction-checkpoint"),
+  predictionQuestion: document.querySelector("#prediction-question"),
+  predictionForm: document.querySelector("#prediction-form"),
+  predictionInput: document.querySelector("#prediction-input"),
+  predictionError: document.querySelector("#prediction-error"),
+  predictionResult: document.querySelector("#prediction-result"),
+  predictionText: document.querySelector("#prediction-text"),
+  predictionFeedback: document.querySelector("#prediction-feedback"),
   codeTitle: document.querySelector("#code-title"),
   fileLabel: document.querySelector("#file-label"),
   codeLines: document.querySelector("#code-lines"),
@@ -176,6 +192,7 @@ function renderCode() {
     const sourceLine = document.createElement("span");
     sourceLine.className = "code-line";
     sourceLine.dataset.codeSteps = line.steps.join(" ");
+    sourceLine.dataset.lineNumber = String(line.number);
     const number = document.createElement("b");
     number.textContent = String(line.number);
     sourceLine.append(number, document.createTextNode(line.text));
@@ -190,6 +207,8 @@ function render() {
   renderStats(step);
   renderCodeState(step);
   renderPip(step);
+  renderPrediction();
+  renderCompletion();
 
   elements.error.textContent = player.error;
   elements.fields.querySelectorAll("[data-field-id]").forEach((input) => {
@@ -199,6 +218,9 @@ function render() {
   elements.stepCount.textContent = `${player.index} / ${player.trace.length - 1}`;
   elements.previous.disabled = player.index === 0;
   elements.next.disabled = player.index === player.trace.length - 1;
+  elements.next.textContent = player.index === 0 && prediction.locked
+    ? "Reveal next step →"
+    : "Next →";
   const playing = player.status === "playing";
   elements.play.innerHTML = playing ? "Ⅱ <span>Pause</span>" : "▶ <span>Play</span>";
   elements.play.setAttribute("aria-label", playing ? "Pause lesson" : "Play lesson");
@@ -209,6 +231,7 @@ function render() {
   elements.pipCard.classList.toggle("is-minimized", player.guideMinimized);
   elements.pipToggle.textContent = player.guideMinimized ? "+" : "−";
   elements.pipToggle.setAttribute("aria-label", player.guideMinimized ? "Expand Pip" : "Minimize Pip");
+  elements.pipToggle.setAttribute("aria-expanded", String(!player.guideMinimized));
   elements.live.textContent = `${lesson.title}. Step ${player.index} of ${player.trace.length - 1}. ${step.narration}`;
 }
 
@@ -229,6 +252,8 @@ function renderArray(step) {
   const { values } = step.view;
   const scroll = document.createElement("div");
   scroll.className = "array-scroll";
+  scroll.tabIndex = 0;
+  scroll.setAttribute("aria-label", "Scrollable array visualization");
   const cellList = document.createElement("div");
   cellList.className = "array-cells";
   cellList.setAttribute("role", "list");
@@ -291,6 +316,8 @@ function renderLinkedList(step) {
   const model = projectLinkedListView(step.view);
   const scroll = document.createElement("div");
   scroll.className = "linked-list-scroll";
+  scroll.tabIndex = 0;
+  scroll.setAttribute("aria-label", "Scrollable linked-list visualization");
   const canvas = document.createElement("div");
   canvas.className = "linked-list-canvas";
   canvas.style.minWidth = `${Math.max(model.nodes.length * 142 + 38, 320)}px`;
@@ -440,16 +467,82 @@ function renderStats(step) {
 }
 
 function renderCodeState(step) {
+  const activeLines = lesson.code.lines.filter((line) => (
+    line.steps.some((codeStep) => step.codeSteps.includes(codeStep))
+  ));
+  const firstLine = activeLines[0];
+  const lastLine = activeLines.at(-1);
+  const representativeLine = activeLines.find((line) => line.text.trim()) ?? firstLine;
+
   document.querySelectorAll(".code-line").forEach((line) => {
     const steps = line.dataset.codeSteps.split(" ");
-    line.classList.toggle("is-active", step.codeSteps.some((codeStep) => steps.includes(codeStep)));
+    const active = step.codeSteps.some((codeStep) => steps.includes(codeStep));
+    line.classList.toggle("is-active", active);
+    if (Number(line.dataset.lineNumber) === representativeLine.number) {
+      line.setAttribute("aria-current", "step");
+    } else {
+      line.removeAttribute("aria-current");
+    }
   });
+
+  elements.mobileCodeLocation.textContent = firstLine === lastLine
+    ? `L${firstLine.number}`
+    : `L${firstLine.number}\u2013${lastLine.number}`;
+  elements.mobileCodeLine.textContent = representativeLine.text.trim() || "Code block boundary";
+}
+
+function renderCompletion() {
+  const complete = player.status === "complete";
+  elements.completion.hidden = !complete;
+  if (!complete) return;
+
+  const nextLesson = getNextLesson();
+  elements.completionTitle.textContent = `${lesson.catalogLabel} complete.`;
+  elements.nextLesson.disabled = nextLesson === null;
+  elements.nextLesson.textContent = nextLesson
+    ? "Next lesson →"
+    : "Next lesson";
+  elements.nextLesson.setAttribute(
+    "aria-label",
+    nextLesson ? `Next lesson: ${nextLesson.title}` : "No next lesson. Curriculum complete."
+  );
+}
+
+function getNextLesson() {
+  const currentIndex = lessons.findIndex((item) => item.id === lesson.id);
+  return lessons[currentIndex + 1] ?? null;
 }
 
 function renderPip(step) {
   setPipState(elements.pipAvatar, pipStateForPlayer(player.status));
   elements.pipMessage.textContent = step.narration;
   elements.pipPrompt.textContent = step.prompt;
+}
+
+function createPredictionState(lessonId) {
+  return { lessonId, locked: false, text: "" };
+}
+
+function resetPrediction() {
+  prediction = createPredictionState(lesson.id);
+  elements.predictionInput.value = "";
+}
+
+function renderPrediction() {
+  const available = player.index === 0 || prediction.locked;
+  elements.prediction.hidden = !available;
+  if (!available) return;
+
+  elements.predictionQuestion.textContent = player.trace[0].prompt;
+  elements.predictionForm.hidden = prediction.locked;
+  elements.predictionResult.hidden = !prediction.locked;
+  elements.predictionError.textContent = "";
+
+  if (!prediction.locked) return;
+  elements.predictionText.textContent = prediction.text;
+  elements.predictionFeedback.textContent = player.index === 0
+    ? "Locked in. Reveal the next step, then compare your reasoning with the visible state."
+    : "Now compare your prediction with the state change and Pip’s explanation.";
 }
 
 function loadLesson(id, { enter = true } = {}) {
@@ -459,6 +552,7 @@ function loadLesson(id, { enter = true } = {}) {
     const input = structuredClone(lesson.input.defaultValue);
     const trace = buildValidatedTrace(lesson, input);
     player = playerReducer(player, { type: "LOAD_LESSON", lessonId: lesson.id, trace, input });
+    resetPrediction();
     window.history.replaceState(null, "", lessonHash(lesson.id));
     renderLessonChrome();
     render();
@@ -488,6 +582,7 @@ function applyCurrentInput() {
     const input = lesson.input.parse(collectFields());
     const trace = buildValidatedTrace(lesson, input);
     player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
+    resetPrediction();
     renderFields();
   } catch (error) {
     player = playerReducer(player, { type: "VALIDATION_ERROR", message: error.message });
@@ -500,6 +595,7 @@ function loadSample() {
   const input = structuredClone(lesson.input.sampleValue);
   const trace = buildValidatedTrace(lesson, input);
   player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
+  resetPrediction();
   renderFields();
   render();
 }
@@ -545,6 +641,30 @@ function move(action) {
 
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
+elements.predictionForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const text = elements.predictionInput.value.trim();
+  if (!text) {
+    elements.predictionError.textContent = "Write a short prediction before locking it in.";
+    elements.predictionInput.focus();
+    return;
+  }
+  prediction = { lessonId: lesson.id, locked: true, text };
+  render();
+  elements.next.focus({ preventScroll: true });
+});
+elements.completionSample.addEventListener("click", () => {
+  loadSample();
+  elements.play.focus({ preventScroll: true });
+});
+elements.replay.addEventListener("click", () => {
+  startPlayback();
+  elements.play.focus({ preventScroll: true });
+});
+elements.nextLesson.addEventListener("click", () => {
+  const nextLesson = getNextLesson();
+  if (nextLesson) loadLesson(nextLesson.id);
+});
 elements.previous.addEventListener("click", () => move({ type: "PREVIOUS" }));
 elements.next.addEventListener("click", () => move({ type: "NEXT" }));
 elements.play.addEventListener("click", () => {
@@ -588,4 +708,6 @@ renderLessonChrome();
 render();
 if (initialLessonIdFromHash) {
   window.requestAnimationFrame(enterLesson);
+} else {
+  window.history.replaceState(null, "", lessonHash(lesson.id));
 }

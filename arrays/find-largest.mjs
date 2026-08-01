@@ -3,8 +3,10 @@ export function validateInput(values) {
     throw new Error("Enter at least one value.");
   }
 
-  if (values.some((value) => !Number.isFinite(value))) {
-    throw new Error("Every value must be a finite number.");
+  for (let index = 0; index < values.length; index += 1) {
+    if (!Object.hasOwn(values, index) || !Number.isFinite(values[index])) {
+      throw new Error("Every value must be a finite number.");
+    }
   }
 
   return values;

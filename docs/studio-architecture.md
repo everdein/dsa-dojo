@@ -22,13 +22,19 @@ npm run studio
 
 Open `http://127.0.0.1:4173`.
 
-The repository requires Node.js 18 or newer.
+The repository requires Node.js 22 or newer.
 
-Run the complete automated suite with:
+Run the complete release suite with:
 
 ```bash
-npm test
+npx playwright install chromium
+npm run check:release
 ```
+
+The Playwright install is a one-time setup on a new machine. `npm test` runs
+the fast Node.js unit and integration suite. The release suite also checks
+syntax, builds the static site, and exercises desktop and mobile Chromium with
+Playwright and axe-core.
 
 The server also accepts an optional port for local verification:
 
@@ -57,6 +63,8 @@ studio/
   index.html                Semantic lesson-studio shell
   styles.css                Responsive lesson-studio visual system
   pip.css                   Shared Pip silhouette, expressions, and motion states
+  favicon.svg               Product favicon
+  social-preview.jpg        Repository and social sharing preview
   server.mjs                Local static-file server
   src/
     app.mjs                 Browser adapter and event wiring
@@ -88,6 +96,15 @@ studio/
 
 test/
   studio.test.mjs           Algorithms, contracts, traces, renderer, and player tests
+  server.test.mjs           HTTP boundary, routing, and security-header tests
+
+e2e/
+  studio.spec.mjs           Desktop/mobile flows and accessibility checks
+
+scripts/
+  build-static.mjs          Dependency-free static release builder
+  check-syntax.mjs          Cross-platform JavaScript syntax check
+  preview-static.mjs        Build-artifact preview server used by Playwright
 ```
 
 ## Runtime Data Flow
@@ -108,7 +125,8 @@ the selected lesson definition and renders its inputs, source mapping,
 complexity, statistics, guide content, trace, and reflection. Its only visual
 dispatch is by renderer type, currently `array` or `linked-list`.
 
-The local server keeps the two product surfaces explicit:
+The local server keeps the two product surfaces explicit, serves only GET and
+HEAD requests, and applies a restrictive set of browser security headers:
 
 - `/` serves the introductory story
 - `/studio` serves the interactive lesson application
@@ -141,6 +159,12 @@ Pip is a shared, code-native companion with six states:
 - `guiding`
 - `celebrating`
 - `caution`
+
+Every instance mounts the same body, eyes, two arms, orbit marker, and sparks.
+Placement poses give the landing hero, story guide, finale, studio intro, and
+lesson guide different arm rhythms; player state then layers on curious,
+thinking, guiding, celebrating, or caution behavior. The arms remain visible
+in every state.
 
 The studio maps player behavior to those states: ready is curious, paused is
 thinking, playing is guiding, complete is celebrating, and an input error is
@@ -254,8 +278,8 @@ and cycle lessons can change topology without moving the nodes themselves.
 4. Create a lesson definition containing the complete lesson contract.
 5. Register it in `studio/src/lessons/index.mjs`.
 6. Add trace tests for every meaningful decision branch and renderer state.
-7. Run `npm test`.
-8. Verify keyboard use, reduced motion, desktop layout, and mobile layout.
+7. Run `npm run check:release`.
+8. Perform a focused visual pass for any new renderer or layout behavior.
 
 A new lesson should introduce learning value or a reusable visual capability.
 It should not be added only to increase the catalog count.
@@ -323,8 +347,12 @@ The current automated suite checks:
 - linked-list topology validation, snapshot ownership, and accessible projection
 - traversal, reversal, null termination, return connections, and cycle meetings
 - player loading, stepping, playback, reset, speed, guide, and error transitions
+- server routes, methods, status codes, static assets, and security headers
+- desktop and mobile lesson deep links, input validation, keyboard controls,
+  prediction/reveal, document overflow, console errors, and serious WCAG issues
 
-Before publishing user-interface changes, also verify:
+Before publishing a substantial visual change, also perform a short human pass
+to confirm:
 
 - lesson switching stops active playback
 - invalid input preserves the last valid visualization
@@ -339,9 +367,11 @@ Before publishing user-interface changes, also verify:
 ## Deliberate Boundaries
 
 The local server is a development tool, not a production application server.
-The studio currently has no accounts, saved progress, backend, analytics, or
-framework dependency. Those concerns should only be introduced when a proven
-learning requirement needs them.
+`npm run build` creates a dependency-free `dist/` directory for deployment from
+a static web root. `npm run preview` serves a fresh build through the same URL
+shape used by the browser suite. The studio currently has no accounts, saved
+progress, backend, analytics, or framework dependency. Those concerns should
+only be introduced when a proven learning requirement needs them.
 
 The seven-lesson foundation now covers four array patterns and a complete
 three-lesson linked-list progression. Two renderer families share the same

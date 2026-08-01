@@ -12,7 +12,7 @@ import {
 import { reverseLinkedList } from "../linked-lists/reverse-linked-list.mjs";
 import { traverseLinkedList } from "../linked-lists/traverse-linked-list.mjs";
 import { projectArrayView } from "../studio/src/array-renderer.mjs";
-import { parseNumberList, parsePositiveInteger } from "../studio/src/input.mjs";
+import { formatNumber, parseNumberList, parsePositiveInteger } from "../studio/src/input.mjs";
 import { projectLinkedListView } from "../studio/src/linked-list-renderer.mjs";
 import {
   assertLesson,
@@ -128,6 +128,61 @@ test("linked-list trace contract rejects broken topology and shared snapshots", 
   assert.throws(() => assertTrace(sharedPointers, lesson), /linked-list renderer pointers snapshot/);
 });
 
+test("trace validation rejects non-finite derived fields and compares data without JSON coercion", () => {
+  const lesson = getLesson("arrays/find-largest");
+  const nonFiniteTrace = lesson.buildTrace({ values: [1, 2, 3] });
+  nonFiniteTrace[0].bestValue = Infinity;
+  assert.throws(() => assertTrace(nonFiniteTrace, lesson), /non-finite number/);
+
+  const nonFiniteResultLesson = {
+    ...lesson,
+    solve: () => Infinity
+  };
+  assert.throws(
+    () => buildValidatedTrace(nonFiniteResultLesson, { values: [1, 2, 3] }),
+    /algorithm result.*non-finite number/
+  );
+
+  let buildCount = 0;
+  const subtlyNondeterministicLesson = {
+    ...lesson,
+    buildTrace: (input) => {
+      const trace = lesson.buildTrace(input);
+      buildCount += 1;
+      if (buildCount === 1) trace[0].optionalDetail = undefined;
+      return trace;
+    }
+  };
+  assert.throws(
+    () => buildValidatedTrace(subtlyNondeterministicLesson, { values: [1, 2, 3] }),
+    /not deterministic/
+  );
+
+  const subtlyMutatingLesson = {
+    ...lesson,
+    buildTrace: (input) => {
+      input.unusedDetail = undefined;
+      return lesson.buildTrace(input);
+    }
+  };
+  assert.throws(
+    () => buildValidatedTrace(subtlyMutatingLesson, { values: [1, 2, 3] }),
+    /mutated its input/
+  );
+
+  const subtlyMutatingSolverLesson = {
+    ...lesson,
+    solve: (input) => {
+      input.unusedDetail = undefined;
+      return lesson.solve(input);
+    }
+  };
+  assert.throws(
+    () => buildValidatedTrace(subtlyMutatingSolverLesson, { values: [1, 2, 3] }),
+    /mutated its input while solving/
+  );
+});
+
 test("every lesson default and sample produces a valid deterministic trace", () => {
   for (const lesson of lessons) {
     for (const input of [lesson.input.defaultValue, lesson.input.sampleValue]) {
@@ -143,6 +198,20 @@ test("every lesson default and sample produces a valid deterministic trace", () 
 
 test("number-list input accepts whitespace, decimals, negatives, and duplicates", () => {
   assert.deepEqual(parseNumberList(" -2, 3.5, 3.5 "), [-2, 3.5, 3.5]);
+});
+
+test("number formatting preserves distinct finite values without rounding", () => {
+  assert.equal(formatNumber(0.0004), "0.0004");
+  assert.equal(formatNumber(1.0004), "1.0004");
+  assert.equal(formatNumber(1.0005), "1.0005");
+  assert.equal(formatNumber(-0), "-0");
+  assert.notEqual(formatNumber(1.0004), formatNumber(1.0005));
+  for (const value of [Number.MIN_VALUE, 1e-7, 1.2345678901234567, Number.MAX_VALUE]) {
+    assert.equal(Number(formatNumber(value)), value);
+  }
+  for (const value of [Number.NaN, Infinity, -Infinity]) {
+    assert.throws(() => formatNumber(value), /finite/);
+  }
 });
 
 test("number-list input rejects empty, missing, nonnumeric, nonfinite, and oversized values", () => {
@@ -167,9 +236,12 @@ test("findLargest handles ordinary, singleton, negative, and duplicate values wi
   assert.deepEqual(values, before);
 });
 
-test("findLargest rejects missing, empty, and nonfinite inputs", () => {
+test("findLargest rejects missing, empty, sparse, and nonfinite inputs", () => {
+  const sparse = Array(2);
+  sparse[1] = 4;
   assert.throws(() => findLargest());
   assert.throws(() => findLargest([]));
+  assert.throws(() => findLargest(sparse));
   assert.throws(() => findLargest([1, Number.NaN]));
 });
 
@@ -185,11 +257,22 @@ test("maxWindowSum handles all-negative values and boundary window sizes", () =>
   assert.deepEqual(maxWindowSum([3, -1, 4], 3), { sum: 6, start: 0, end: 2 });
 });
 
-test("maxWindowSum rejects invalid sizes and values", () => {
+test("maxWindowSum rejects invalid sizes, sparse values, and non-finite sums", () => {
   for (const size of [0, 1.5, 4]) {
     assert.throws(() => maxWindowSum([1, 2, 3], size));
   }
+  const sparse = Array(3);
+  sparse[0] = 1;
+  sparse[2] = 3;
+  assert.throws(() => maxWindowSum(sparse, 2));
   assert.throws(() => maxWindowSum([1, Number.NaN], 1));
+  assert.throws(() => maxWindowSum([Number.MAX_VALUE, Number.MAX_VALUE], 2), /sums must remain finite/);
+
+  const lesson = getLesson("arrays/sliding-window");
+  assert.throws(
+    () => buildValidatedTrace(lesson, { values: [Number.MAX_VALUE, Number.MAX_VALUE], size: 2 }),
+    /sums must remain finite/
+  );
 });
 
 test("reverseArray handles odd, even, singleton, and duplicate values without mutation", () => {
@@ -238,6 +321,11 @@ test("linked-list traversal handles empty, singleton, duplicate, and ordinary li
   assert.deepEqual(traverseLinkedList(null), []);
   assert.deepEqual(traverseLinkedList(createLinkedList([7])), [7]);
   assert.deepEqual(traverseLinkedList(createLinkedList([4, -2, 4, 9])), [4, -2, 4, 9]);
+});
+
+test("linked-list traversal rejects a cycle instead of looping forever", () => {
+  const head = createLinkedList([1, 2, 3], { cycleEntryIndex: 1 });
+  assert.throws(() => traverseLinkedList(head), /acyclic linked list/);
 });
 
 test("linked-list reversal rewires the provided nodes in place", () => {
@@ -710,11 +798,24 @@ test("Pip mounts an idempotent decorative structure and supports observer fallba
   assert.equal(element.replaceCount, 1);
   assert.equal(element.children.length, 5);
   assert.equal(element.children[0].className, "pip-body");
+  assert.deepEqual(
+    element.children[0].children.map(({ className }) => className),
+    ["pip-face", "pip-arm pip-arm--left", "pip-arm pip-arm--right"]
+  );
+  assert.deepEqual(
+    element.children[0].children[0].children.map(({ className }) => className),
+    ["pip-eye pip-eye--left", "pip-eye pip-eye--right"]
+  );
+  assert.equal(element.children[1].children[0].className, "pip-orbit-dot");
   assert.equal(attributes["aria-hidden"], "true");
   assert.equal(element.dataset.visible, "true");
 
+  const originalLeftArm = element.children[0].children[1];
+  const originalRightArm = element.children[0].children[2];
   mountPips(root);
   assert.equal(element.replaceCount, 1);
+  assert.equal(element.children[0].children[1], originalLeftArm);
+  assert.equal(element.children[0].children[2], originalRightArm);
   assert.equal(observePipVisibility(root), null);
   assert.equal(element.dataset.visible, "true");
 });

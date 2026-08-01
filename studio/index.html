@@ -5,11 +5,27 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#10251f" />
     <meta name="description" content="Practice data structures and algorithms by watching each state change, one decision at a time." />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="DSA Dojo" />
+    <meta property="og:title" content="DSA Dojo — Interactive Algorithm Studio" />
+    <meta property="og:description" content="Step through seven JavaScript algorithm lessons with synchronized state, source code, and explanation." />
+    <meta property="og:image" content="https://raw.githubusercontent.com/everdein/dsa-dojo/main/studio/social-preview.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="DSA Dojo — Interactive Algorithm Studio" />
+    <meta name="twitter:description" content="Pause, predict, and explain seven JavaScript algorithm lessons one decision at a time." />
+    <meta name="twitter:image" content="https://raw.githubusercontent.com/everdein/dsa-dojo/main/studio/social-preview.jpg" />
     <title>DSA Dojo — Interactive Algorithm Studio</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="/styles.css" />
     <link rel="stylesheet" href="/pip.css" />
   </head>
   <body>
+    <nav class="skip-links" aria-label="Skip links">
+      <a href="#main-content">Skip to main content</a>
+      <a href="#catalog">Skip to lesson catalog</a>
+      <a href="#lesson">Skip to current lesson</a>
+    </nav>
+
     <header class="site-header">
       <a class="brand" href="/" aria-label="DSA Dojo home">
         <span class="brand-mark" aria-hidden="true">[]</span>
@@ -24,7 +40,7 @@
       </div>
     </header>
 
-    <main>
+    <main id="main-content" tabindex="-1">
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy">
           <p class="eyebrow">LEARN BY WATCHING STATE CHANGE</p>
@@ -33,7 +49,7 @@
           <a class="text-link" href="#catalog">Choose a lesson <span aria-hidden="true">↓</span></a>
         </div>
         <aside class="pip-intro" aria-label="Meet Pip">
-          <div class="pip-avatar pip-avatar--large" data-pip data-state="curious"></div>
+          <div class="pip-avatar pip-avatar--large" data-pip data-pip-pose="intro" data-state="curious"></div>
           <div>
             <p class="eyebrow">MEET PIP</p>
             <p class="pip-title">Your little data guide.</p>
@@ -42,7 +58,7 @@
         </aside>
       </section>
 
-      <section class="catalog" id="catalog" aria-labelledby="catalog-title">
+      <section class="catalog" id="catalog" aria-labelledby="catalog-title" tabindex="-1">
         <div class="catalog-heading">
           <div>
             <p class="eyebrow">CURRICULUM · 2 DATA STRUCTURES</p>
@@ -53,7 +69,7 @@
         <div class="lesson-list" id="lesson-list" aria-label="Available lessons"></div>
       </section>
 
-      <section class="lesson-shell" id="lesson" aria-labelledby="lesson-title">
+      <section class="lesson-shell" id="lesson" aria-labelledby="lesson-title" tabindex="-1">
         <div class="lesson-heading">
           <div>
             <p class="eyebrow" id="lesson-eyebrow"></p>
@@ -111,21 +127,59 @@
                 <span class="sr-only" id="speed-direction">Move right to play faster.</span>
               </label>
             </div>
+            <div class="mobile-code-strip" aria-label="Current source line">
+              <span class="mobile-code-label">ACTIVE CODE</span>
+              <span class="mobile-code-location" id="mobile-code-location"></span>
+              <code id="mobile-code-line"></code>
+            </div>
             <p class="keyboard-help">Keyboard: ← previous · → next · Space play/pause · R reset</p>
+
+            <section class="lesson-complete" id="lesson-complete" aria-labelledby="lesson-complete-title" hidden>
+              <div class="lesson-complete-copy">
+                <p class="eyebrow">ROUND COMPLETE</p>
+                <h3 id="lesson-complete-title"></h3>
+                <p>Run it again, change the input, or carry the idea into the next lesson.</p>
+              </div>
+              <div class="lesson-complete-actions">
+                <button class="secondary-button" id="replay-button" type="button">↻ Replay</button>
+                <button class="secondary-button" id="completion-sample-button" type="button">Try sample input</button>
+                <button class="primary-button" id="next-lesson-button" type="button"></button>
+                <a class="lesson-complete-back" href="#catalog">Back to lessons</a>
+              </div>
+            </section>
           </div>
 
           <aside class="explanation-column" aria-label="Lesson explanation">
             <section class="pip-card" aria-labelledby="pip-heading">
               <div class="pip-card-header">
-                <div class="pip-avatar" data-pip data-state="curious"></div>
+                <div class="pip-avatar" data-pip data-pip-pose="lesson" data-state="curious"></div>
                 <div>
                   <p class="eyebrow">PIP’S NOTE</p>
                   <h3 id="pip-heading"></h3>
                 </div>
-                <button class="icon-button icon-button--light" id="pip-toggle" type="button" aria-label="Minimize Pip">−</button>
+                <button class="icon-button icon-button--light" id="pip-toggle" type="button" aria-label="Minimize Pip" aria-expanded="true" aria-controls="pip-content">−</button>
               </div>
-              <div id="pip-message" class="pip-message"></div>
-              <div class="pip-prompt" id="pip-prompt"></div>
+              <div id="pip-content">
+                <div id="pip-message" class="pip-message"></div>
+                <div class="pip-prompt" id="pip-prompt"></div>
+                <section class="prediction-checkpoint" id="prediction-checkpoint" aria-labelledby="prediction-title">
+                  <p class="eyebrow">PAUSE &amp; PREDICT</p>
+                  <h4 id="prediction-title">Commit to what happens next.</h4>
+                  <p class="prediction-question" id="prediction-question"></p>
+                  <form id="prediction-form">
+                    <label class="sr-only" for="prediction-input">Your prediction</label>
+                    <div class="prediction-entry">
+                      <input id="prediction-input" type="text" maxlength="180" autocomplete="off" placeholder="I think…" aria-describedby="prediction-error" />
+                      <button class="primary-button" type="submit">Lock it in</button>
+                    </div>
+                    <p class="field-error" id="prediction-error" role="alert"></p>
+                  </form>
+                  <div class="prediction-result" id="prediction-result" hidden>
+                    <p><strong>You predicted:</strong> <span id="prediction-text"></span></p>
+                    <p id="prediction-feedback" role="status"></p>
+                  </div>
+                </section>
+              </div>
             </section>
 
             <section class="code-card" aria-labelledby="code-title">
@@ -136,7 +190,7 @@
                 </div>
                 <span class="file-label" id="file-label"></span>
               </div>
-              <pre class="code-block" aria-label="Lesson source code"><code id="code-lines"></code></pre>
+              <pre class="code-block" tabindex="0" aria-label="Lesson source code"><code id="code-lines"></code></pre>
             </section>
 
             <section class="complexity-card" aria-labelledby="complexity-title">
