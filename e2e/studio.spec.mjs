@@ -17,6 +17,11 @@ test("landing and studio are accessible, quiet, and free of page overflow", asyn
 
   await page.goto("./");
   await expect(page.getByRole("heading", { level: 1, name: "See the algorithm think." })).toBeVisible();
+  await expect(page.getByText("Built by Matthew Clark")).toBeVisible();
+  await expect(page.getByRole("link", { name: "Portfolio" })).toHaveAttribute(
+    "href",
+    "https://everdein.github.io/portfolio/"
+  );
   await expectNoDocumentOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
 
