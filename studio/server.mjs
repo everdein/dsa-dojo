@@ -49,6 +49,9 @@ export function resolveRequest(requestUrl) {
   if (pathname === "/pip.css") return path.resolve(studioRoot, "pip.css");
   if (pathname === "/favicon.svg") return path.resolve(studioRoot, "favicon.svg");
   if (pathname === "/social-preview.jpg") return path.resolve(studioRoot, "social-preview.jpg");
+  if (pathname.startsWith("/studio/src/")) {
+    return resolveModuleInside(srcRoot, pathname.slice("/studio/src/".length));
+  }
   if (pathname.startsWith("/src/")) {
     return resolveModuleInside(srcRoot, pathname.slice("/src/".length));
   }

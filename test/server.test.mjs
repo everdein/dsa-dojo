@@ -28,6 +28,8 @@ test("server configuration is local by default and supports deployment overrides
 });
 
 test("route resolution serves only the required static asset types", () => {
+  assert.match(resolveRequest("/studio/src/home.mjs"), /studio[\\/]src[\\/]home\.mjs$/);
+  assert.match(resolveRequest("/studio/src/app.mjs"), /studio[\\/]src[\\/]app\.mjs$/);
   assert.match(resolveRequest("/src/app.mjs?cache=bust"), /studio[\\/]src[\\/]app\.mjs$/);
   assert.match(resolveRequest("/favicon.svg"), /studio[\\/]favicon\.svg$/);
   assert.match(resolveRequest("/social-preview.jpg"), /studio[\\/]social-preview\.jpg$/);
@@ -58,7 +60,7 @@ test("static server enforces methods, status codes, HEAD behavior, and security 
   assert.equal(getResponse.headers["cross-origin-opener-policy"], "same-origin");
   assert.equal(getResponse.headers["referrer-policy"], "no-referrer");
 
-  const headResponse = await send(server, { method: "HEAD", path: "/src/app.mjs" });
+  const headResponse = await send(server, { method: "HEAD", path: "/studio/src/app.mjs" });
   assert.equal(headResponse.statusCode, 200);
   assert.equal(headResponse.body, "");
   assert.ok(Number(headResponse.headers["content-length"]) > 0);
