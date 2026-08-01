@@ -1,4 +1,6 @@
 import { mountPips, observePipVisibility, setPipState } from "./pip.mjs";
+import { buildFindLargestTrace } from "./find-largest.mjs";
+import { buildSlidingWindowTrace } from "./sliding-window.mjs";
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const header = document.querySelector("[data-home-header]");
@@ -95,50 +97,52 @@ function updateHeader() {
 
 function createScanDemo(root) {
   const values = [...root.querySelectorAll("[data-scan-cell]")].map((cell) => Number(cell.dataset.value));
+  const trace = buildFindLargestTrace(values);
   const cells = [...root.querySelectorAll("[data-scan-cell]")];
   const current = root.querySelector("[data-scan-current]");
   const best = root.querySelector("[data-scan-best]");
   const decision = root.querySelector("[data-scan-decision]");
   const status = root.querySelector("[data-scan-status]");
   let index = 0;
-  let bestIndex = 0;
   let timer = null;
   let complete = false;
 
   function render() {
-    if (index === 0) bestIndex = 0;
-    const previousBest = values[bestIndex];
-    if (values[index] > values[bestIndex]) bestIndex = index;
+    const step = trace[index];
+    const activeIndex = step.view.activeIndices[0] ?? null;
     cells.forEach((cell, cellIndex) => {
-      cell.classList.toggle("is-current", cellIndex === index);
-      cell.classList.toggle("is-best", cellIndex === bestIndex);
+      cell.classList.toggle("is-current", cellIndex === activeIndex);
+      cell.classList.toggle("is-best", cellIndex === step.bestIndex);
       const label = cell.querySelector("i");
-      label.textContent = cellIndex === index && cellIndex === bestIndex
+      label.textContent = cellIndex === activeIndex && cellIndex === step.bestIndex
         ? "current · best"
-        : cellIndex === index
+        : cellIndex === activeIndex
           ? "current"
-          : cellIndex === bestIndex
+          : cellIndex === step.bestIndex
             ? "best"
             : "";
     });
-    current.textContent = values[index];
-    best.textContent = values[bestIndex];
-    const changed = values[index] > previousBest;
-    decision.textContent = index === 0 ? "Start here" : changed ? "Update best" : "Keep best";
-    status.textContent = index === 0
-      ? `Start with ${values[index]} as the best`
-      : `${values[index]} ${changed ? "beats" : "does not beat"} ${previousBest}`;
+    current.textContent = activeIndex === null ? "—" : values[activeIndex];
+    best.textContent = step.bestValue;
+    decision.textContent = step.phase === "complete"
+      ? "Result locked"
+      : step.step === 0
+        ? "Start here"
+        : step.changed
+          ? "Update best"
+          : "Keep best";
+    status.textContent = step.narration;
   }
 
   function next() {
-    if (index >= values.length - 1) {
+    if (index >= trace.length - 1) {
       complete = true;
       stop();
       return;
     }
     index += 1;
     render();
-    if (index === values.length - 1) {
+    if (index === trace.length - 1) {
       complete = true;
       stop();
     }
@@ -146,7 +150,6 @@ function createScanDemo(root) {
 
   function reset() {
     index = 0;
-    bestIndex = 0;
     complete = false;
     render();
   }
@@ -165,8 +168,8 @@ function createScanDemo(root) {
 
   function showRepresentativeState() {
     stop();
-    index = 2;
-    bestIndex = 0;
+    index = trace.findIndex((step) => step.step > 0 && step.changed);
+    if (index < 0) index = Math.max(0, trace.length - 2);
     complete = true;
     render();
   }
@@ -192,55 +195,56 @@ function createScanDemo(root) {
 
 function createWindowDemo(root) {
   const values = [...root.querySelectorAll("[data-window-cell]")].map((cell) => Number(cell.dataset.value));
+  const size = 3;
+  const trace = buildSlidingWindowTrace({ values, size });
   const cells = [...root.querySelectorAll("[data-window-cell]")];
   const leaves = root.querySelector("[data-window-leaves]");
   const enters = root.querySelector("[data-window-enters]");
   const sum = root.querySelector("[data-window-sum]");
   const status = root.querySelector("[data-window-status]");
-  const size = 3;
-  const lastStart = values.length - size;
-  let start = 0;
+  let index = 0;
   let timer = null;
   let complete = false;
 
   function render() {
-    const end = start + size - 1;
-    cells.forEach((cell, index) => {
-      cell.classList.toggle("is-window", index >= start && index <= end);
-      cell.classList.toggle("is-leaving", start > 0 && index === start - 1);
-      cell.classList.toggle("is-entering", start > 0 && index === end);
+    const step = trace[index];
+    cells.forEach((cell, cellIndex) => {
+      cell.classList.toggle("is-window", cellIndex >= step.currentStart && cellIndex <= step.currentEnd);
+      cell.classList.toggle("is-leaving", cellIndex === step.leavingIndex);
+      cell.classList.toggle("is-entering", cellIndex === step.enteringIndex);
       const label = cell.querySelector("i");
-      label.textContent = start > 0 && index === start - 1
+      label.textContent = cellIndex === step.leavingIndex
         ? "leaves"
-        : start > 0 && index === end
+        : cellIndex === step.enteringIndex
           ? "enters"
-          : index === start
+          : cellIndex === step.currentStart
             ? "window"
             : "";
     });
-    const runningSum = values.slice(start, end + 1).reduce((total, value) => total + value, 0);
-    leaves.textContent = start === 0 ? "—" : values[start - 1];
-    enters.textContent = start === 0 ? "—" : values[end];
-    sum.textContent = runningSum;
-    status.textContent = `Window ${start}–${end}`;
+    leaves.textContent = step.leavingIndex === null ? "—" : values[step.leavingIndex];
+    enters.textContent = step.enteringIndex === null ? "—" : values[step.enteringIndex];
+    sum.textContent = step.currentSum;
+    status.textContent = step.phase === "complete"
+      ? `Best ${step.bestStart}–${step.bestEnd}`
+      : `Window ${step.currentStart}–${step.currentEnd}`;
   }
 
   function next() {
-    if (start >= lastStart) {
+    if (index >= trace.length - 1) {
       complete = true;
       stop();
       return;
     }
-    start += 1;
+    index += 1;
     render();
-    if (start === lastStart) {
+    if (index === trace.length - 1) {
       complete = true;
       stop();
     }
   }
 
   function reset() {
-    start = 0;
+    index = 0;
     complete = false;
     render();
   }
@@ -259,7 +263,8 @@ function createWindowDemo(root) {
 
   function showRepresentativeState() {
     stop();
-    start = lastStart;
+    index = trace.findIndex((step) => step.step > 0 && step.changed);
+    if (index < 0) index = Math.max(0, trace.length - 2);
     complete = true;
     render();
   }

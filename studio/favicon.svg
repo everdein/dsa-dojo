@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title id="title">DSA Dojo</title>
+  <rect width="64" height="64" rx="18" fill="#10251f"/>
+  <rect x="8" y="8" width="48" height="48" rx="15" fill="none" stroke="#61c9a4" stroke-width="3"/>
+  <rect x="18" y="22" width="9" height="18" rx="3" fill="none" stroke="#f7f5ef" stroke-width="3"/>
+  <rect x="37" y="22" width="9" height="18" rx="3" fill="none" stroke="#f7f5ef" stroke-width="3"/>
+</svg>

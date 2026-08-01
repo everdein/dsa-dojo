@@ -3,22 +3,40 @@
   "version": "1.0.0",
   "description": "Interactive JavaScript data structures and algorithms lessons with deterministic traces, visual state, and guided explanations.",
   "engines": {
-    "node": ">=18"
+    "node": ">=22"
   },
   "scripts": {
+    "build": "node scripts/build-static.mjs",
+    "check": "npm run check:syntax && npm run test:unit && npm run build",
+    "check:release": "npm run check && npm run test:e2e",
+    "check:syntax": "node scripts/check-syntax.mjs",
+    "coverage": "node --test --experimental-test-coverage",
+    "preview": "node scripts/preview-static.mjs",
     "studio": "node studio/server.mjs",
-    "test": "node --test"
+    "test": "npm run test:unit",
+    "test:e2e": "playwright test",
+    "test:unit": "node --test"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/everdein/dsa-dojo.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "algorithms",
+    "algorithm-visualization",
+    "data-structures",
+    "education",
+    "javascript"
+  ],
+  "author": "everdein",
   "license": "ISC",
   "type": "commonjs",
   "bugs": {
     "url": "https://github.com/everdein/dsa-dojo/issues"
   },
-  "homepage": "https://github.com/everdein/dsa-dojo#readme"
+  "homepage": "https://everdein.github.io/dsa-dojo/",
+  "devDependencies": {
+    "@axe-core/playwright": "^4.12.1",
+    "@playwright/test": "^1.62.1"
+  }
 }

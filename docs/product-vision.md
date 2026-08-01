@@ -2,7 +2,7 @@
 
 - **Status:** Living product direction
 - **Implemented foundation:** Seven lessons across arrays and linked lists
-- **Current checkpoint:** Showcase readiness before broader catalog expansion
+- **Current checkpoint:** Static release ready; public delivery and learner feedback next
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -49,7 +49,10 @@ The learner should remain an active participant. The studio should not immediate
 
 Pip gives the studio warmth and continuity without becoming the product itself. The character can evolve visually as new structures introduce links, branches, queues, and graphs.
 
-Pip's persistent base silhouette is a rounded data cell with one small orbiting index marker. Expressions, colors, and topic-specific accessories can change, but the recognizable cell-and-marker shape remains consistent.
+Pip's persistent base silhouette is a rounded data cell with two short,
+expressive arms and one small orbiting index marker. Arm poses, expressions,
+colors, and topic-specific accessories can change, but the recognizable
+cell-and-marker shape remains consistent.
 
 ### Responsibilities
 
@@ -266,12 +269,14 @@ topology one protected link at a time, and cycle detection adds overlapping
 pointer speeds, return links, and self-loops. Stable node identity and fresh
 topology snapshots keep pointer mutation reversible and accessible.
 
-The next checkpoint is showcase readiness before catalog breadth: deliver the
-experience publicly, explain the reusable trace-and-renderer architecture
-concisely, and validate the two-category experience as a product. Narrow
-categories should still contain two or three distinct lessons; broad
-structures may grow to three to five. This avoids both a shallow one-lesson
-sampler and a large catalog of repetitive exercises.
+The showcase foundation now includes a static release build, continuous
+integration, desktop/mobile browser and accessibility checks, a short demo
+path, prediction-before-reveal, and explicit lesson-completion actions. The
+next checkpoint is public delivery and learner feedback on the two-category
+experience before catalog breadth. Narrow categories should still contain two
+or three distinct lessons; broad structures may grow to three to five. This
+avoids both a shallow one-lesson sampler and a large catalog of repetitive
+exercises.
 
 ## Introductory story checkpoint
 

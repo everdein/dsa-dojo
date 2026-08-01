@@ -2,8 +2,10 @@ export function validateSlidingWindowInput(values, size) {
   if (!Array.isArray(values) || values.length === 0) {
     throw new Error("Sliding Window requires at least one value.");
   }
-  if (values.some((value) => !Number.isFinite(value))) {
-    throw new Error("Sliding Window only accepts finite numbers.");
+  for (let index = 0; index < values.length; index += 1) {
+    if (!Object.hasOwn(values, index) || !Number.isFinite(values[index])) {
+      throw new Error("Sliding Window only accepts finite numbers.");
+    }
   }
   if (!Number.isInteger(size) || size < 1 || size > values.length) {
     throw new Error("Window size must be a positive integer no larger than the array.");
@@ -17,6 +19,7 @@ export function maxWindowSum(values, size) {
   let windowSum = 0;
   for (let index = 0; index < size; index += 1) {
     windowSum += values[index];
+    assertFiniteWindowSum(windowSum);
   }
 
   let bestSum = windowSum;
@@ -24,6 +27,7 @@ export function maxWindowSum(values, size) {
 
   for (let end = size; end < values.length; end += 1) {
     windowSum += values[end] - values[end - size];
+    assertFiniteWindowSum(windowSum);
     if (windowSum > bestSum) {
       bestSum = windowSum;
       bestStart = end - size + 1;
@@ -35,4 +39,10 @@ export function maxWindowSum(values, size) {
     start: bestStart,
     end: bestStart + size - 1
   };
+}
+
+function assertFiniteWindowSum(sum) {
+  if (!Number.isFinite(sum)) {
+    throw new Error("Sliding Window sums must remain finite.");
+  }
 }

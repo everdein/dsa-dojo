@@ -9,7 +9,11 @@ export { maxWindowSum };
 export function buildSlidingWindowTrace({ values, size }) {
   validateSlidingWindowInput(values, size);
 
-  let currentSum = values.slice(0, size).reduce((sum, value) => sum + value, 0);
+  let currentSum = 0;
+  for (let index = 0; index < size; index += 1) {
+    currentSum += values[index];
+    assertFiniteWindowSum(currentSum);
+  }
   let bestSum = currentSum;
   let bestStart = 0;
   let bestEnd = size - 1;
@@ -36,6 +40,7 @@ export function buildSlidingWindowTrace({ values, size }) {
     const start = end - size + 1;
     const leavingIndex = start - 1;
     currentSum += values[end] - values[leavingIndex];
+    assertFiniteWindowSum(currentSum);
     const changed = currentSum > bestSum;
 
     if (changed) {
@@ -107,4 +112,10 @@ function buildWindowView(values, start, end, bestStart, bestEnd, leavingIndex, e
     ],
     markers
   };
+}
+
+function assertFiniteWindowSum(sum) {
+  if (!Number.isFinite(sum)) {
+    throw new Error("Sliding Window sums must remain finite.");
+  }
 }
