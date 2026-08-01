@@ -1152,6 +1152,12 @@ h3 {
   text-align: center;
 }
 
+.home-footer p a {
+  color: var(--mint-bright);
+  font-weight: 800;
+  text-underline-offset: 5px;
+}
+
 .home-footer > a:last-child {
   color: var(--mint-bright);
   font-size: 0.72rem;
