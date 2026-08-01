@@ -1,5 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 4174);
+const deploymentBaseUrl = `http://127.0.0.1:${port}/dsa-dojo/`;
+
 export default defineConfig({
   testDir: "./e2e",
   outputDir: "./test-results",
@@ -11,14 +14,15 @@ export default defineConfig({
     ? [["line"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : "line",
   use: {
-    baseURL: "http://127.0.0.1:4173",
+    baseURL: deploymentBaseUrl,
     screenshot: "only-on-failure",
     trace: "retain-on-failure"
   },
   webServer: {
     command: "npm run preview",
-    url: "http://127.0.0.1:4173/",
-    reuseExistingServer: !process.env.CI,
+    url: deploymentBaseUrl,
+    env: { PORT: String(port) },
+    reuseExistingServer: false,
     stdout: "pipe",
     stderr: "pipe"
   },

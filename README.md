@@ -4,6 +4,8 @@
 
 [![CI](https://github.com/everdein/dsa-dojo/actions/workflows/ci.yml/badge.svg)](https://github.com/everdein/dsa-dojo/actions/workflows/ci.yml)
 
+[Open the live DSA Dojo](https://everdein.github.io/dsa-dojo/)
+
 ![DSA Dojo landing page with Pip and an animated Find Largest example](studio/social-preview.jpg)
 
 DSA Dojo is a framework-free learning product that makes data structures and
@@ -145,8 +147,11 @@ npm run build
 npm run preview
 ```
 
-`npm run build` creates a dependency-free static release in `dist/`. Serve that
-directory from the web root so `/`, `/studio`, and the lesson hash URLs share
-the same asset paths. `npm run preview` rebuilds and serves that release
-locally; the Playwright suite uses this path so CI exercises the deployable
-artifact.
+`npm run build` creates a dependency-free static release in `dist/`. Its asset
+and lesson links are relative, so the site works at either a domain root or a
+project subpath. `npm run preview` rebuilds and serves that release locally;
+the Playwright suite exercises it at the same `/dsa-dojo/` subpath used by
+GitHub Pages.
+
+Pushes to `main` deploy the verified `dist/` artifact through
+`.github/workflows/pages.yml` to the live URL above.

@@ -367,11 +367,13 @@ to confirm:
 ## Deliberate Boundaries
 
 The local server is a development tool, not a production application server.
-`npm run build` creates a dependency-free `dist/` directory for deployment from
-a static web root. `npm run preview` serves a fresh build through the same URL
-shape used by the browser suite. The studio currently has no accounts, saved
-progress, backend, analytics, or framework dependency. Those concerns should
-only be introduced when a proven learning requirement needs them.
+`npm run build` creates a dependency-free `dist/` directory whose relative
+asset links work from a domain root or project subpath. `npm run preview` serves
+a fresh build through the `/dsa-dojo/` URL shape used by the browser suite and
+GitHub Pages. Pushes to `main` upload that artifact through the Pages workflow.
+The studio currently has no accounts, saved progress, backend, analytics, or
+framework dependency. Those concerns should only be introduced when a proven
+learning requirement needs them.
 
 The seven-lesson foundation now covers four array patterns and a complete
 three-lesson linked-list progression. Two renderer families share the same

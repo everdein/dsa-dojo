@@ -15,12 +15,12 @@ test("landing and studio are accessible, quiet, and free of page overflow", asyn
   const errors = collectPageErrors(page);
   await page.emulateMedia({ reducedMotion: "reduce" });
 
-  await page.goto("/");
+  await page.goto("./");
   await expect(page.getByRole("heading", { level: 1, name: "See the algorithm think." })).toBeVisible();
   await expectNoDocumentOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
 
-  await page.goto("/studio");
+  await page.goto("./studio/");
   await expect(page.getByRole("heading", { level: 2, name: "Find the largest value" })).toBeVisible();
   await expectNoDocumentOverflow(page);
   await expectNoSeriousAccessibilityViolations(page);
@@ -29,7 +29,7 @@ test("landing and studio are accessible, quiet, and free of page overflow", asyn
 });
 
 test("every Pip has two visible animated arms and a distinct placement pose", async ({ page }) => {
-  for (const [path, expectedCount] of [["/", 3], ["/studio#lesson=arrays%2Ffind-largest", 2]]) {
+  for (const [path, expectedCount] of [["./", 3], ["./studio/#lesson=arrays%2Ffind-largest", 2]]) {
     await page.goto(path);
     const pips = page.locator("[data-pip]");
     await expect(pips).toHaveCount(expectedCount);
@@ -82,7 +82,7 @@ test("every lesson deep link renders its expected interactive surface", async ({
   const errors = collectPageErrors(page);
 
   for (const [lessonId, title] of lessons) {
-    await page.goto(`/studio#lesson=${lessonId}`);
+    await page.goto(`./studio/#lesson=${lessonId}`);
     await expect(page.getByRole("heading", { level: 2, name: title })).toBeVisible();
     await expect(page.getByRole("button", { name: "Play lesson" })).toBeEnabled();
     await expect(page.getByRole("button", { name: "Next →" })).toBeEnabled();
@@ -94,7 +94,7 @@ test("every lesson deep link renders its expected interactive surface", async ({
 
 test("custom input, validation, stepping, playback, and keyboard controls stay coherent", async ({ page }) => {
   const errors = collectPageErrors(page);
-  await page.goto("/studio#lesson=arrays%2Ffind-largest");
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
 
   const input = page.getByRole("textbox", { name: "Enter 1–12 finite numbers" });
   await input.fill("1,,2");
@@ -125,7 +125,7 @@ test("custom input, validation, stepping, playback, and keyboard controls stay c
 });
 
 test("a learner can commit a prediction before revealing the next state", async ({ page }) => {
-  await page.goto("/studio#lesson=arrays%2Ffind-largest");
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
 
   await page.getByRole("textbox", { name: "Your prediction" }).fill("The best value will remain 1 until a larger value appears.");
   await page.getByRole("button", { name: "Lock it in" }).click();

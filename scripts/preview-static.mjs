@@ -8,6 +8,7 @@ await import("./build-static.mjs");
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const distRoot = path.join(projectRoot, "dist");
+const deploymentBasePath = "/dsa-dojo";
 const allowedExtensions = new Set([".css", ".html", ".jpg", ".mjs", ".svg"]);
 const contentTypes = {
   ".css": "text/css; charset=utf-8",
@@ -68,6 +69,10 @@ function resolveStaticRequest(requestUrl) {
   }
 
   if (pathname.includes("\\") || pathname.includes("\0")) return null;
+  if (pathname === deploymentBasePath) pathname = "/";
+  if (pathname.startsWith(`${deploymentBasePath}/`)) {
+    pathname = pathname.slice(deploymentBasePath.length);
+  }
   if (pathname === "/") pathname = "/index.html";
   if (pathname === "/studio" || pathname === "/studio/") pathname = "/studio/index.html";
 
