@@ -32,7 +32,7 @@ await Promise.all([
   copyFile(path.join(studioRoot, "pip.css"), path.join(outputRoot, "pip.css")),
   copyFile(path.join(studioRoot, "favicon.svg"), path.join(outputRoot, "favicon.svg")),
   copyFile(path.join(studioRoot, "social-preview.jpg"), path.join(outputRoot, "social-preview.jpg")),
-  cp(path.join(studioRoot, "src"), path.join(outputRoot, "src"), { recursive: true })
+  cp(path.join(studioRoot, "src"), path.join(outputRoot, "studio", "src"), { recursive: true })
 ]);
 
 for (const [directory, files] of Object.entries(algorithmFiles)) {

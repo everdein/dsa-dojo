@@ -712,7 +712,7 @@ test("static server maps the landing page, studio, and shared assets", () => {
   assert.match(resolveRequest("/home.css"), /studio[\\/]home\.css$/);
   assert.match(resolveRequest("/styles.css"), /studio[\\/]styles\.css$/);
   assert.match(resolveRequest("/pip.css"), /studio[\\/]pip\.css$/);
-  assert.match(resolveRequest("/src/app.mjs"), /studio[\\/]src[\\/]app\.mjs$/);
+  assert.match(resolveRequest("/studio/src/app.mjs"), /studio[\\/]src[\\/]app\.mjs$/);
   assert.match(resolveRequest("/src/pip.mjs"), /studio[\\/]src[\\/]pip\.mjs$/);
   assert.match(resolveRequest("/arrays/find-largest.mjs"), /arrays[\\/]find-largest\.mjs$/);
   assert.match(resolveRequest("/arrays/reverse-array.mjs"), /arrays[\\/]reverse-array\.mjs$/);
