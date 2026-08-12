@@ -9,7 +9,7 @@ explain what changed.
 
 The implementation is intentionally dependency-free. It uses browser-native
 ES modules, semantic HTML, CSS, and a small Node.js static server. This keeps
-the learning code visible while the product model is still being proven.
+the learning code visible across the complete 55-lesson curriculum.
 
 ## Running the Studio
 
@@ -32,9 +32,10 @@ npm run check:release
 ```
 
 The Playwright install is a one-time setup on a new machine. `npm test` runs
-the fast Node.js unit and integration suite. The release suite also checks
-syntax, builds the static site, and exercises desktop and mobile Chromium with
-Playwright and axe-core.
+hundreds of focused Node.js unit and integration tests. The release suite also
+checks syntax, builds the static site, and then uses `scripts/run-e2e.mjs` to
+start the artifact preview, exercise desktop and mobile Chromium with
+Playwright and axe-core, and stop the preview cleanly.
 
 The server also accepts an optional port for local verification:
 
@@ -45,66 +46,41 @@ node studio/server.mjs 4180
 ## Project Map
 
 ```text
-arrays/
-  find-largest.mjs          Pure Find Largest implementation
-  move-zeros.mjs            Pure stable Move Zeros implementation
-  reverse-array.mjs         Pure two-pointer Reverse Array implementation
-  sliding-window.mjs        Pure fixed-size Sliding Window implementation
-
-linked-lists/
-  model.mjs                 Shared node creation, validation, and cloning
-  traverse-linked-list.mjs  Pure traversal implementation
-  reverse-linked-list.mjs   Pure in-place reversal implementation
-  detect-cycle.mjs          Pure Floyd cycle-detection implementation
+<topic>/
+  *.mjs                     Pure algorithms and shared domain models
+  *.js                      Thin runnable Node.js examples
+  README.md                 Topic field guide
 
 studio/
   home.html                 Scroll-driven introductory story
-  home.css                  Landing-page visual system and responsive story layout
   index.html                Semantic lesson-studio shell
-  styles.css                Responsive lesson-studio visual system
-  pip.css                   Shared Pip silhouette, expressions, and motion states
-  favicon.svg               Product favicon
-  social-preview.jpg        Repository and social sharing preview
-  server.mjs                Local static-file server
+  server.mjs                Manifest-aware local static-file server
   src/
     app.mjs                 Browser adapter and event wiring
-    array-renderer.mjs      Pure trace-view to array-cell projection
-    linked-list-renderer.mjs Pure trace-view to node/link projection
-    linked-list-view.mjs    Stable linked-list snapshot helpers
-    home.mjs                Scroll reveals and compact landing demonstrations
-    input.mjs               Shared input parsing and formatting
+    curriculum-manifest.mjs Authoritative catalog and runtime-module data
+    renderer-registry.mjs   Adapters and composite-panel resolution
+    *-renderer.mjs          Validation, ownership, and accessible projection
     lesson-contract.mjs     Lesson and deterministic trace validation
-    navigation.mjs          Safe lesson-hash parsing and serialization
-    pip.mjs                 Shared Pip component and player-state mapping
     player.mjs              Framework-free player state machine
-    find-largest.mjs        Find Largest trace builder
-    move-zeros.mjs          Move Zeros trace builder
-    reverse-array.mjs       Reverse Array trace builder
-    sliding-window.mjs      Sliding Window trace builder
-    traverse-linked-list.mjs Linked List Traversal trace builder
-    reverse-linked-list.mjs Linked List Reversal trace builder
-    detect-cycle.mjs        Detect Cycle trace builder
+    *.mjs                   Lesson-specific deterministic trace builders
     lessons/
       index.mjs             Validated lesson registry
-      find-largest.mjs      Find Largest lesson definition
-      move-zeros.mjs        Move Zeros lesson definition
-      reverse-array.mjs     Reverse Array lesson definition
-      sliding-window.mjs    Sliding Window lesson definition
-      traverse-linked-list.mjs Linked List Traversal lesson definition
-      reverse-linked-list.mjs Linked List Reversal lesson definition
-      detect-cycle.mjs      Detect Cycle lesson definition
+      *.mjs                 L01-L55 lesson definitions
 
 test/
-  studio.test.mjs           Algorithms, contracts, traces, renderer, and player tests
-  server.test.mjs           HTTP boundary, routing, and security-header tests
+  build.test.mjs            Static artifact completeness tests
+  server.test.mjs           HTTP boundary and allowlist tests
+  *-renderer.test.mjs       Focused adapter contract/projection tests
+  <lesson>.test.mjs         Focused algorithm and trace tests
 
 e2e/
   studio.spec.mjs           Desktop/mobile flows and accessibility checks
 
 scripts/
-  build-static.mjs          Dependency-free static release builder
+  build-static.mjs          Manifest-aware static release builder
   check-syntax.mjs          Cross-platform JavaScript syntax check
-  preview-static.mjs        Build-artifact preview server used by Playwright
+  preview-static.mjs        Exportable build-artifact preview server
+  run-e2e.mjs               Preview lifecycle and Playwright orchestrator
 ```
 
 ## Runtime Data Flow
@@ -122,8 +98,12 @@ lesson registry
 
 The browser controller does not contain algorithm-specific branches. It reads
 the selected lesson definition and renders its inputs, source mapping,
-complexity, statistics, guide content, trace, and reflection. Its only visual
-dispatch is by renderer type, currently `array` or `linked-list`.
+complexity, statistics, guide content, trace, and reflection. Visual state is
+projected through the renderer registry. A lesson declares either one legacy
+`renderer` or an ordered `views` panel list; composite trace steps provide one
+keyed snapshot for every declared panel. The built-in adapters are `array`,
+`sequence`, `lookup`, `grid`, `stack`, `queue`, `branching`, `graph`, and
+`linked-list`.
 
 The local server keeps the two product surfaces explicit, serves only GET and
 HEAD requests, and applies a restrictive set of browser security headers:
@@ -132,7 +112,9 @@ HEAD requests, and applies a restrictive set of browser security headers:
 - `/studio` serves the interactive lesson application
 
 Shared CSS and browser modules are allowlisted without exposing the rest of the
-repository. Malformed URLs and directory traversal attempts resolve to no file.
+repository. The curriculum manifest supplies lesson definitions and transitive
+domain-module paths to both the server and static builder. Malformed URLs and
+directory traversal attempts resolve to no file.
 
 ## Introductory Story
 
@@ -177,22 +159,27 @@ continuous motion while preserving each visible state.
 
 ### Pure algorithm
 
-The implementation in `arrays/*.mjs` or `linked-lists/*.mjs` owns the actual result and complexity.
-It must not know about animation, the browser, Pip, or playback history.
-Runnable `.js` files remain thin Node.js entry points for independent study.
+The implementation in the relevant topic folder owns the actual result and
+complexity. It must not know about animation, the browser, Pip, or playback
+history. Runnable `.js` files remain thin Node.js entry points for independent
+study.
 
 ### Lesson definition
 
 A registered lesson supplies:
 
 - stable id, topic, order, title, summary, and catalog copy
+- instructional prerequisites and reusable pattern tags
 - input fields, parser, serializer, default input, and sample input
 - pure solver and deterministic trace builder
 - executable source lines and semantic code-step mappings
 - statistic selectors, complexity explanation, legend, Pip heading, and reflection
-- renderer type
+- exactly one renderer id or an ordered list of keyed view panels
 
-The registry validates every lesson when it loads. Duplicate ids, incomplete
+`studio/src/curriculum-manifest.mjs` is the lightweight authority for ordering,
+catalog metadata, prerequisites, patterns, lesson-module paths, and transitive
+domain modules. The lesson registry overlays that metadata onto definitions and
+tests require exact manifest/registry agreement. Duplicate ids, incomplete
 metadata, invalid default traces, nondeterministic traces, or solver/trace
 disagreement fail immediately.
 
@@ -221,10 +208,11 @@ contains:
 
 The final step must use the `complete` phase and provide a `result` that
 matches the pure solver. Every view owns a fresh snapshot so mutating lessons
-can still rewind deterministically. Array views validate values, ranges,
-markers, annotations, and changed indices. Linked-list views validate stable
-node ids, next references, pointers, states, annotations, and changed nodes.
-Dangling topology and shared snapshots fail before the browser renders them.
+can still rewind deterministically. Each renderer adapter validates its own
+shape, references, bounds, nested objects, and snapshot ownership. Composite
+steps must provide exactly the declared panel keys. Dangling topology, unknown
+references, non-finite derived numbers, and shared snapshots fail before the
+browser renders them.
 
 ### Player
 
@@ -270,13 +258,32 @@ The browser keeps the node track on one logical row and scrolls it inside the
 visualization. Connection shape is derived from stable node indices, so reverse
 and cycle lessons can change topology without moving the nodes themselves.
 
+### Additional renderer adapters
+
+- **Sequence** preserves Unicode-aware character identity and raw-text position.
+- **Lookup** projects deterministic key/value entries, active keys, annotations,
+  and result keys for maps, sets, memo tables, and parent tables.
+- **Grid** validates bounded rectangular numeric cells for matrices, intervals,
+  dynamic-programming tables, and boards.
+- **Stack** and **queue** preserve stable item identity while exposing their
+  different accessible order and endpoint semantics.
+- **Branching** validates bounded rooted forests for trees, tries, heaps,
+  recursion, and backtracking choices.
+- **Graph** validates directed or undirected general topology, including
+  self-edges, traversal states, and stable semantic node ids.
+
+Composite lessons synchronize any compatible subset of these adapters while
+the player still advances one shared trace index.
+
 ## Adding a Lesson
 
 1. Implement and export a pure algorithm in the appropriate topic folder.
 2. Add focused algorithm tests, including invalid and boundary inputs.
 3. Build a deterministic trace adapter with an explicit completion result.
 4. Create a lesson definition containing the complete lesson contract.
-5. Register it in `studio/src/lessons/index.mjs`.
+5. Add its catalog and transitive runtime modules to
+   `studio/src/curriculum-manifest.mjs`, then register its definition in
+   `studio/src/lessons/index.mjs`.
 6. Add trace tests for every meaningful decision branch and renderer state.
 7. Run `npm run check:release`.
 8. Perform a focused visual pass for any new renderer or layout behavior.
@@ -284,68 +291,37 @@ and cycle lessons can change topology without moving the nodes themselves.
 A new lesson should introduce learning value or a reusable visual capability.
 It should not be added only to increase the catalog count.
 
-## Current Lessons
+## Current Curriculum
 
-### Find Largest
+The registry contains 55 ordered lessons across 20 topics:
 
-Introduces a linear scan, active index, best-value marker, conditional update,
-and `O(n)` time with `O(1)` auxiliary space.
+| Progression | Lessons |
+| --- | ---: |
+| Arrays, Linked Lists, Strings, Matrices, Hash Maps and Sets | 16 |
+| Stacks, Queues, Patterns, Searching, Trees, and Tries | 13 |
+| Heaps and Priority Queues, Graphs, and Disjoint Sets | 10 |
+| Sorting, Recursion, Backtracking, Greedy, Dynamic Programming, and Bit Manipulation | 16 |
 
-### Fixed-Size Sliding Window
-
-Introduces a contiguous range, entering and leaving values, a reusable running
-sum, and result ownership across multiple candidate windows. It demonstrates
-why reusing previous work keeps the algorithm at `O(n)` time.
-
-### Reverse Array
-
-Introduces two inward-moving pointers, mirrored swaps, changed cells, settled
-regions, and the pointer-meeting stopping rule. Its immutable public API makes
-the returned copy's `O(n)` space explicit while separating the swap technique's
-`O(1)` working space.
-
-### Move Zeros
-
-Introduces coordinated read and write pointers, stable compaction, overlapping
-markers, and a growing invariant: every value before write is a correctly
-ordered non-zero value. The visual trace distinguishes a skipped zero, a value
-already in place, and a value moved into the stable prefix.
-
-### Traverse a Linked List
-
-Introduces node identity, next references, null termination, and a growing
-visited set. It makes the difference between following a reference and
-incrementing an array index explicit.
-
-### Reverse a Linked List
-
-Introduces three-pointer reasoning: save next, redirect current, then advance
-previous and current. Nodes remain in stable visual positions while their links
-change, so rewind restores the exact earlier topology. The executable core is
-the canonical in-place `O(n)` time, `O(1)` auxiliary-space algorithm; the
-studio supplies disposable nodes and records snapshots outside that core. A
-constant-space Floyd preflight rejects cyclic inputs before mutation begins.
-
-### Detect a Cycle
-
-Introduces Floyd's fast-and-slow pointer technique, overlapping pointers,
-cycle-entry versus meeting-node identity, return links, and self-loops. It
-demonstrates that repeated values do not imply a cycle; node identity does.
+The sequence starts with inspectable scalar and pointer state, composes multiple
+views for derived structures and traversals, and ends with alternative-strategy
+comparisons and optimization. The complete lecture list, prerequisites, module
+paths, and deliberate practice-only exclusions live in
+[`curriculum-roadmap.md`](curriculum-roadmap.md).
 
 ## Verification Standard
 
 The current automated suite checks:
 
+- manifest ordering, immutability, transitive runtime-module coverage, and
+  registry agreement
 - registry uniqueness and complete lesson contracts
 - default and sample trace determinism
 - solver/trace result agreement
 - input parsing and validation
 - algorithm correctness and input immutability
-- trace decision branches and range invariants
-- mutation snapshots, changed indices, pointer convergence, and stable order
-- array view-model projection and accessible descriptions
-- linked-list topology validation, snapshot ownership, and accessible projection
-- traversal, reversal, null termination, return connections, and cycle meetings
+- trace decision branches, invariants, stable identity, and phase-specific state
+- all nine renderer adapters, composite panel keys, projection, accessible
+  descriptions, and deep snapshot ownership
 - player loading, stepping, playback, reset, speed, guide, and error transitions
 - server routes, methods, status codes, static assets, and security headers
 - desktop and mobile lesson deep links, input validation, keyboard controls,
@@ -358,7 +334,8 @@ to confirm:
 - invalid input preserves the last valid visualization
 - code highlighting agrees with the executed transition
 - no document-level horizontal overflow at desktop or mobile widths
-- long array and linked-list rows scroll only inside the visualization stage
+- long rows, grids, branching layouts, graphs, and composite panels stay inside
+  the visualization stage at supported widths
 - browser console contains no warnings or errors
 - `/` and `/studio` both load without document-level horizontal overflow
 - Pip reacts to ready, playing, paused, complete, and error states
@@ -370,14 +347,17 @@ The local server is a development tool, not a production application server.
 `npm run build` creates a dependency-free `dist/` directory whose relative
 asset links work from a domain root or project subpath. `npm run preview` serves
 a fresh build through the `/dsa-dojo/` URL shape used by the browser suite and
-GitHub Pages. Pushes to `main` upload that artifact through the Pages workflow.
+GitHub Pages. The Pages workflow independently runs the fast syntax, unit, and
+build checks before uploading its freshly built `dist/`; it does not yet depend
+on the separate browser-smoke job.
 The studio currently has no accounts, saved progress, backend, analytics, or
 framework dependency. Those concerns should only be introduced when a proven
 learning requirement needs them.
 
-The seven-lesson foundation now covers four array patterns and a complete
-three-lesson linked-list progression. Two renderer families share the same
-validated lesson registry, deterministic traces, player, code mapping, Pip
-guidance, and accessibility model. The next checkpoint should emphasize
-showcase readiness: public delivery, concise architecture evidence, and only
-then a third category whose visual needs genuinely extend the renderer system.
+The 55-lesson core curriculum now spans 20 topics and nine renderer families.
+Every lesson shares the validated registry, deterministic traces, player, code
+mapping, Pip guidance, and accessibility model. The next checkpoint is the
+post-curriculum verification phase: consolidate fixtures, measure and fill
+coverage gaps, broaden per-renderer browser assertions, and gate Pages on the
+fully verified artifact. That work is tracked in
+[`curriculum-roadmap.md`](curriculum-roadmap.md).

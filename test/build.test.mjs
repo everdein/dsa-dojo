@@ -5,6 +5,7 @@ import { access, readFile } from "node:fs/promises";
 import path from "node:path";
 import { promisify } from "node:util";
 import { fileURLToPath } from "node:url";
+import { curriculumModulePaths } from "../studio/src/curriculum-manifest.mjs";
 
 const run = promisify(execFile);
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -29,6 +30,10 @@ test("static build keeps every browser module inside the Pages artifact", async 
 
   const visited = new Set();
   for (const entry of entries) await assertModuleGraphStaysInArtifact(entry, visited);
+
+  for (const modulePath of curriculumModulePaths) {
+    await access(path.join(outputRoot, ...modulePath.split("/")));
+  }
 });
 
 async function readModuleEntry(htmlPath) {

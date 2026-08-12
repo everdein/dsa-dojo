@@ -37,7 +37,7 @@ import { resolveRequest } from "../studio/server.mjs";
 
 const lessons = listLessons();
 
-test("registry exposes seven unique, ordered lessons across two categories", () => {
+test("registry exposes fifty-five unique, ordered lessons across twenty topics", () => {
   assert.deepEqual(lessons.map((lesson) => lesson.id), [
     "arrays/find-largest",
     "arrays/sliding-window",
@@ -45,13 +45,130 @@ test("registry exposes seven unique, ordered lessons across two categories", () 
     "arrays/move-zeros",
     "linked-lists/traverse-linked-list",
     "linked-lists/reverse-linked-list",
-    "linked-lists/detect-cycle"
+    "linked-lists/detect-cycle",
+    "strings/valid-palindrome",
+    "arrays/pair-sum",
+    "arrays/frequency-count",
+    "strings/first-non-repeating",
+    "matrices/traverse-matrix",
+    "matrices/rotate-matrix",
+    "hash-maps-and-sets/find-duplicates",
+    "arrays/longest-consecutive",
+    "hash-maps-and-sets/group-anagrams",
+    "stacks/valid-parentheses",
+    "stacks/min-stack",
+    "stacks/evaluate-postfix",
+    "queues/queue-operations",
+    "queues/sliding-window-maximum",
+    "patterns/prefix-sum-range-queries",
+    "patterns/merge-intervals",
+    "searching/binary-search",
+    "trees/inorder-traversal",
+    "trees/level-order-traversal",
+    "trees/validate-bst",
+    "tries/trie-insert-search",
+    "tries/prefix-count",
+    "heaps-and-priority-queues/heap-operations",
+    "heaps-and-priority-queues/k-largest",
+    "heaps-and-priority-queues/top-k-frequent",
+    "heaps-and-priority-queues/merge-k-sorted-lists",
+    "graphs/connected-components",
+    "graphs/unweighted-shortest-path",
+    "graphs/detect-cycle",
+    "disjoint-sets/union-find-fundamentals",
+    "disjoint-sets/connectivity-queries",
+    "disjoint-sets/count-components",
+    "sorting/bubble-sort",
+    "sorting/insertion-sort",
+    "recursion/factorial",
+    "recursion/recursive-fibonacci",
+    "sorting/merge-sort",
+    "sorting/quick-sort",
+    "backtracking/permutations",
+    "backtracking/n-queens",
+    "greedy/activity-selection",
+    "greedy/coin-change-counterexample",
+    "dynamic-programming/memoized-fibonacci",
+    "dynamic-programming/climbing-stairs",
+    "dynamic-programming/minimum-coins",
+    "bit-manipulation/parity",
+    "bit-manipulation/count-set-bits",
+    "bit-manipulation/single-number"
   ]);
   assert.equal(new Set(lessons.map((lesson) => lesson.id)).size, lessons.length);
-  assert.deepEqual([...new Set(lessons.map((lesson) => lesson.topic))], ["Arrays", "Linked Lists"]);
+  assert.deepEqual([...new Set(lessons.map((lesson) => lesson.topic))], [
+    "Arrays",
+    "Linked Lists",
+    "Strings",
+    "Matrices",
+    "Hash Maps and Sets",
+    "Stacks",
+    "Queues",
+    "Patterns",
+    "Searching",
+    "Trees",
+    "Tries",
+    "Heaps and Priority Queues",
+    "Graphs",
+    "Disjoint Sets",
+    "Sorting",
+    "Recursion",
+    "Backtracking",
+    "Greedy",
+    "Dynamic Programming",
+    "Bit Manipulation"
+  ]);
   assert.equal(getLesson("arrays/sliding-window").order, 2);
   assert.equal(getLesson("arrays/move-zeros").order, 4);
   assert.equal(getLesson("linked-lists/detect-cycle").order, 7);
+  assert.equal(getLesson("strings/valid-palindrome").order, 8);
+  assert.equal(getLesson("arrays/pair-sum").order, 9);
+  assert.equal(getLesson("arrays/frequency-count").order, 10);
+  assert.equal(getLesson("strings/first-non-repeating").order, 11);
+  assert.equal(getLesson("matrices/traverse-matrix").order, 12);
+  assert.equal(getLesson("matrices/rotate-matrix").order, 13);
+  assert.equal(getLesson("hash-maps-and-sets/find-duplicates").order, 14);
+  assert.equal(getLesson("arrays/longest-consecutive").order, 15);
+  assert.equal(getLesson("hash-maps-and-sets/group-anagrams").order, 16);
+  assert.equal(getLesson("stacks/valid-parentheses").order, 17);
+  assert.equal(getLesson("stacks/min-stack").order, 18);
+  assert.equal(getLesson("stacks/evaluate-postfix").order, 19);
+  assert.equal(getLesson("queues/queue-operations").order, 20);
+  assert.equal(getLesson("queues/sliding-window-maximum").order, 21);
+  assert.equal(getLesson("patterns/prefix-sum-range-queries").order, 22);
+  assert.equal(getLesson("patterns/merge-intervals").order, 23);
+  assert.equal(getLesson("searching/binary-search").order, 24);
+  assert.equal(getLesson("trees/inorder-traversal").order, 25);
+  assert.equal(getLesson("trees/level-order-traversal").order, 26);
+  assert.equal(getLesson("trees/validate-bst").order, 27);
+  assert.equal(getLesson("tries/trie-insert-search").order, 28);
+  assert.equal(getLesson("tries/prefix-count").order, 29);
+  assert.equal(getLesson("heaps-and-priority-queues/heap-operations").order, 30);
+  assert.equal(getLesson("heaps-and-priority-queues/k-largest").order, 31);
+  assert.equal(getLesson("heaps-and-priority-queues/top-k-frequent").order, 32);
+  assert.equal(getLesson("heaps-and-priority-queues/merge-k-sorted-lists").order, 33);
+  assert.equal(getLesson("graphs/connected-components").order, 34);
+  assert.equal(getLesson("graphs/unweighted-shortest-path").order, 35);
+  assert.equal(getLesson("graphs/detect-cycle").order, 36);
+  assert.equal(getLesson("disjoint-sets/union-find-fundamentals").order, 37);
+  assert.equal(getLesson("disjoint-sets/connectivity-queries").order, 38);
+  assert.equal(getLesson("disjoint-sets/count-components").order, 39);
+  assert.equal(getLesson("sorting/bubble-sort").order, 40);
+  assert.equal(getLesson("sorting/insertion-sort").order, 41);
+  assert.equal(getLesson("recursion/factorial").order, 42);
+  assert.equal(getLesson("recursion/recursive-fibonacci").order, 43);
+  assert.equal(getLesson("sorting/merge-sort").order, 44);
+  assert.equal(getLesson("sorting/quick-sort").order, 45);
+  assert.equal(getLesson("backtracking/permutations").order, 46);
+  assert.equal(getLesson("backtracking/n-queens").order, 47);
+  assert.equal(getLesson("greedy/activity-selection").order, 48);
+  assert.equal(getLesson("greedy/coin-change-counterexample").order, 49);
+  assert.equal(getLesson("dynamic-programming/memoized-fibonacci").order, 50);
+  assert.equal(getLesson("dynamic-programming/climbing-stairs").order, 51);
+  assert.equal(getLesson("dynamic-programming/minimum-coins").order, 52);
+  assert.equal(getLesson("bit-manipulation/parity").order, 53);
+  assert.equal(getLesson("bit-manipulation/count-set-bits").order, 54);
+  assert.equal(getLesson("bit-manipulation/single-number").order, 55);
   assert.throws(() => getLesson("missing"));
 });
 
@@ -74,6 +191,21 @@ test("lesson contract rejects metadata and input definitions the browser cannot 
     ...lesson,
     legend: [{ kind: "unsafe kind", label: "unsafe" }]
   }));
+  assert.throws(() => assertLesson({
+    ...lesson,
+    code: { ...lesson.code, sourcePath: "../arrays/find-largest.mjs" }
+  }), /sourcePath/);
+  assert.throws(() => assertLesson({
+    ...lesson,
+    code: { ...lesson.code, sourcePath: "arrays/sliding-window.mjs" }
+  }), /filename/);
+  assert.throws(() => assertLesson({
+    ...lesson,
+    code: {
+      ...lesson.code,
+      lines: [{ ...lesson.code.lines[0], number: 0 }]
+    }
+  }), /source line/);
 });
 
 test("trace contract rejects unsafe mutable renderer state", () => {
@@ -98,6 +230,32 @@ test("trace contract rejects unsafe mutable renderer state", () => {
   const unsafeKind = lesson.buildTrace({ values: [1, 2, 3] });
   unsafeKind[0].view.markers = [{ index: 0, kind: "bad kind", label: "bad" }];
   assert.throws(() => assertTrace(unsafeKind, lesson), /marker/);
+});
+
+test("an explicitly selected array renderer can represent an empty derived structure", () => {
+  const lesson = getLesson("arrays/find-largest");
+  const trace = lesson.buildTrace({ values: [1] });
+  trace[0].view = {
+    values: [],
+    activeIndices: [],
+    ranges: [],
+    markers: [],
+    annotations: [],
+    changedIndices: []
+  };
+  assert.doesNotThrow(() => assertTrace([trace[0], {
+    ...structuredClone(trace.at(-1)),
+    step: 1,
+    result: 1,
+    view: {
+      values: [],
+      activeIndices: [],
+      ranges: [],
+      markers: [],
+      annotations: [],
+      changedIndices: []
+    }
+  }], lesson));
 });
 
 test("linked-list trace contract rejects broken topology and shared snapshots", () => {
@@ -753,6 +911,10 @@ test("lesson navigation accepts safe encoded hashes and rejects malformed values
   assert.equal(
     readLessonIdFromHash("#lesson=linked-lists%2Fdetect-cycle", ids),
     "linked-lists/detect-cycle"
+  );
+  assert.equal(
+    readLessonIdFromHash("#lesson=strings%2Fvalid-palindrome", ids),
+    "strings/valid-palindrome"
   );
   assert.equal(readLessonIdFromHash("#lesson=missing", ids), null);
   assert.equal(readLessonIdFromHash("#other=value", ids), null);

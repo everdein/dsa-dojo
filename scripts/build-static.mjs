@@ -1,25 +1,11 @@
 import { cp, copyFile, mkdir, rm } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { curriculumModulePaths } from "../studio/src/curriculum-manifest.mjs";
 
 const projectRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const studioRoot = path.join(projectRoot, "studio");
 const outputRoot = path.join(projectRoot, "dist");
-
-const algorithmFiles = {
-  arrays: [
-    "find-largest.mjs",
-    "move-zeros.mjs",
-    "reverse-array.mjs",
-    "sliding-window.mjs"
-  ],
-  "linked-lists": [
-    "detect-cycle.mjs",
-    "model.mjs",
-    "reverse-linked-list.mjs",
-    "traverse-linked-list.mjs"
-  ]
-};
 
 await rm(outputRoot, { recursive: true, force: true });
 await mkdir(path.join(outputRoot, "studio"), { recursive: true });
@@ -35,12 +21,12 @@ await Promise.all([
   cp(path.join(studioRoot, "src"), path.join(outputRoot, "studio", "src"), { recursive: true })
 ]);
 
-for (const [directory, files] of Object.entries(algorithmFiles)) {
-  const destination = path.join(outputRoot, directory);
-  await mkdir(destination, { recursive: true });
-  await Promise.all(files.map((file) => (
-    copyFile(path.join(projectRoot, directory, file), path.join(destination, file))
-  )));
-}
+await Promise.all(curriculumModulePaths.map(async (modulePath) => {
+  const segments = modulePath.split("/");
+  const source = path.join(projectRoot, ...segments);
+  const destination = path.join(outputRoot, ...segments);
+  await mkdir(path.dirname(destination), { recursive: true });
+  await copyFile(source, destination);
+}));
 
 console.log(`Built static site at ${outputRoot}`);

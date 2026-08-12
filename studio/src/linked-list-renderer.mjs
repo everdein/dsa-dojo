@@ -1,4 +1,90 @@
 import { formatNumber } from "./input.mjs";
+import {
+  assertOwnedArrays,
+  assertOwnedObjects,
+  isSafeRendererToken
+} from "./renderer-validation.mjs";
+
+export const linkedListRendererAdapter = Object.freeze({
+  id: "linked-list",
+  matchesView: (view) => Array.isArray(view?.nodes),
+  assertView: assertLinkedListView,
+  assertSnapshotOwnership: assertLinkedListSnapshotOwnership,
+  projectView: projectLinkedListView
+});
+
+export function assertLinkedListView(view, stepIndex) {
+  if (
+    !view
+    || !Array.isArray(view.nodes)
+    || !Array.isArray(view.pointers)
+    || !Array.isArray(view.activeNodeIds)
+    || !Array.isArray(view.changedNodeIds)
+    || !Array.isArray(view.states)
+    || !Array.isArray(view.annotations)
+  ) {
+    throw new Error(`Trace step ${stepIndex} has an invalid linked-list renderer view.`);
+  }
+  const nodeIds = new Set();
+  view.nodes.forEach((node, nodeIndex) => {
+    if (
+      !isSafeRendererToken(node.id)
+      || nodeIds.has(node.id)
+      || node.index !== nodeIndex
+      || !Number.isFinite(node.value)
+      || (node.nextId !== null && !isSafeRendererToken(node.nextId))
+    ) {
+      throw new Error(`Trace step ${stepIndex} has an invalid linked-list node.`);
+    }
+    nodeIds.add(node.id);
+  });
+  for (const node of view.nodes) {
+    if (node.nextId !== null && !nodeIds.has(node.nextId)) {
+      throw new Error(`Trace step ${stepIndex} has a dangling next-node reference.`);
+    }
+  }
+  for (const nodeId of view.activeNodeIds) {
+    assertNodeId(nodeId, nodeIds, stepIndex, "active node");
+  }
+  for (const nodeId of view.changedNodeIds) {
+    assertNodeId(nodeId, nodeIds, stepIndex, "changed node");
+  }
+  for (const pointer of view.pointers) {
+    if (!isSafeRendererToken(pointer.kind) || !pointer.label) {
+      throw new Error(`Trace step ${stepIndex} has an invalid pointer.`);
+    }
+    if (pointer.nodeId !== null) {
+      assertNodeId(pointer.nodeId, nodeIds, stepIndex, "pointer");
+    }
+  }
+  for (const state of view.states) {
+    if (!isSafeRendererToken(state.kind) || !state.label) {
+      throw new Error(`Trace step ${stepIndex} has an invalid node state.`);
+    }
+    assertNodeId(state.nodeId, nodeIds, stepIndex, "node state");
+  }
+  for (const annotation of view.annotations) {
+    if (!annotation.label) {
+      throw new Error(`Trace step ${stepIndex} has an invalid annotation.`);
+    }
+    assertNodeId(annotation.nodeId, nodeIds, stepIndex, "annotation");
+  }
+  return view;
+}
+
+export function assertLinkedListSnapshotOwnership(trace) {
+  assertOwnedArrays(
+    trace,
+    ["nodes", "pointers", "activeNodeIds", "changedNodeIds", "states", "annotations"],
+    "linked-list renderer"
+  );
+  assertOwnedObjects(
+    trace,
+    ["nodes", "pointers", "states", "annotations"],
+    "linked-list renderer"
+  );
+  return trace;
+}
 
 /**
  * Converts a renderer-neutral linked-list snapshot into stable node, link,
@@ -100,4 +186,10 @@ function classifyLinkDirection(fromNode, toNode) {
   if (distance === 0) return "self-loop";
   if (distance < -1) return "return";
   return "forward-jump";
+}
+
+function assertNodeId(nodeId, nodeIds, stepIndex, label) {
+  if (!nodeIds.has(nodeId)) {
+    throw new Error(`Trace step ${stepIndex} has an unknown ${label} reference.`);
+  }
 }

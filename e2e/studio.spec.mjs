@@ -8,7 +8,55 @@ const lessons = [
   ["arrays%2Fmove-zeros", "Move zeros to the end"],
   ["linked-lists%2Ftraverse-linked-list", "Traverse a linked list"],
   ["linked-lists%2Freverse-linked-list", "Reverse a linked list"],
-  ["linked-lists%2Fdetect-cycle", "Detect a cycle with two speeds"]
+  ["linked-lists%2Fdetect-cycle", "Detect a cycle with two speeds"],
+  ["strings%2Fvalid-palindrome", "Check whether text is a palindrome"],
+  ["arrays%2Fpair-sum", "Find two values that reach a target"],
+  ["arrays%2Ffrequency-count", "Count how often each value appears"],
+  ["strings%2Ffirst-non-repeating", "Find the first non-repeating character"],
+  ["matrices%2Ftraverse-matrix", "Traverse a matrix row by row"],
+  ["matrices%2Frotate-matrix", "Rotate a matrix clockwise"],
+  ["hash-maps-and-sets%2Ffind-duplicates", "Find duplicates with a set"],
+  ["arrays%2Flongest-consecutive", "Find the longest consecutive sequence"],
+  ["hash-maps-and-sets%2Fgroup-anagrams", "Group words that contain the same letters"],
+  ["stacks%2Fvalid-parentheses", "Validate nested brackets with a stack"],
+  ["stacks%2Fmin-stack", "Maintain a minimum inside a stack"],
+  ["stacks%2Fevaluate-postfix", "Evaluate postfix expressions with a value stack"],
+  ["queues%2Fqueue-operations", "Run first-in, first-out queue operations"],
+  ["queues%2Fsliding-window-maximum", "Emit every window maximum"],
+  ["patterns%2Fprefix-sum-range-queries", "Answer range sums with a prefix array"],
+  ["patterns%2Fmerge-intervals", "Merge overlapping closed intervals"],
+  ["searching%2Fbinary-search", "Search a sorted array by halving"],
+  ["trees%2Finorder-traversal", "Traverse a binary tree inorder"],
+  ["trees%2Flevel-order-traversal", "Traverse a tree breadth first"],
+  ["trees%2Fvalidate-bst", "Validate a binary search tree with bounds"],
+  ["tries%2Ftrie-insert-search", "Insert and search words in a trie"],
+  ["tries%2Fprefix-count", "Count words beneath a trie prefix"],
+  ["heaps-and-priority-queues%2Fheap-operations", "Insert and remove from a min-heap"],
+  ["heaps-and-priority-queues%2Fk-largest", "Find the k largest elements"],
+  ["heaps-and-priority-queues%2Ftop-k-frequent", "Select the top k frequent values"],
+  ["heaps-and-priority-queues%2Fmerge-k-sorted-lists", "Merge k sorted linked lists"],
+  ["graphs%2Fconnected-components", "Find connected components with BFS"],
+  ["graphs%2Funweighted-shortest-path", "Find an unweighted shortest path"],
+  ["graphs%2Fdetect-cycle", "Detect an undirected cycle with DFS"],
+  ["disjoint-sets%2Funion-find-fundamentals", "Build connectivity with Union-Find"],
+  ["disjoint-sets%2Fconnectivity-queries", "Answer dynamic connectivity queries"],
+  ["disjoint-sets%2Fcount-components", "Count graph components with Union-Find"],
+  ["sorting%2Fbubble-sort", "Sort by bubbling large values right"],
+  ["sorting%2Finsertion-sort", "Sort by inserting into a prefix"],
+  ["recursion%2Ffactorial", "Compute factorial through recursive calls"],
+  ["recursion%2Frecursive-fibonacci", "See repeated work in recursive Fibonacci"],
+  ["sorting%2Fmerge-sort", "Sort by dividing and merging"],
+  ["sorting%2Fquick-sort", "Partition around a pivot, then recurse"],
+  ["backtracking%2Fpermutations", "Generate every permutation with backtracking"],
+  ["backtracking%2Fn-queens", "Place queens with constraint search"],
+  ["greedy%2Factivity-selection", "Select the largest compatible activity schedule"],
+  ["greedy%2Fcoin-change-counterexample", "Challenge greedy coin change"],
+  ["dynamic-programming%2Fmemoized-fibonacci", "Replace repeated Fibonacci subtrees with memo hits"],
+  ["dynamic-programming%2Fclimbing-stairs", "Count stair paths with a DP transition"],
+  ["dynamic-programming%2Fminimum-coins", "Minimize coins with predecessor states"],
+  ["bit-manipulation%2Fparity", "Read parity from the lowest bit"],
+  ["bit-manipulation%2Fcount-set-bits", "Count ones by clearing the lowest set bit"],
+  ["bit-manipulation%2Fsingle-number", "Find the unique value with XOR"]
 ];
 
 test("landing and studio are accessible, quiet, and free of page overflow", async ({ page }) => {
@@ -140,6 +188,22 @@ test("a learner can commit a prediction before revealing the next state", async 
   await page.getByRole("button", { name: "Reveal next step →" }).click();
   await expect(page.getByRole("status")).toContainText("compare your prediction");
   await expect(page.locator("#step-count")).toHaveText("1 / 5");
+});
+
+test("the sequence renderer supports custom text and accessible stepping", async ({ page }) => {
+  const errors = collectPageErrors(page);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./studio/#lesson=strings%2Fvalid-palindrome");
+
+  const input = page.getByRole("textbox", { name: /Enter 1.*48 characters/ });
+  await input.fill("No 'x' in Nixon");
+  await page.getByRole("button", { name: "Apply input" }).click();
+  await expect(page.getByRole("region", { name: "Scrollable character sequence visualization" })).toBeVisible();
+  await page.getByRole("button", { name: "Next →" }).click();
+  await expect(page.locator("#step-count")).toContainText("1 /");
+  await expectNoDocumentOverflow(page);
+  await expectNoSeriousAccessibilityViolations(page);
+  expect(errors).toEqual([]);
 });
 
 function collectPageErrors(page) {

@@ -6,6 +6,8 @@ export const moveZerosLesson = {
   id: "arrays/move-zeros",
   order: 4,
   topic: "Arrays",
+  prerequisites: ["arrays/find-largest"],
+  patterns: ["two-pointers"],
   catalogLabel: "Move Zeros",
   catalogDescription: "Compact non-zero values with read and write pointers.",
   title: "Move zeros to the end",
@@ -30,6 +32,7 @@ export const moveZerosLesson = {
   code: {
     title: "Protect a stable prefix",
     filename: "move-zeros.mjs",
+    sourcePath: "arrays/move-zeros.mjs",
     lines: [
       { number: 1, text: "export function moveZeros(values) {", steps: ["function"] },
       { number: 2, text: "  validateMoveZerosInput(values);", steps: ["initialize"] },

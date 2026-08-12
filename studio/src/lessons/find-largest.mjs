@@ -6,6 +6,8 @@ export const findLargestLesson = {
   id: "arrays/find-largest",
   order: 1,
   topic: "Arrays",
+  prerequisites: [],
+  patterns: ["linear-scan"],
   catalogLabel: "Find Largest",
   catalogDescription: "Track one best value during a linear scan.",
   title: "Find the largest value",
@@ -30,6 +32,7 @@ export const findLargestLesson = {
   code: {
     title: "One clear loop",
     filename: "find-largest.mjs",
+    sourcePath: "arrays/find-largest.mjs",
     lines: [
       { number: 1, text: "export function findLargest(values) {", steps: ["function"] },
       { number: 2, text: "  validateInput(values);", steps: ["initialize"] },

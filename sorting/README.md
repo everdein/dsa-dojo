@@ -27,3 +27,10 @@ const sorted = [3, 1, 2].sort((a, b) => a - b);
 - Sort an array
 - Sort by custom criteria
 - Merge two sorted arrays
+
+## Interactive Lessons
+
+- [Bubble Sort](bubble-sort.mjs) grows a settled suffix with adjacent swaps.
+- [Insertion Sort](insertion-sort.mjs) grows a sorted prefix around a held key.
+- [Merge Sort](merge-sort.mjs) makes divide, buffer writes, and merging inspectable.
+- [Quick Sort](quick-sort.mjs) preserves a partition invariant around each pivot.

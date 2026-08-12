@@ -1,4 +1,9 @@
-const SUPPORTED_RENDERERS = new Set(["array", "linked-list"]);
+import {
+  inferRendererAdapter,
+  resolveLessonViewPanels,
+  resolveStepViewPanels
+} from "./renderer-registry.mjs";
+import { isSafeRendererToken } from "./renderer-validation.mjs";
 
 /**
  * The small contract every interactive lesson should satisfy.
@@ -13,7 +18,8 @@ export function assertLesson(lesson) {
     "catalogDescription",
     "title",
     "summary",
-    "renderer",
+    "prerequisites",
+    "patterns",
     "input",
     "solve",
     "buildTrace",
@@ -32,8 +38,16 @@ export function assertLesson(lesson) {
   if (!Number.isInteger(lesson.order) || lesson.order < 1) {
     throw new Error("Lesson order must be a positive integer.");
   }
-  if (!SUPPORTED_RENDERERS.has(lesson.renderer)) {
-    throw new Error(`Unsupported renderer: ${lesson.renderer}`);
+  resolveLessonViewPanels(lesson);
+  if (!Array.isArray(lesson.prerequisites)) {
+    throw new Error("Lesson prerequisites must be an array.");
+  }
+  if (
+    !Array.isArray(lesson.patterns)
+    || lesson.patterns.length === 0
+    || lesson.patterns.some((pattern) => !isSafeRendererToken(pattern))
+  ) {
+    throw new Error("Lesson patterns require at least one safe pattern id.");
   }
   if (!Array.isArray(lesson.input.fields) || lesson.input.fields.length === 0) {
     throw new Error("Lesson input must define at least one field.");
@@ -52,12 +66,16 @@ export function assertLesson(lesson) {
   if (!Array.isArray(lesson.code.lines) || lesson.code.lines.length === 0) {
     throw new Error("Lesson code must define source lines.");
   }
-  if (!lesson.code.title || !lesson.code.filename) {
-    throw new Error("Lesson code requires a title and filename.");
+  if (!lesson.code.title || !lesson.code.filename || !isRepoRelativeModulePath(lesson.code.sourcePath)) {
+    throw new Error("Lesson code requires a title, filename, and safe repo-relative sourcePath.");
+  }
+  if (lesson.code.sourcePath.split("/").at(-1) !== lesson.code.filename) {
+    throw new Error("Lesson code filename must match the final sourcePath segment.");
   }
   for (const line of lesson.code.lines) {
     if (
       !Number.isInteger(line.number)
+      || line.number < 1
       || typeof line.text !== "string"
       || !Array.isArray(line.steps)
       || line.steps.length === 0
@@ -83,7 +101,7 @@ export function assertLesson(lesson) {
   if (
     !Array.isArray(lesson.legend)
     || lesson.legend.length === 0
-    || lesson.legend.some((item) => !isSafeKind(item.kind) || !item.label)
+    || lesson.legend.some((item) => !isSafeRendererToken(item.kind) || !item.label)
   ) {
     throw new Error("Lesson legend requires at least one labeled item.");
   }
@@ -97,25 +115,59 @@ export function assertLesson(lesson) {
   return lesson;
 }
 
+function isRepoRelativeModulePath(value) {
+  return typeof value === "string"
+    && /^(?:[a-z0-9][a-z0-9-]*\/)+[a-z0-9][a-z0-9-]*\.mjs$/.test(value);
+}
+
 export function assertTrace(trace, lesson) {
   if (!Array.isArray(trace) || trace.length === 0) {
     throw new Error("A lesson trace must contain at least one step.");
   }
-  const renderer = lesson?.renderer ?? (trace[0]?.view?.nodes ? "linked-list" : "array");
-  if (!SUPPORTED_RENDERERS.has(renderer)) throw new Error(`Unsupported renderer: ${renderer}`);
+  const inferredAdapter = lesson ? null : inferRendererAdapter(trace[0]?.view);
+  const lessonPanels = lesson ? resolveLessonViewPanels(lesson) : null;
 
   const codeSteps = lesson
     ? new Set(lesson.code.lines.flatMap((line) => line.steps ?? []))
     : null;
 
-  trace.forEach((step, index) => {
+  const resolvedPanelsByStep = trace.map((step, index) => {
     assertFiniteNumbers(step, `Trace step ${index}`);
     assertSharedStep(step, index, codeSteps);
-    if (renderer === "array") assertArrayView(step.view, index);
-    if (renderer === "linked-list") assertLinkedListView(step.view, index);
+    const stepPanels = lesson
+      ? resolveStepViewPanels(lesson, step)
+      : [{
+          id: "primary",
+          renderer: inferredAdapter.id,
+          heading: null,
+          adapter: inferredAdapter,
+          legacy: true,
+          snapshot: step.view
+        }];
+    for (const panel of stepPanels) {
+      try {
+        panel.adapter.assertView(panel.snapshot, index);
+      } catch (error) {
+        if (panel.legacy) throw error;
+        throw panelError(panel.id, error);
+      }
+    }
+    return stepPanels;
   });
 
-  assertSnapshotOwnership(trace, renderer);
+  const panels = lessonPanels ?? resolvedPanelsByStep[0];
+  for (const panel of panels) {
+    const panelTrace = trace.map((step, index) => ({
+      ...step,
+      view: resolvedPanelsByStep[index].find(({ id }) => id === panel.id).snapshot
+    }));
+    try {
+      panel.adapter.assertSnapshotOwnership(panelTrace);
+    } catch (error) {
+      if (panel.legacy) throw error;
+      throw panelError(panel.id, error);
+    }
+  }
   if (trace.at(-1).phase !== "complete") {
     throw new Error("A trace must end with a complete step.");
   }
@@ -160,173 +212,6 @@ function assertSharedStep(step, index, codeSteps) {
     if (codeSteps && !codeSteps.has(codeStep)) {
       throw new Error(`Trace step ${index} references unknown code step: ${codeStep}.`);
     }
-  }
-}
-
-function assertArrayView(view, stepIndex) {
-  if (
-    !view
-    || !Array.isArray(view.values)
-    || !Array.isArray(view.activeIndices)
-    || !Array.isArray(view.ranges)
-    || !Array.isArray(view.markers)
-  ) {
-    throw new Error(`Trace step ${stepIndex} has an invalid array renderer view.`);
-  }
-  if (view.values.length === 0 || Array.from(view.values).some((value) => !Number.isFinite(value))) {
-    throw new Error(`Trace step ${stepIndex} must contain finite renderer values.`);
-  }
-  if (view.annotations !== undefined && !Array.isArray(view.annotations)) {
-    throw new Error(`Trace step ${stepIndex} has invalid annotations.`);
-  }
-  if (view.changedIndices !== undefined && !Array.isArray(view.changedIndices)) {
-    throw new Error(`Trace step ${stepIndex} has invalid changed indices.`);
-  }
-
-  const maximumIndex = view.values.length - 1;
-  for (const activeIndex of view.activeIndices) {
-    assertArrayIndex(activeIndex, maximumIndex, stepIndex, "active index");
-  }
-  for (const marker of view.markers) {
-    if (!isSafeKind(marker.kind) || !marker.label) {
-      throw new Error(`Trace step ${stepIndex} has an invalid marker.`);
-    }
-    assertArrayIndex(marker.index, maximumIndex, stepIndex, "marker");
-  }
-  for (const range of view.ranges) {
-    if (
-      !isSafeKind(range.kind)
-      || !range.label
-      || !Number.isInteger(range.start)
-      || !Number.isInteger(range.end)
-      || range.start < 0
-      || range.start > range.end
-      || range.end > maximumIndex
-    ) {
-      throw new Error(`Trace step ${stepIndex} has an invalid range.`);
-    }
-  }
-  for (const annotation of view.annotations ?? []) {
-    if (!annotation.label) {
-      throw new Error(`Trace step ${stepIndex} has an invalid annotation.`);
-    }
-    assertArrayIndex(annotation.index, maximumIndex, stepIndex, "annotation");
-  }
-  for (const changedIndex of view.changedIndices ?? []) {
-    assertArrayIndex(changedIndex, maximumIndex, stepIndex, "changed index");
-  }
-}
-
-function assertLinkedListView(view, stepIndex) {
-  if (
-    !view
-    || !Array.isArray(view.nodes)
-    || !Array.isArray(view.pointers)
-    || !Array.isArray(view.activeNodeIds)
-    || !Array.isArray(view.changedNodeIds)
-    || !Array.isArray(view.states)
-    || !Array.isArray(view.annotations)
-  ) {
-    throw new Error(`Trace step ${stepIndex} has an invalid linked-list renderer view.`);
-  }
-  const nodeIds = new Set();
-  view.nodes.forEach((node, nodeIndex) => {
-    if (
-      !isSafeId(node.id)
-      || nodeIds.has(node.id)
-      || node.index !== nodeIndex
-      || !Number.isFinite(node.value)
-      || (node.nextId !== null && !isSafeId(node.nextId))
-    ) {
-      throw new Error(`Trace step ${stepIndex} has an invalid linked-list node.`);
-    }
-    nodeIds.add(node.id);
-  });
-  for (const node of view.nodes) {
-    if (node.nextId !== null && !nodeIds.has(node.nextId)) {
-      throw new Error(`Trace step ${stepIndex} has a dangling next-node reference.`);
-    }
-  }
-  for (const nodeId of view.activeNodeIds) {
-    assertNodeId(nodeId, nodeIds, stepIndex, "active node");
-  }
-  for (const nodeId of view.changedNodeIds) {
-    assertNodeId(nodeId, nodeIds, stepIndex, "changed node");
-  }
-  for (const pointer of view.pointers) {
-    if (!isSafeKind(pointer.kind) || !pointer.label) {
-      throw new Error(`Trace step ${stepIndex} has an invalid pointer.`);
-    }
-    if (pointer.nodeId !== null) {
-      assertNodeId(pointer.nodeId, nodeIds, stepIndex, "pointer");
-    }
-  }
-  for (const state of view.states) {
-    if (!isSafeKind(state.kind) || !state.label) {
-      throw new Error(`Trace step ${stepIndex} has an invalid node state.`);
-    }
-    assertNodeId(state.nodeId, nodeIds, stepIndex, "node state");
-  }
-  for (const annotation of view.annotations) {
-    if (!annotation.label) {
-      throw new Error(`Trace step ${stepIndex} has an invalid annotation.`);
-    }
-    assertNodeId(annotation.nodeId, nodeIds, stepIndex, "annotation");
-  }
-}
-
-function assertSnapshotOwnership(trace, renderer) {
-  if (renderer === "array") {
-    assertOwnedArrays(
-      trace,
-      ["values", "activeIndices", "ranges", "markers", "annotations", "changedIndices"],
-      "array renderer"
-    );
-    assertOwnedObjects(trace, ["ranges", "markers", "annotations"], "array renderer");
-    return;
-  }
-
-  assertOwnedArrays(
-    trace,
-    ["nodes", "pointers", "activeNodeIds", "changedNodeIds", "states", "annotations"],
-    "linked-list renderer"
-  );
-  assertOwnedObjects(
-    trace,
-    ["nodes", "pointers", "states", "annotations"],
-    "linked-list renderer"
-  );
-}
-
-function assertOwnedArrays(trace, properties, label) {
-  for (const property of properties) {
-    const snapshots = trace
-      .map((step) => step.view[property])
-      .filter((snapshot) => snapshot !== undefined);
-    if (new Set(snapshots).size !== snapshots.length) {
-      throw new Error(`Every trace step must own its ${label} ${property} snapshot.`);
-    }
-  }
-}
-
-function assertOwnedObjects(trace, properties, label) {
-  for (const property of properties) {
-    const objects = trace.flatMap((step) => step.view[property] ?? []);
-    if (new Set(objects).size !== objects.length) {
-      throw new Error(`Every trace step must own its ${label} ${property} objects.`);
-    }
-  }
-}
-
-function assertArrayIndex(index, maximumIndex, stepIndex, label) {
-  if (!Number.isInteger(index) || index < 0 || index > maximumIndex) {
-    throw new Error(`Trace step ${stepIndex} has an out-of-bounds ${label}.`);
-  }
-}
-
-function assertNodeId(nodeId, nodeIds, stepIndex, label) {
-  if (!nodeIds.has(nodeId)) {
-    throw new Error(`Trace step ${stepIndex} has an unknown ${label} reference.`);
   }
 }
 
@@ -387,10 +272,7 @@ function isDeeplyEqual(left, right, leftToRight = new WeakMap(), rightToLeft = n
   return true;
 }
 
-function isSafeKind(kind) {
-  return typeof kind === "string" && /^[a-z][a-z0-9-]*$/.test(kind);
-}
-
-function isSafeId(id) {
-  return typeof id === "string" && /^[a-z][a-z0-9-]*$/.test(id);
+function panelError(panelId, error) {
+  const detail = error instanceof Error ? error.message : String(error);
+  return new Error(`View panel ${panelId}: ${detail}`, { cause: error });
 }

@@ -11,6 +11,8 @@ export const traverseLinkedListLesson = {
   id: "linked-lists/traverse-linked-list",
   order: 5,
   topic: "Linked Lists",
+  prerequisites: ["arrays/find-largest"],
+  patterns: ["traversal"],
   catalogLabel: "Traverse List",
   catalogDescription: "Follow next references and record each node exactly once.",
   title: "Traverse a linked list",
@@ -35,6 +37,7 @@ export const traverseLinkedListLesson = {
   code: {
     title: "Follow one reference at a time",
     filename: "traverse-linked-list.mjs",
+    sourcePath: "linked-lists/traverse-linked-list.mjs",
     lines: [
       { number: 1, text: "export function traverseLinkedList(head) {", steps: ["function"] },
       { number: 2, text: "  validateLinkedListNode(head);", steps: ["initialize"] },

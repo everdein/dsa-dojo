@@ -26,3 +26,8 @@ function backtrack(state) {
 - Generate permutations
 - Solve Sudoku-style puzzles
 - N-Queens
+
+## Interactive Lessons
+
+- [Generate Permutations](permutations.mjs) traces choose, recurse, record, and undo.
+- [N-Queens](n-queens.mjs) prunes attacked squares and backtracks from dead ends.

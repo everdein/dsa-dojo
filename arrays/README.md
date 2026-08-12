@@ -45,13 +45,16 @@ numbers.push(40);
 
 ## Interactive Lessons
 
-The DSA Dojo studio currently uses four array lessons to establish reusable
+The DSA Dojo studio uses seven array lessons to establish and compose reusable
 visual patterns:
 
 1. **Find Largest** - linear scan and scalar best-so-far state
 2. **Sliding Window** - moving range and reusable aggregate state
 3. **Reverse Array** - mirrored swaps and converging pointers
 4. **Move Zeros** - stable compaction with read and write pointers
+5. **Pair Sum** - one-pass complement lookup
+6. **Frequency Count** - derived key/value state
+7. **Longest Consecutive Sequence** - set-backed run starts
 
 Each lesson keeps the public algorithm input immutable, records deterministic
 array snapshots for exact rewind, and explains the difference between the

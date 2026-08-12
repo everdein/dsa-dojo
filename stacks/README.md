@@ -30,3 +30,9 @@ console.log(stack.pop());
 - Valid parentheses
 - Min stack
 - Evaluate postfix expression
+
+## Interactive Lessons
+
+- [Valid Parentheses](valid-parentheses.mjs) matches each closer to the latest opener.
+- [Min Stack](min-stack.mjs) stores a running minimum at every depth.
+- [Evaluate Postfix](evaluate-postfix.mjs) preserves operand order during reductions.

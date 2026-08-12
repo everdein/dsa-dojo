@@ -27,3 +27,8 @@ console.log(matrix[1][0]);
 - Traverse a matrix
 - Rotate a matrix
 - Find the largest element in a matrix
+
+## Interactive Lessons
+
+- [Matrix Traversal](traverse-matrix.mjs) connects nested loops to row-major coordinates.
+- [Rotate Matrix](rotate-matrix.mjs) composes transpose and row reversal.

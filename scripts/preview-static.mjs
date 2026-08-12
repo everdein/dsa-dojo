@@ -24,43 +24,59 @@ const securityHeaders = {
   "X-Frame-Options": "DENY"
 };
 
-const { host, port } = getListenConfig();
-const server = createServer(async (request, response) => {
-  const method = request.method ?? "GET";
-  if (method !== "GET" && method !== "HEAD") {
-    sendText(response, 405, "Method not allowed", method === "HEAD", { Allow: "GET, HEAD" });
-    return;
-  }
+export function createPreviewServer() {
+  return createServer(async (request, response) => {
+    const method = request.method ?? "GET";
+    if (method !== "GET" && method !== "HEAD") {
+      sendText(response, 405, "Method not allowed", method === "HEAD", { Allow: "GET, HEAD" });
+      return;
+    }
 
-  const filePath = resolveStaticRequest(request.url ?? "/");
-  if (!filePath) {
-    sendText(response, 404, "Not found", method === "HEAD");
-    return;
-  }
+    const filePath = resolveStaticRequest(request.url ?? "/");
+    if (!filePath) {
+      sendText(response, 404, "Not found", method === "HEAD");
+      return;
+    }
 
+    try {
+      const content = await readFile(filePath);
+      response.writeHead(200, {
+        ...securityHeaders,
+        "Cache-Control": "no-cache",
+        "Content-Length": content.byteLength,
+        "Content-Type": contentTypes[path.extname(filePath)]
+      });
+      response.end(method === "HEAD" ? undefined : content);
+    } catch {
+      sendText(response, 404, "Not found", method === "HEAD");
+    }
+  });
+}
+
+export async function listenForPreview({ host, port }) {
+  const server = createPreviewServer();
+  await new Promise((resolve, reject) => {
+    server.once("error", reject);
+    server.listen(port, host, resolve);
+  });
+  return server;
+}
+
+const isDirectInvocation = process.argv[1]
+  && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isDirectInvocation) {
+  const { host, port } = getListenConfig();
   try {
-    const content = await readFile(filePath);
-    response.writeHead(200, {
-      ...securityHeaders,
-      "Cache-Control": "no-cache",
-      "Content-Length": content.byteLength,
-      "Content-Type": contentTypes[path.extname(filePath)]
-    });
-    response.end(method === "HEAD" ? undefined : content);
-  } catch {
-    sendText(response, 404, "Not found", method === "HEAD");
+    await listenForPreview({ host, port });
+    console.log(`DSA Dojo static preview running at http://${host}:${port}`);
+  } catch (error) {
+    console.error(`Unable to preview DSA Dojo on ${host}:${port}: ${error.message}`);
+    process.exitCode = 1;
   }
-});
+}
 
-server.once("error", (error) => {
-  console.error(`Unable to preview DSA Dojo on ${host}:${port}: ${error.message}`);
-  process.exitCode = 1;
-});
-server.listen(port, host, () => {
-  console.log(`DSA Dojo static preview running at http://${host}:${port}`);
-});
-
-function resolveStaticRequest(requestUrl) {
+export function resolveStaticRequest(requestUrl) {
   let pathname;
   try {
     pathname = decodeURIComponent(new URL(requestUrl, "http://localhost").pathname);

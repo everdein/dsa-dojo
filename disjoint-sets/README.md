@@ -18,8 +18,18 @@ class UnionFind {
 }
 ```
 
+The Count Components studio lesson uses the shared graph grammar: declare
+comma-separated nodes, then write edges with a colon between endpoint labels,
+such as `north-hub:east-2`. Hyphens remain valid inside labels.
+
 ## Practice Exercises
 
 - Union two sets
 - Detect whether two nodes are connected
 - Count connected components
+
+## Interactive Lessons
+
+- [Union-Find Fundamentals](union-find.mjs) combines path compression with union by size.
+- [Connectivity Queries](connectivity-queries.mjs) answers pair queries while improving later finds.
+- [Count Components](count-components.mjs) reduces the count only when an edge joins distinct roots.

@@ -32,3 +32,9 @@ class TreeNode {
 - Inorder traversal
 - Level order traversal
 - Validate a binary search tree
+
+## Interactive Lessons
+
+- [Inorder Traversal](inorder-traversal.mjs) uses an explicit stack to visit left, node, then right.
+- [Level-Order Traversal](level-order-traversal.mjs) composes a binary tree with FIFO level boundaries.
+- [Validate a BST](validate-bst.mjs) carries exclusive ancestor bounds to every node.

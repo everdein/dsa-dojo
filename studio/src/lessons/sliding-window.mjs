@@ -6,6 +6,8 @@ export const slidingWindowLesson = {
   id: "arrays/sliding-window",
   order: 2,
   topic: "Arrays",
+  prerequisites: ["arrays/find-largest"],
+  patterns: ["sliding-window"],
   catalogLabel: "Sliding Window",
   catalogDescription: "Reuse a fixed-size range and its running sum.",
   title: "Find the best fixed window",
@@ -44,6 +46,7 @@ export const slidingWindowLesson = {
   code: {
     title: "Reuse the previous sum",
     filename: "sliding-window.mjs",
+    sourcePath: "arrays/sliding-window.mjs",
     lines: [
       { number: 1, text: "export function maxWindowSum(values, size) {", steps: ["function"] },
       { number: 2, text: "  validateSlidingWindowInput(values, size);", steps: ["initialize-window"] },

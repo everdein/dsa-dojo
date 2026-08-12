@@ -1,8 +1,8 @@
 # DSA Dojo Product Vision
 
 - **Status:** Living product direction
-- **Implemented foundation:** Seven lessons across arrays and linked lists
-- **Current checkpoint:** Static release ready; public delivery and learner feedback next
+- **Implemented foundation:** 55 lessons across 20 topics
+- **Current checkpoint:** Core curriculum delivered; verification and pipeline hardening next
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -14,7 +14,10 @@ The studio helps learners understand what changes during an algorithm, why it
 changes, and how that behavior connects to the code. It complements the
 existing study material rather than replacing it.
 
-The product will evolve according to learner value, pattern coverage, and proven renderer needs. Arrays establish the interaction model first. Each later data structure, algorithm, or pattern should add only the visualization capabilities it genuinely needs.
+The product evolves according to learner value, pattern coverage, and proven
+renderer needs. Arrays established the interaction model; the completed core
+curriculum then added only the visualization capabilities each later structure,
+algorithm, or pattern required.
 
 ## Who It Is For
 
@@ -47,7 +50,9 @@ The learner should remain an active participant. The studio should not immediate
 - **Working name:** Pip
 - **Concept:** A small, friendly data-node companion derived from the shapes of array cells, cursors, and connected nodes.
 
-Pip gives the studio warmth and continuity without becoming the product itself. The character can evolve visually as new structures introduce links, branches, queues, and graphs.
+Pip gives the studio warmth and continuity without becoming the product itself.
+The character varies subtly across arrays, links, branches, queues, and graphs
+while keeping one recognizable identity.
 
 Pip's persistent base silhouette is a rounded data cell with two short,
 expressive arms and one small orbiting index marker. Arm poses, expressions,
@@ -106,7 +111,7 @@ The studio can use an expressive product-storytelling style while developing its
 
 Long empty scroll sequences, decorative motion, and oversized type should not delay the lesson or reduce usability. The studio entry point remains visible in the landing-page header and first viewport.
 
-## Arrays-First Vertical Slice (Implemented)
+## Arrays-First Vertical Slice (Historical Design Record)
 
 The first complete lesson visualizes the reusable implementation in
 `arrays/find-largest.mjs`.
@@ -122,7 +127,8 @@ Finding the largest value is small enough to understand without extra domain kno
 - a deterministic execution history
 - time and space complexity
 
-If this lesson feels clear, reversible, accessible, and useful, the same player can support more complex array lessons.
+This lesson proved clear, reversible, accessible, and useful; the same player
+now supports the complete 55-lesson curriculum.
 
 ### Learner Experience
 
@@ -186,33 +192,42 @@ The first lesson is complete when:
 - Pip appears at the four defined learning moments and its minimized state persists for the current lesson
 - the existing Node.js exercise continues to run independently
 
-### Arrays Expansion Order
+### Shipped Array Progression
 
 After Find Largest establishes scalar state and a linear scan:
 
 1. **Sliding Window** validates the shared player with a moving range and aggregate state.
 2. **Reverse Array** adds mirrored mutation and converging pointers.
 3. **Move Zeros** adds stable compaction and coordinated read/write pointers.
-4. **Pair Sum** can introduce lookup decisions when the catalog returns to arrays.
-5. **Frequency Count** can introduce derived state.
-6. The remaining array exercises become lessons only when they add learning value rather than duplicate an existing interaction.
+4. **Pair Sum** introduces lookup decisions when the catalog returns to arrays.
+5. **Frequency Count** introduces derived lookup state.
+6. **Longest Consecutive Sequence** uses set membership to start only the runs
+   that matter.
+
+Other array exercises remain standalone practice when they repeat an existing
+interaction without adding a distinct reasoning pattern.
 
 ## Reusable Product Model
 
-Each lesson should be composed from four separable parts:
+Each lesson is composed from five separable parts:
 
-1. **Algorithm definition** produces a deterministic execution trace.
-2. **Player state** handles forward, backward, play, pause, speed, and reset.
-3. **Renderer** translates trace state into an array, string, tree, graph, or other semantic view.
-4. **Lesson content** supplies the goal, code, explanations, complexity, prompts, and Pip dialogue.
+1. **Pure solver** computes the answer without browser or playback concerns.
+2. **Trace builder** records a deterministic, solver-aligned execution history.
+3. **Player state** handles forward, backward, play, pause, speed, and reset.
+4. **Renderer adapters** validate and project one or more semantic views.
+5. **Lesson content** supplies the goal, code, explanations, complexity, prompts, and Pip dialogue.
 
 The existing topic folders remain useful as standalone study material. The interactive layer should consume or reference that knowledge without making the simple Node.js exercises harder to run.
 
-The first implementation begins by extracting `findLargest(values)` into a pure reusable module. The existing Node.js exercise becomes a thin runnable entry point, while a separate trace adapter records comparisons and updates for the studio. Tests must verify that the pure function and the final trace state always produce the same result.
+The first implementation extracted `findLargest(values)` into a pure reusable
+module. Its Node.js exercise became a thin runnable entry point, while a
+separate trace adapter recorded comparisons and updates for the studio. Every
+shipped lecture now follows the same solver/trace separation, and contract tests
+verify that the final trace result agrees with the pure function.
 
-## Iterative Roadmap
+## Delivered Curriculum Sequence
 
-Expansion follows learner value and reusable product capability:
+The core curriculum was delivered in this capability order:
 
 1. Arrays vertical slice with the minimum lesson player
 2. Extract and harden the reusable player, then add more array lessons
@@ -222,7 +237,16 @@ Expansion follows learner value and reusable product capability:
 6. Graphs and disjoint sets
 7. Searching, sorting, recursion, backtracking, greedy algorithms, dynamic programming, and bit manipulation
 
-Each topic should introduce the smallest reusable visual capability needed for that topic. For example, linked lists add connections, trees add branching, and graphs add traversal across non-hierarchical relationships.
+Each topic introduced the smallest reusable visual capability it needed. Linked
+lists added connections, trees added branching, and graphs added traversal
+across non-hierarchical relationships. The current catalog uses nine registered
+renderer adapters and supports both single-view and ordered composite lessons.
+
+The shipped lecture sequence, prerequisites, renderer increments, and deliberate
+practice-only exclusions are recorded in
+[`curriculum-roadmap.md`](curriculum-roadmap.md). That document is the delivery
+record for L01-L55 and the authority for the current post-curriculum
+verification phase.
 
 ## Definition of Done for a Topic
 
@@ -255,28 +279,29 @@ The first release proved that an algorithm can be made easier to understand
 through synchronized state, code, narration, and learner-controlled playback.
 Everything else builds from that evidence.
 
-## Foundation checkpoint
+## Core Curriculum Checkpoint
 
-The studio now has a framework-free player state machine, a validated
-renderer-aware lesson registry, deterministic trace contracts, array and
-linked-list view models, and automated tests for algorithms, traces, input
-rules, rendering state, and player transitions. Four array lessons cover a
-scalar scan, a moving range, mirrored swaps, and stable compaction.
+The studio now has a framework-free player state machine, a validated lesson
+registry, a lightweight curriculum manifest, deterministic trace contracts,
+and nine renderer adapters: array, sequence, lookup, grid, stack, queue,
+branching, graph, and linked list. A lecture can use one view or synchronize
+several ordered panels without adding lesson-specific browser branches.
 
-Three linked-list lessons form the first complete cross-category progression:
-traversal establishes references and null termination, reversal changes
-topology one protected link at a time, and cycle detection adds overlapping
-pointer speeds, return links, and self-loops. Stable node identity and fresh
-topology snapshots keep pointer mutation reversible and accessible.
+The shipped curriculum contains 55 lessons across 20 topics, from linear scans
+and pointer movement through trees, graphs, union-find, sorting, recursion,
+backtracking, greedy reasoning, dynamic programming, and bit manipulation.
+Prerequisite metadata connects those topics into a progression, while pattern
+tags make repeated ideas such as breadth-first search, memoization, and top-k
+selection visible across category boundaries.
 
-The showcase foundation now includes a static release build, continuous
-integration, desktop/mobile browser and accessibility checks, a short demo
-path, prediction-before-reveal, and explicit lesson-completion actions. The
-next checkpoint is public delivery and learner feedback on the two-category
-experience before catalog breadth. Narrow categories should still contain two
-or three distinct lessons; broad structures may grow to three to five. This
-avoids both a shallow one-lesson sampler and a large catalog of repetitive
-exercises.
+The repository includes a GitHub Pages release workflow, a dependency-free
+static build, CI on supported Node.js versions, hundreds of focused Node
+unit/integration tests, coverage collection, desktop/mobile Playwright checks,
+axe accessibility checks, prediction-before-reveal, and explicit
+lesson-completion actions. The core curriculum is complete. The next phase
+consolidates fixtures, fills branch gaps, broadens per-renderer browser
+assertions, establishes justified coverage thresholds, and makes the fully
+verified artifact the deployment gate.
 
 ## Introductory story checkpoint
 
