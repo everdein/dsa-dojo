@@ -34,16 +34,16 @@ export const findLargestLesson = {
     filename: "find-largest.mjs",
     sourcePath: "arrays/find-largest.mjs",
     lines: [
-      { number: 1, text: "export function findLargest(values) {", steps: ["function"] },
-      { number: 2, text: "  validateInput(values);", steps: ["initialize"] },
-      { number: 3, text: "  let largest = values[0];", steps: ["initialize"] },
-      { number: 4, text: "  for (let index = 1; index < values.length; index += 1) {", steps: ["compare"] },
-      { number: 5, text: "    if (largest < values[index]) {", steps: ["compare"] },
-      { number: 6, text: "      largest = values[index];", steps: ["update-largest"] },
-      { number: 7, text: "    }", steps: ["compare"] },
-      { number: 8, text: "  }", steps: ["compare"] },
-      { number: 9, text: "  return largest;", steps: ["return"] },
-      { number: 10, text: "}", steps: ["function"] }
+      { number: 15, text: "export function findLargest(values) {", steps: ["function"] },
+      { number: 16, text: "  validateInput(values);", steps: ["initialize"] },
+      { number: 18, text: "  let largest = values[0];", steps: ["initialize"] },
+      { number: 19, text: "  for (let index = 1; index < values.length; index += 1) {", steps: ["compare"] },
+      { number: 20, text: "    if (largest < values[index]) {", steps: ["compare"] },
+      { number: 21, text: "      largest = values[index];", steps: ["update-largest"] },
+      { number: 22, text: "    }", steps: ["compare"] },
+      { number: 23, text: "  }", steps: ["compare"] },
+      { number: 25, text: "  return largest;", steps: ["return"] },
+      { number: 26, text: "}", steps: ["function"] }
     ]
   },
   stats: [
