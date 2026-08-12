@@ -42,20 +42,18 @@ export const reverseLinkedListLesson = {
     filename: "reverse-linked-list.mjs",
     sourcePath: "linked-lists/reverse-linked-list.mjs",
     lines: [
-      { number: 1, text: "export function reverseLinkedList(head) {", steps: ["function"] },
-      { number: 2, text: "  validateAcyclicLinkedList(head);", steps: ["initialize"] },
-      { number: 3, text: "  let current = head;", steps: ["initialize"] },
-      { number: 4, text: "  let previous = null;", steps: ["initialize"] },
-      { number: 5, text: "", steps: ["initialize"] },
-      { number: 6, text: "  while (current !== null) {", steps: ["check-current"] },
-      { number: 7, text: "    const next = current.next;", steps: ["save-next"] },
-      { number: 8, text: "    current.next = previous;", steps: ["reverse-link"] },
-      { number: 9, text: "    previous = current;", steps: ["advance-pointers"] },
-      { number: 10, text: "    current = next;", steps: ["advance-pointers"] },
-      { number: 11, text: "  }", steps: ["check-current"] },
-      { number: 12, text: "", steps: ["return"] },
-      { number: 13, text: "  return previous;", steps: ["return"] },
-      { number: 14, text: "}", steps: ["function"] }
+      { number: 3, text: "export function reverseLinkedList(head) {", steps: ["function"] },
+      { number: 4, text: "  validateAcyclicLinkedList(head);", steps: ["initialize"] },
+      { number: 5, text: "  let current = head;", steps: ["initialize"] },
+      { number: 6, text: "  let previous = null;", steps: ["initialize"] },
+      { number: 8, text: "  while (current !== null) {", steps: ["check-current"] },
+      { number: 9, text: "    const next = current.next;", steps: ["save-next"] },
+      { number: 10, text: "    current.next = previous;", steps: ["reverse-link"] },
+      { number: 11, text: "    previous = current;", steps: ["advance-pointers"] },
+      { number: 12, text: "    current = next;", steps: ["advance-pointers"] },
+      { number: 13, text: "  }", steps: ["check-current"] },
+      { number: 15, text: "  return previous;", steps: ["return"] },
+      { number: 16, text: "}", steps: ["function"] }
     ]
   },
   stats: [

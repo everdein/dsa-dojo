@@ -39,19 +39,16 @@ export const traverseLinkedListLesson = {
     filename: "traverse-linked-list.mjs",
     sourcePath: "linked-lists/traverse-linked-list.mjs",
     lines: [
-      { number: 1, text: "export function traverseLinkedList(head) {", steps: ["function"] },
-      { number: 2, text: "  validateLinkedListNode(head);", steps: ["initialize"] },
-      { number: 3, text: "  const values = [];", steps: ["initialize"] },
-      { number: 4, text: "  let current = head;", steps: ["initialize"] },
-      { number: 5, text: "", steps: ["initialize"] },
-      { number: 6, text: "  while (current !== null) {", steps: ["check-current"] },
-      { number: 7, text: "    values.push(current.value);", steps: ["record-value"] },
-      { number: 8, text: "    current = current.next;", steps: ["advance-current"] },
-      { number: 9, text: "    validateLinkedListNode(current);", steps: ["advance-current"] },
-      { number: 10, text: "  }", steps: ["check-current"] },
-      { number: 11, text: "", steps: ["return"] },
-      { number: 12, text: "  return values;", steps: ["return"] },
-      { number: 13, text: "}", steps: ["function"] }
+      { number: 3, text: "export function traverseLinkedList(head) {", steps: ["function"] },
+      { number: 4, text: "  validateAcyclicLinkedList(head);", steps: ["initialize"] },
+      { number: 5, text: "  const values = [];", steps: ["initialize"] },
+      { number: 6, text: "  let current = head;", steps: ["initialize"] },
+      { number: 8, text: "  while (current !== null) {", steps: ["check-current"] },
+      { number: 9, text: "    values.push(current.value);", steps: ["record-value"] },
+      { number: 10, text: "    current = current.next;", steps: ["advance-current"] },
+      { number: 11, text: "  }", steps: ["check-current"] },
+      { number: 13, text: "  return values;", steps: ["return"] },
+      { number: 14, text: "}", steps: ["function"] }
     ]
   },
   stats: [
