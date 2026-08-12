@@ -29,10 +29,10 @@ export const countSetBitsLesson = {
     sourcePath: "bit-manipulation/count-set-bits.mjs",
     lines: [
       { number: 3, text: "export function countSetBits(value) {", steps: ["initialize"] },
-      { number: 6, text: "  while (working !== 0) {", steps: ["loop"] },
-      { number: 7, text: "    working &= working - 1;", steps: ["subtract-one", "and-clear"] },
-      { number: 8, text: "    count += 1;", steps: ["increment"] },
-      { number: 10, text: "  return count;", steps: ["return"] }
+      { number: 7, text: "  while (working !== 0) {", steps: ["loop"] },
+      { number: 8, text: "    working &= working - 1;", steps: ["subtract-one", "and-clear"] },
+      { number: 9, text: "    count += 1;", steps: ["increment"] },
+      { number: 11, text: "  return count;", steps: ["return"] }
     ]
   },
   stats: [

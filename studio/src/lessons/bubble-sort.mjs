@@ -32,18 +32,18 @@ export const bubbleSortLesson = {
     sourcePath: "sorting/bubble-sort.mjs",
     lines: [
       { number: 15, text: "export function bubbleSort(values) {", steps: ["copy"] },
-      { number: 16, text: "  const sorted = [...values];", steps: ["copy"] },
-      { number: 17, text: "  for (let end = sorted.length - 1; end > 0; end -= 1) {", steps: ["outer-loop"] },
-      { number: 18, text: "    let swapped = false;", steps: ["outer-loop"] },
-      { number: 19, text: "    for (let index = 0; index < end; index += 1) {", steps: ["inner-loop"] },
-      { number: 20, text: "      if (sorted[index] <= sorted[index + 1]) continue;", steps: ["compare"] },
-      { number: 21, text: "      [sorted[index], sorted[index + 1]] = [sorted[index + 1], sorted[index]];", steps: ["swap"] },
-      { number: 22, text: "      swapped = true;", steps: ["swap"] },
-      { number: 23, text: "    }", steps: ["finish-pass"] },
-      { number: 24, text: "    if (!swapped) break;", steps: ["finish-pass"] },
-      { number: 25, text: "  }", steps: ["outer-loop"] },
-      { number: 26, text: "  return sorted;", steps: ["return"] },
-      { number: 27, text: "}", steps: ["return"] }
+      { number: 17, text: "  const sorted = [...values];", steps: ["copy"] },
+      { number: 18, text: "  for (let end = sorted.length - 1; end > 0; end -= 1) {", steps: ["outer-loop"] },
+      { number: 19, text: "    let swapped = false;", steps: ["outer-loop"] },
+      { number: 20, text: "    for (let index = 0; index < end; index += 1) {", steps: ["inner-loop"] },
+      { number: 21, text: "      if (sorted[index] <= sorted[index + 1]) continue;", steps: ["compare"] },
+      { number: 22, text: "      [sorted[index], sorted[index + 1]] = [sorted[index + 1], sorted[index]];", steps: ["swap"] },
+      { number: 23, text: "      swapped = true;", steps: ["swap"] },
+      { number: 10, text: "    }", steps: ["finish-pass"] },
+      { number: 25, text: "    if (!swapped) break;", steps: ["finish-pass"] },
+      { number: 6, text: "  }", steps: ["outer-loop"] },
+      { number: 27, text: "  return sorted;", steps: ["return"] },
+      { number: 13, text: "}", steps: ["return"] }
     ]
   },
   stats: [

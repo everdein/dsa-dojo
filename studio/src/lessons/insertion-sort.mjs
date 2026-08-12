@@ -32,18 +32,18 @@ export const insertionSortLesson = {
     sourcePath: "sorting/insertion-sort.mjs",
     lines: [
       { number: 15, text: "export function insertionSort(values) {", steps: ["copy"] },
-      { number: 16, text: "  const sorted = [...values];", steps: ["copy"] },
-      { number: 17, text: "  for (let index = 1; index < sorted.length; index += 1) {", steps: ["outer-loop"] },
-      { number: 18, text: "    const key = sorted[index];", steps: ["save-key"] },
-      { number: 19, text: "    let position = index - 1;", steps: ["save-key"] },
-      { number: 20, text: "    while (position >= 0 && sorted[position] > key) {", steps: ["while-compare"] },
-      { number: 21, text: "      sorted[position + 1] = sorted[position];", steps: ["shift-right"] },
-      { number: 22, text: "      position -= 1;", steps: ["shift-right"] },
-      { number: 23, text: "    }", steps: ["while-compare"] },
-      { number: 24, text: "    sorted[position + 1] = key;", steps: ["insert-key"] },
-      { number: 25, text: "  }", steps: ["outer-loop"] },
-      { number: 26, text: "  return sorted;", steps: ["return"] },
-      { number: 27, text: "}", steps: ["return"] }
+      { number: 17, text: "  const sorted = [...values];", steps: ["copy"] },
+      { number: 18, text: "  for (let index = 1; index < sorted.length; index += 1) {", steps: ["outer-loop"] },
+      { number: 19, text: "    const key = sorted[index];", steps: ["save-key"] },
+      { number: 20, text: "    let position = index - 1;", steps: ["save-key"] },
+      { number: 21, text: "    while (position >= 0 && sorted[position] > key) {", steps: ["while-compare"] },
+      { number: 22, text: "      sorted[position + 1] = sorted[position];", steps: ["shift-right"] },
+      { number: 23, text: "      position -= 1;", steps: ["shift-right"] },
+      { number: 10, text: "    }", steps: ["while-compare"] },
+      { number: 25, text: "    sorted[position + 1] = key;", steps: ["insert-key"] },
+      { number: 6, text: "  }", steps: ["outer-loop"] },
+      { number: 27, text: "  return sorted;", steps: ["return"] },
+      { number: 13, text: "}", steps: ["return"] }
     ]
   },
   stats: [

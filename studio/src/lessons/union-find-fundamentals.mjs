@@ -94,11 +94,11 @@ export const unionFindFundamentalsLesson = {
       { number: 157, text: "  this.size.set(root, this.size.get(root) + this.size.get(attachedRoot));", steps: ["attach-smaller"] },
       { number: 158, text: "  this.components -= 1;", steps: ["attach-smaller"] },
       { number: 188, text: "snapshot() {", steps: ["initialize", "return-state"] },
-      { number: 189, text: "  return {", steps: ["return-state"] },
+      { number: 255, text: "  return {", steps: ["return-state"] },
       { number: 190, text: "    parent: Object.fromEntries(this.nodes.map((node) => [node, this.parent.get(node)])),", steps: ["return-state"] },
       { number: 191, text: "    size: Object.fromEntries(this.nodes.map((node) => [node, this.size.get(node)])),", steps: ["return-state"] },
       { number: 192, text: "    components: this.components", steps: ["return-state"] },
-      { number: 193, text: "  };", steps: ["return-state"] }
+      { number: 258, text: "  };", steps: ["return-state"] }
     ]
   },
   stats: [

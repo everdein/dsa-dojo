@@ -35,8 +35,8 @@ export const singleNumberLesson = {
     filename: "single-number.mjs",
     sourcePath: "bit-manipulation/single-number.mjs",
     lines: [
-      { number: 26, text: "export function singleNumber(values) {", steps: ["initialize"] },
-      { number: 27, text: "  validateSingleNumberInput(values);", steps: ["initialize"] },
+      { number: 22, text: "export function singleNumber(values) {", steps: ["initialize"] },
+      { number: 23, text: "  validateSingleNumberInput(values);", steps: ["initialize"] },
       { number: 28, text: "  return values.reduce(", steps: ["loop"] },
       { number: 28, text: "    (accumulator, value) => accumulator ^ value,", steps: ["xor-accumulator"] },
       { number: 28, text: "    0", steps: ["return"] },

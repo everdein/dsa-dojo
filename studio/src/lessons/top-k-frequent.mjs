@@ -56,19 +56,19 @@ export const topKFrequentLesson = {
     filename: "top-k-frequent.mjs",
     sourcePath: "heaps-and-priority-queues/top-k-frequent.mjs",
     lines: [
-      { number: 24, text: "export function topKFrequent(values, k) {", steps: ["initialize-counts"] },
-      { number: 25, text: "  validateTopKFrequentInput(values, k);", steps: ["initialize-counts"] },
-      { number: 26, text: "  const entries = frequencyEntries(values);", steps: ["count-values"] },
-      { number: 27, text: "  const heap = [];", steps: ["offer-entry"] },
-      { number: 28, text: "  for (const entry of entries) {", steps: ["offer-entry"] },
-      { number: 29, text: "    heap.push(entry);", steps: ["offer-entry"] },
-      { number: 30, text: "    siftUp(heap, heap.length - 1);", steps: ["sift-up"] },
-      { number: 31, text: "    if (heap.length > k) removeMinimum(heap);", steps: ["trim-heap", "sift-down"] },
-      { number: 32, text: "  }", steps: ["offer-entry"] },
-      { number: 33, text: "  return [...heap]", steps: ["return"] },
+      { number: 22, text: "export function topKFrequent(values, k) {", steps: ["initialize-counts"] },
+      { number: 23, text: "  validateTopKFrequentInput(values, k);", steps: ["initialize-counts"] },
+      { number: 24, text: "  const entries = frequencyEntries(values);", steps: ["count-values"] },
+      { number: 25, text: "  const heap = [];", steps: ["offer-entry"] },
+      { number: 26, text: "  for (const entry of entries) {", steps: ["offer-entry"] },
+      { number: 27, text: "    heap.push(entry);", steps: ["offer-entry"] },
+      { number: 28, text: "    siftUp(heap, heap.length - 1);", steps: ["sift-up"] },
+      { number: 29, text: "    if (heap.length > k) removeMinimum(heap);", steps: ["trim-heap", "sift-down"] },
+      { number: 8, text: "  }", steps: ["offer-entry"] },
+      { number: 31, text: "  return [...heap]", steps: ["return"] },
       { number: 34, text: "    .sort((a, b) => b.count - a.count || a.firstIndex - b.firstIndex)", steps: ["return"] },
-      { number: 35, text: "    .map(({ value }) => value);", steps: ["return"] },
-      { number: 36, text: "}", steps: ["return"] }
+      { number: 33, text: "    .map(({ value }) => value);", steps: ["return"] },
+      { number: 20, text: "}", steps: ["return"] }
     ]
   },
   stats: [
