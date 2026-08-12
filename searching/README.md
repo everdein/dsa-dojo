@@ -22,3 +22,7 @@ function linearSearch(arr, target) {
 
 - Search in an unsorted array
 - Search in a sorted array with binary search
+
+## Interactive Lesson
+
+[Binary Search](binary-search.mjs) preserves a candidate-range invariant while halving sorted input.

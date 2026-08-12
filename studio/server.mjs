@@ -2,12 +2,15 @@ import { createServer } from "node:http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { curriculumModulePaths } from "./src/curriculum-manifest.mjs";
 
 const studioRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)));
 const projectRoot = path.resolve(studioRoot, "..");
-const arraysRoot = path.resolve(projectRoot, "arrays");
-const linkedListsRoot = path.resolve(projectRoot, "linked-lists");
 const srcRoot = path.resolve(studioRoot, "src");
+const curriculumModuleRoutes = new Map(curriculumModulePaths.map((modulePath) => [
+  `/${modulePath}`,
+  path.resolve(projectRoot, ...modulePath.split("/"))
+]));
 const defaultHost = "127.0.0.1";
 const defaultPort = 4173;
 const allowedMethods = new Set(["GET", "HEAD"]);
@@ -55,13 +58,7 @@ export function resolveRequest(requestUrl) {
   if (pathname.startsWith("/src/")) {
     return resolveModuleInside(srcRoot, pathname.slice("/src/".length));
   }
-  if (pathname.startsWith("/arrays/")) {
-    return resolveModuleInside(arraysRoot, pathname.slice("/arrays/".length));
-  }
-  if (pathname.startsWith("/linked-lists/")) {
-    return resolveModuleInside(linkedListsRoot, pathname.slice("/linked-lists/".length));
-  }
-  return null;
+  return curriculumModuleRoutes.get(pathname) ?? null;
 }
 
 function resolveModuleInside(root, relativePath) {

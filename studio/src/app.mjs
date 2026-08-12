@@ -1,6 +1,4 @@
 import { buildValidatedTrace } from "./lesson-contract.mjs";
-import { projectArrayView } from "./array-renderer.mjs";
-import { projectLinkedListView } from "./linked-list-renderer.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
@@ -10,6 +8,7 @@ import {
   setPipState
 } from "./pip.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
+import { projectLessonStepViews } from "./renderer-registry.mjs";
 import {
   controlValueToPlaybackDelay,
   playbackDelayToControlValue,
@@ -32,6 +31,8 @@ let prediction = createPredictionState(lesson.id);
 
 const elements = {
   headerStatus: document.querySelector("#header-status"),
+  catalogCount: document.querySelector("#catalog-count"),
+  catalogSummary: document.querySelector("#catalog-summary"),
   lessonList: document.querySelector("#lesson-list"),
   lessonSection: document.querySelector("#lesson"),
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
@@ -126,11 +127,14 @@ function renderCatalogState() {
 }
 
 function renderLessonChrome() {
-  elements.headerStatus.textContent = `${topicCount} DATA STRUCTURES · ${lessons.length} LESSONS`;
+  const topicLabel = topicCount === 1 ? "TOPIC" : "TOPICS";
+  elements.headerStatus.textContent = `${topicCount} ${topicLabel} · ${lessons.length} LESSONS`;
+  elements.catalogCount.textContent = `CURRICULUM · ${topicCount} ${topicLabel}`;
+  elements.catalogSummary.textContent = `${lessons.length} focused lessons build reusable reasoning patterns one state change at a time.`;
   elements.lessonEyebrow.textContent = `${lesson.topic.toUpperCase()} / LESSON ${String(lesson.order).padStart(2, "0")}`;
   elements.lessonTitle.textContent = lesson.title;
   elements.lessonSummary.textContent = lesson.summary;
-  elements.inputTitle.textContent = lesson.input.heading ?? (lesson.renderer === "array" ? "Your array" : "Your linked list");
+  elements.inputTitle.textContent = lesson.input.heading ?? "Your data";
   elements.help.textContent = lesson.input.help;
   elements.pipHeading.textContent = lesson.guide.heading;
   elements.codeTitle.textContent = lesson.code.title;
@@ -236,29 +240,83 @@ function render() {
 }
 
 function renderVisualization(step) {
-  if (lesson.renderer === "array") {
-    renderArray(step);
+  const panels = projectLessonStepViews(lesson, step);
+  if (panels.length === 1 && panels[0].legacy) {
+    renderProjectedView(panels[0], elements.visualizationRoot);
     return;
   }
-  if (lesson.renderer === "linked-list") {
-    renderLinkedList(step);
-    return;
+
+  const panelGrid = document.createElement("div");
+  panelGrid.className = "visualization-panels";
+  for (const panel of panels) {
+    const section = document.createElement("section");
+    section.className = "visualization-panel";
+    section.dataset.panelId = panel.id;
+    const heading = document.createElement("h3");
+    heading.className = "visualization-panel-heading";
+    heading.textContent = panel.heading;
+    const body = document.createElement("div");
+    body.className = "visualization-panel-body";
+    section.append(heading, body);
+    panelGrid.append(section);
+    renderProjectedView(panel, body);
   }
-  throw new Error(`Unsupported renderer: ${lesson.renderer}`);
+  elements.visualizationRoot.replaceChildren(panelGrid);
 }
 
-function renderArray(step) {
-  const cells = projectArrayView(step.view);
-  const { values } = step.view;
+function renderProjectedView(panel, root) {
+  if (panel.renderer === "array" || panel.renderer === "sequence") {
+    renderLinearCells({
+      cells: panel.model,
+      regionLabel: panel.renderer === "array"
+        ? "Scrollable array visualization"
+        : "Scrollable character sequence visualization",
+      root
+    });
+    return;
+  }
+  if (panel.renderer === "linked-list") {
+    renderLinkedListModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "lookup") {
+    renderLookupModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "grid") {
+    renderGridModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "stack") {
+    renderStackModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "queue") {
+    renderQueueModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "branching") {
+    renderBranchingModel(panel.model, root);
+    return;
+  }
+  if (panel.renderer === "graph") {
+    renderGraphModel(panel.model, root);
+    return;
+  }
+  throw new Error(`Unsupported renderer: ${panel.renderer}`);
+}
+
+function renderLinearCells({ cells, regionLabel, root }) {
   const scroll = document.createElement("div");
   scroll.className = "array-scroll";
   scroll.tabIndex = 0;
-  scroll.setAttribute("aria-label", "Scrollable array visualization");
+  scroll.setAttribute("role", "region");
+  scroll.setAttribute("aria-label", regionLabel);
   const cellList = document.createElement("div");
   cellList.className = "array-cells";
   cellList.setAttribute("role", "list");
-  cellList.style.setProperty("--array-count", values.length);
-  cellList.style.minWidth = `${Math.max(values.length * 66, 280)}px`;
+  cellList.style.setProperty("--array-count", cells.length);
+  cellList.style.minWidth = `${Math.max(cells.length * 66, 280)}px`;
   cellList.replaceChildren(...cells.map((model) => {
     const cell = document.createElement("div");
     cell.className = "array-cell";
@@ -294,6 +352,9 @@ function renderArray(step) {
       annotationList.className = "array-annotations";
       annotationList.setAttribute("aria-hidden", "true");
       for (const annotation of model.annotations) {
+        if (/^[a-z][a-z0-9-]*$/.test(annotation.label)) {
+          cell.classList.add(`array-cell--annotation-${annotation.label}`);
+        }
         const note = document.createElement("span");
         note.className = "array-annotation";
         note.textContent = annotation.label;
@@ -308,12 +369,11 @@ function renderArray(step) {
     return cell;
   }));
   scroll.append(cellList);
-  elements.visualizationRoot.replaceChildren(scroll);
+  root.replaceChildren(scroll);
   keepActiveItemsVisible(scroll, cellList.querySelectorAll(".array-cell--active"));
 }
 
-function renderLinkedList(step) {
-  const model = projectLinkedListView(step.view);
+function renderLinkedListModel(model, root) {
   const scroll = document.createElement("div");
   scroll.className = "linked-list-scroll";
   scroll.tabIndex = 0;
@@ -399,10 +459,313 @@ function renderLinkedList(step) {
     label.setAttribute("aria-label", pointer.ariaLabel);
     return label;
   }));
-  elements.visualizationRoot.replaceChildren(scroll, nullPointers);
+  root.replaceChildren(scroll, nullPointers);
   const activeItems = canvas.querySelectorAll(".linked-list-item--active");
   const fastItem = canvas.querySelector(".linked-list-pointer--fast")?.closest(".linked-list-item");
   keepActiveItemsVisible(scroll, activeItems, fastItem);
+}
+
+function renderLookupModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "lookup-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "region");
+  region.setAttribute("aria-label", model.description ?? "Lookup table visualization");
+
+  if (model.entries.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "lookup-empty";
+    empty.textContent = "No entries yet";
+    region.append(empty);
+    root.replaceChildren(region);
+    return;
+  }
+
+  const entries = document.createElement("div");
+  entries.className = "lookup-entries";
+  entries.setAttribute("role", "list");
+  for (const entry of model.entries) {
+    const item = document.createElement("div");
+    item.className = "lookup-entry";
+    item.setAttribute("role", "listitem");
+    item.setAttribute("aria-label", entry.description);
+    if (entry.isActive) item.classList.add("lookup-entry--active");
+    if (entry.isResult) item.classList.add("lookup-entry--result");
+    if (entry.state) item.classList.add(`lookup-entry--state-${entry.state}`);
+
+    const key = document.createElement("span");
+    key.className = "lookup-entry-key";
+    key.textContent = entry.key;
+    const separator = document.createElement("span");
+    separator.className = "lookup-entry-separator";
+    separator.setAttribute("aria-hidden", "true");
+    separator.textContent = "→";
+    const value = document.createElement("strong");
+    value.className = "lookup-entry-value";
+    value.textContent = entry.valueText;
+    item.append(key, separator, value);
+    if (entry.annotation) {
+      const annotation = document.createElement("small");
+      annotation.className = "lookup-entry-annotation";
+      annotation.textContent = entry.annotation;
+      item.append(annotation);
+    }
+    entries.append(item);
+  }
+  region.append(entries);
+  root.replaceChildren(region);
+}
+
+function renderGridModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "grid-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "grid");
+  region.setAttribute("aria-label", model.ariaLabel);
+  region.style.setProperty("--grid-columns", String(model.columnCount));
+
+  for (const rowModel of model.rows) {
+    const row = document.createElement("div");
+    row.className = "grid-row";
+    row.setAttribute("role", "row");
+    for (const cellModel of rowModel) {
+      const cell = document.createElement("div");
+      cell.className = "grid-cell";
+      cell.dataset.row = String(cellModel.row);
+      cell.dataset.column = String(cellModel.column);
+      cell.setAttribute("role", "gridcell");
+      cell.setAttribute("aria-label", cellModel.ariaLabel);
+      if (cellModel.active) cell.classList.add("grid-cell--active");
+      if (cellModel.changed) cell.classList.add("grid-cell--changed");
+      for (const marker of cellModel.markers) {
+        cell.classList.add(`grid-cell--marker-${marker.kind}`);
+      }
+      const value = document.createElement("strong");
+      value.textContent = cellModel.formattedValue;
+      cell.append(value);
+      if (cellModel.markers.length || cellModel.annotations.length) {
+        const details = document.createElement("small");
+        details.setAttribute("aria-hidden", "true");
+        details.textContent = [
+          ...cellModel.markers.map(({ label }) => label),
+          ...cellModel.annotations.map(({ label }) => label)
+        ].join(" · ");
+        cell.append(details);
+      }
+      row.append(cell);
+    }
+    region.append(row);
+  }
+  root.replaceChildren(region);
+}
+
+function renderStackModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "stack-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "region");
+  region.setAttribute("aria-label", model.ariaLabel);
+  if (model.items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "stack-empty";
+    empty.textContent = "Empty stack";
+    region.append(empty);
+    root.replaceChildren(region);
+    return;
+  }
+
+  const items = document.createElement("div");
+  items.className = "stack-items";
+  items.setAttribute("role", "list");
+  for (const itemModel of [...model.items].reverse()) {
+    const item = document.createElement("div");
+    item.className = "stack-item";
+    item.setAttribute("role", "listitem");
+    item.setAttribute("aria-label", itemModel.ariaLabel);
+    if (itemModel.isTop) item.classList.add("stack-item--top");
+    if (itemModel.isActive) item.classList.add("stack-item--active");
+    if (itemModel.isChanged) item.classList.add("stack-item--changed");
+    if (itemModel.state) item.classList.add(`stack-item--state-${itemModel.state}`);
+    const value = document.createElement("strong");
+    value.textContent = itemModel.valueText;
+    item.append(value);
+    if (itemModel.annotation) {
+      const note = document.createElement("small");
+      note.textContent = itemModel.annotation;
+      item.append(note);
+    }
+    items.append(item);
+  }
+  region.append(items);
+  root.replaceChildren(region);
+}
+
+function renderQueueModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "queue-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "region");
+  region.setAttribute("aria-label", model.ariaLabel);
+  if (model.items.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "queue-empty";
+    empty.textContent = "Empty queue";
+    region.append(empty);
+    root.replaceChildren(region);
+    return;
+  }
+  const items = document.createElement("div");
+  items.className = "queue-items";
+  items.setAttribute("role", "list");
+  for (const itemModel of model.items) {
+    const item = document.createElement("div");
+    item.className = "queue-item";
+    item.setAttribute("role", "listitem");
+    item.setAttribute("aria-label", itemModel.ariaLabel);
+    if (itemModel.isFront) item.classList.add("queue-item--front");
+    if (itemModel.isBack) item.classList.add("queue-item--back");
+    if (itemModel.isActive) item.classList.add("queue-item--active");
+    if (itemModel.isChanged) item.classList.add("queue-item--changed");
+    const endpoint = document.createElement("small");
+    endpoint.textContent = itemModel.isFront && itemModel.isBack
+      ? "FRONT · BACK"
+      : itemModel.isFront ? "FRONT" : itemModel.isBack ? "BACK" : "";
+    const value = document.createElement("strong");
+    value.textContent = itemModel.valueText;
+    item.append(endpoint, value);
+    if (itemModel.annotation) {
+      const note = document.createElement("span");
+      note.textContent = itemModel.annotation;
+      item.append(note);
+    }
+    items.append(item);
+  }
+  region.append(items);
+  root.replaceChildren(region);
+}
+
+function renderBranchingModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "branching-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "tree");
+  region.setAttribute("aria-label", model.ariaLabel);
+  if (model.nodes.length === 0) {
+    const empty = document.createElement("p");
+    empty.className = "branching-empty";
+    empty.textContent = "Empty tree";
+    region.append(empty);
+    root.replaceChildren(region);
+    return;
+  }
+
+  for (let levelIndex = 0; levelIndex < model.levels.length; levelIndex += 1) {
+    const level = document.createElement("div");
+    level.className = "branching-level";
+    level.dataset.level = String(levelIndex);
+    level.setAttribute("role", "group");
+    level.setAttribute("aria-label", `Tree level ${levelIndex}`);
+    for (const nodeModel of model.levels[levelIndex]) {
+      const node = document.createElement("div");
+      node.className = "branching-node";
+      node.setAttribute("role", "treeitem");
+      node.setAttribute("aria-label", nodeModel.ariaLabel);
+      node.setAttribute("aria-level", String(levelIndex + 1));
+      if (nodeModel.active) node.classList.add("branching-node--active");
+      if (nodeModel.changed) node.classList.add("branching-node--changed");
+      for (const state of nodeModel.states) node.classList.add(`branching-node--state-${state.kind}`);
+      const pointers = document.createElement("span");
+      pointers.className = "branching-node-pointers";
+      pointers.setAttribute("aria-hidden", "true");
+      pointers.textContent = nodeModel.pointers.map(({ label }) => label).join(" · ");
+      const value = document.createElement("strong");
+      value.textContent = nodeModel.valueText;
+      const details = document.createElement("small");
+      details.setAttribute("aria-hidden", "true");
+      details.textContent = [
+        ...nodeModel.states.map(({ label }) => label),
+        ...nodeModel.annotations.map(({ label }) => label)
+      ].join(" · ");
+      node.append(pointers, value, details);
+      level.append(node);
+    }
+    region.append(level);
+    if (levelIndex < model.levels.length - 1) {
+      const connector = document.createElement("div");
+      connector.className = "branching-level-connector";
+      connector.setAttribute("aria-hidden", "true");
+      region.append(connector);
+    }
+  }
+  if (model.nullPointers.length) {
+    const nulls = document.createElement("p");
+    nulls.className = "branching-null-pointers";
+    nulls.textContent = model.nullPointers.map(({ label }) => `${label} → null`).join(" · ");
+    region.append(nulls);
+  }
+  root.replaceChildren(region);
+}
+
+function renderGraphModel(model, root) {
+  const region = document.createElement("div");
+  region.className = "graph-view";
+  region.tabIndex = 0;
+  region.setAttribute("role", "img");
+  region.setAttribute("aria-label", model.ariaLabel);
+  const canvas = document.createElement("div");
+  canvas.className = "graph-canvas";
+
+  const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+  svg.classList.add("graph-edges");
+  svg.setAttribute("viewBox", "0 0 100 100");
+  svg.setAttribute("aria-hidden", "true");
+  for (const edgeModel of model.edges) {
+    const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+    line.setAttribute("x1", String(edgeModel.from.x));
+    line.setAttribute("y1", String(edgeModel.from.y));
+    line.setAttribute("x2", String(edgeModel.to.x));
+    line.setAttribute("y2", String(edgeModel.to.y));
+    line.classList.add("graph-edge");
+    if (edgeModel.active) line.classList.add("graph-edge--active");
+    if (model.directed) line.classList.add("graph-edge--directed");
+    svg.append(line);
+  }
+  canvas.append(svg);
+
+  for (const nodeModel of model.nodes) {
+    const node = document.createElement("div");
+    node.className = "graph-node";
+    node.style.setProperty("--graph-x", `${nodeModel.x}%`);
+    node.style.setProperty("--graph-y", `${nodeModel.y}%`);
+    node.setAttribute("aria-hidden", "true");
+    if (nodeModel.active) node.classList.add("graph-node--active");
+    if (nodeModel.changed) node.classList.add("graph-node--changed");
+    for (const state of nodeModel.states) node.classList.add(`graph-node--state-${state.kind}`);
+    const value = document.createElement("strong");
+    value.textContent = nodeModel.valueText;
+    const note = document.createElement("small");
+    note.textContent = [
+      ...nodeModel.states.map(({ label }) => label),
+      ...nodeModel.annotations.map(({ label }) => label)
+    ].join(" · ");
+    node.append(value, note);
+    canvas.append(node);
+  }
+  region.append(canvas);
+  const accessible = document.createElement("ul");
+  accessible.className = "sr-only";
+  for (const nodeModel of model.nodes) {
+    const item = document.createElement("li");
+    item.textContent = nodeModel.description;
+    accessible.append(item);
+  }
+  for (const edgeModel of model.edges) {
+    const item = document.createElement("li");
+    item.textContent = edgeModel.description;
+    accessible.append(item);
+  }
+  region.append(accessible);
+  root.replaceChildren(region);
 }
 
 function keepActiveItemsVisible(scroll, activeItems, preferredItem = null) {

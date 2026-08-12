@@ -1,6 +1,12 @@
-// Exercise: Find the pair that sums to a target.
-// Goal: Search for two numbers whose sum equals a given target value.
+// Runnable entry point for the shared Pair Sum implementation.
 
-function findPair(values, target) {
-  // Write your solution here
-}
+const values = [2, 7, 11, 15];
+const target = 9;
+
+(async () => {
+  const { findPairSum } = await import("./pair-sum.mjs");
+  console.log(findPairSum(values, target));
+})();
+
+// Time complexity: O(n) average
+// Space complexity: O(n)

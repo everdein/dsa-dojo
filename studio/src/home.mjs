@@ -1,6 +1,9 @@
 import { mountPips, observePipVisibility, setPipState } from "./pip.mjs";
 import { buildFindLargestTrace } from "./find-largest.mjs";
 import { buildSlidingWindowTrace } from "./sliding-window.mjs";
+import { curriculumLessons } from "./curriculum-manifest.mjs";
+
+renderCurriculum();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const header = document.querySelector("[data-home-header]");
@@ -13,6 +16,57 @@ const revealItems = [...document.querySelectorAll("[data-reveal]")];
 
 mountPips();
 observePipVisibility();
+
+function renderCurriculum() {
+  const container = document.querySelector("#home-lessons");
+  const count = document.querySelector("#home-curriculum-count");
+  const summary = document.querySelector("#home-curriculum-summary");
+  if (!container || !count || !summary) return;
+
+  const topicCount = new Set(curriculumLessons.map((lesson) => lesson.topic)).size;
+  count.textContent = `CURRICULUM · ${topicCount} ${topicCount === 1 ? "TOPIC" : "TOPICS"}`;
+  summary.textContent = `${curriculumLessons.length} focused lessons. One shared way to inspect state, test an idea, and explain the tradeoff.`;
+
+  const content = [];
+  let previousTopic = null;
+  for (const lesson of curriculumLessons) {
+    if (lesson.topic !== previousTopic) {
+      const group = document.createElement("p");
+      group.className = "home-lesson-group";
+      group.textContent = lesson.topic.toUpperCase();
+      content.push(group);
+      previousTopic = lesson.topic;
+    }
+
+    const card = document.createElement("a");
+    card.className = "home-lesson-card";
+    card.href = `./studio/#lesson=${encodeURIComponent(lesson.id)}`;
+    card.dataset.reveal = "";
+
+    const index = document.createElement("span");
+    index.className = "lesson-index";
+    index.textContent = String(lesson.order).padStart(2, "0");
+
+    const copy = document.createElement("span");
+    copy.className = "lesson-card-copy";
+    const pattern = document.createElement("small");
+    pattern.textContent = (lesson.patterns[0] ?? lesson.topic).replaceAll("-", " ");
+    const title = document.createElement("strong");
+    title.textContent = lesson.catalogLabel;
+    const description = document.createElement("span");
+    description.textContent = lesson.catalogDescription;
+    copy.append(pattern, title, description);
+
+    const arrow = document.createElement("span");
+    arrow.className = "lesson-card-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "↗";
+    card.append(index, copy, arrow);
+    content.push(card);
+  }
+
+  container.replaceChildren(...content);
+}
 
 if (!reducedMotion.matches && "IntersectionObserver" in window) {
   document.documentElement.classList.add("motion-ready");

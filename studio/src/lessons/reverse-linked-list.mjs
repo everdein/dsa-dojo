@@ -12,6 +12,8 @@ export const reverseLinkedListLesson = {
   id: "linked-lists/reverse-linked-list",
   order: 6,
   topic: "Linked Lists",
+  prerequisites: ["linked-lists/traverse-linked-list"],
+  patterns: ["pointer-rewiring"],
   catalogLabel: "Reverse List",
   catalogDescription: "Redirect each next link while protecting the unvisited suffix.",
   title: "Reverse a linked list",
@@ -38,6 +40,7 @@ export const reverseLinkedListLesson = {
   code: {
     title: "Protect, redirect, advance",
     filename: "reverse-linked-list.mjs",
+    sourcePath: "linked-lists/reverse-linked-list.mjs",
     lines: [
       { number: 1, text: "export function reverseLinkedList(head) {", steps: ["function"] },
       { number: 2, text: "  validateAcyclicLinkedList(head);", steps: ["initialize"] },

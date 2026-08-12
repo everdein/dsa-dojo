@@ -19,3 +19,10 @@ const heap = [3, 1, 2];
 - K largest elements
 - Merge K sorted lists
 - Top K frequent elements
+
+## Interactive Lessons
+
+- [Heap Insert and Remove](heap-operations.mjs) restores a min-heap with sift-up and sift-down.
+- [K Largest Elements](k-largest.mjs) keeps a bounded min-heap of candidates.
+- [Top K Frequent Elements](top-k-frequent.mjs) composes frequency counting with priority selection.
+- [Merge K Sorted Lists](merge-k-sorted-lists.mjs) advances one source from a deterministic heap frontier.

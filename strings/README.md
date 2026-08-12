@@ -34,3 +34,15 @@ console.log(word.toUpperCase());
 - Check for palindrome
 - Count characters
 - Find the first non-repeating character
+
+## Interactive Lessons
+
+1. **Valid Palindrome** keeps the original text visible while two pointers skip
+   punctuation and compare Unicode letters and numbers without case sensitivity.
+2. **First Non-Repeating Character** composes a normalized frequency pass with
+   an order-preserving selection pass.
+
+Run `npm run studio`, then choose Strings from the lesson catalog. The reusable
+algorithms live in [`valid-palindrome.mjs`](valid-palindrome.mjs) and
+[`first-non-repeating.mjs`](first-non-repeating.mjs); the matching `.js` files
+remain thin runnable examples.

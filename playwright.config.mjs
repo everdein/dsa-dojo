@@ -18,14 +18,6 @@ export default defineConfig({
     screenshot: "only-on-failure",
     trace: "retain-on-failure"
   },
-  webServer: {
-    command: "npm run preview",
-    url: deploymentBaseUrl,
-    env: { PORT: String(port) },
-    reuseExistingServer: false,
-    stdout: "pipe",
-    stderr: "pipe"
-  },
   projects: [
     {
       name: "desktop-chromium",

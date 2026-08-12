@@ -6,6 +6,8 @@ export const reverseArrayLesson = {
   id: "arrays/reverse-array",
   order: 3,
   topic: "Arrays",
+  prerequisites: ["arrays/find-largest"],
+  patterns: ["two-pointers"],
   catalogLabel: "Reverse Array",
   catalogDescription: "Swap mirrored values with two inward-moving pointers.",
   title: "Reverse an array in pairs",
@@ -30,6 +32,7 @@ export const reverseArrayLesson = {
   code: {
     title: "Swap mirrored pairs",
     filename: "reverse-array.mjs",
+    sourcePath: "arrays/reverse-array.mjs",
     lines: [
       { number: 1, text: "export function reverseArray(values) {", steps: ["function"] },
       { number: 2, text: "  validateReverseArrayInput(values);", steps: ["initialize"] },

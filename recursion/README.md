@@ -22,3 +22,8 @@ function factorial(n) {
 - Factorial
 - Fibonacci
 - Sum of a list
+
+## Interactive Lessons
+
+- [Factorial](factorial.mjs) shows base-case descent and return-value unwinding.
+- [Recursive Fibonacci](fibonacci.mjs) exposes overlapping subproblems and repeated call-tree work.

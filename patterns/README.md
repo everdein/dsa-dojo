@@ -18,3 +18,8 @@ Recognizing a pattern often leads to a faster and clearer solution.
 - Binary search
 - BFS
 - DFS
+
+## Interactive Lessons
+
+- [Prefix Sum Range Queries](prefix-sums/range-sum-queries.mjs) trades preprocessing for constant-time queries.
+- [Merge Intervals](intervals/merge-intervals.mjs) sorts once, then maintains one active closed interval.

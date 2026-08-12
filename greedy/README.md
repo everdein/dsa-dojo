@@ -19,5 +19,10 @@ function makeChange(coins, amount) {
 ## Practice Exercises
 
 - Activity selection
-- Minimum number of coins
+- Greedy coin change and a counterexample
 - Interval scheduling
+
+## Interactive Lessons
+
+- [Activity Selection](activity-selection.mjs) chooses the next finishing compatible interval.
+- [Greedy Coin Change](coin-change.mjs) compares local choices with an optimal dynamic-programming baseline.

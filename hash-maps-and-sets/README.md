@@ -28,3 +28,8 @@ console.log(counts.get('a'));
 - Count frequency of characters
 - Find duplicates
 - Group anagrams
+
+## Interactive Lessons
+
+- [Find Duplicates](find-duplicates.mjs) classifies first sightings and repeats with set membership.
+- [Group Anagrams](group-anagrams.mjs) derives canonical keys and preserves group discovery order.

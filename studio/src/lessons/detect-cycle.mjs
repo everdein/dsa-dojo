@@ -7,6 +7,8 @@ export const detectCycleLesson = {
   id: "linked-lists/detect-cycle",
   order: 7,
   topic: "Linked Lists",
+  prerequisites: ["linked-lists/traverse-linked-list"],
+  patterns: ["fast-and-slow-pointers"],
   catalogLabel: "Detect a Cycle",
   catalogDescription: "Let two pointer speeds prove whether the chain loops.",
   title: "Detect a cycle with two speeds",
@@ -59,6 +61,7 @@ export const detectCycleLesson = {
   code: {
     title: "Let fast catch slow",
     filename: "detect-cycle.mjs",
+    sourcePath: "linked-lists/detect-cycle.mjs",
     lines: [
       { number: 1, text: "export function hasCycle(head) {", steps: ["function"] },
       { number: 2, text: "  validateLinkedListNode(head);", steps: ["initialize-slow", "initialize-fast"] },

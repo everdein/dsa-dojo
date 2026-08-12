@@ -14,8 +14,10 @@ move through an execution one decision at a time, connect each state change to
 the code that caused it, and use Pip, an original guide companion, to reinforce
 the underlying pattern.
 
-**Current status:** A working introductory experience and seven interactive
-lessons spanning arrays and linked lists.
+**Current status:** The complete core curriculum is implemented: 55 interactive
+lessons across 20 topics. The next phase strengthens coverage, browser
+verification, and release-pipeline gating rather than adding another core
+lecture.
 
 ## Try It Locally
 
@@ -45,8 +47,8 @@ npm run check:release
 ```
 
 The Playwright install is a one-time setup on a new machine. `npm test` runs
-the fast Node.js unit and integration suite. The release check also builds the
-static site and runs Playwright browser and accessibility tests.
+hundreds of focused Node.js unit and integration tests. The release check also
+builds the static site and runs Playwright browser and accessibility tests.
 
 ## 60-Second Demo Path
 
@@ -55,17 +57,25 @@ static site and runs Playwright browser and accessibility tests.
 3. Open **Detect a Cycle** to see the same player drive a connected-node renderer.
 4. Finish either lesson to reveal replay, sample, and next-lesson actions.
 
-## Interactive Lessons
+## Interactive Curriculum
 
-| Category | Lesson | Core idea |
-| --- | --- | --- |
-| Arrays | Find Largest | Track scalar state during a linear scan |
-| Arrays | Sliding Window | Reuse a fixed-size range and running aggregate |
-| Arrays | Reverse Array | Swap mirrored values with converging pointers |
-| Arrays | Move Zeros | Compact values with coordinated read and write pointers |
-| Linked lists | Traverse a Linked List | Follow references until null |
-| Linked lists | Reverse a Linked List | Protect, redirect, and advance pointers |
-| Linked lists | Detect a Cycle | Use Floyd's fast-and-slow pointer technique |
+The 55-lesson sequence moves from linear state to composed structures and
+optimization techniques. The catalog and counts are derived from
+[`studio/src/curriculum-manifest.mjs`](studio/src/curriculum-manifest.mjs).
+
+| Topics | Lessons | Lecture range |
+| --- | ---: | --- |
+| Arrays | 7 | L01-L04, L09-L10, L15 |
+| Linked Lists, Strings, Matrices, Hash Maps and Sets | 9 | L05-L08, L11-L14, L16 |
+| Stacks, Queues, and Patterns | 7 | L17-L23 |
+| Searching, Trees, and Tries | 6 | L24-L29 |
+| Heaps and Priority Queues | 4 | L30-L33 |
+| Graphs and Disjoint Sets | 6 | L34-L39 |
+| Sorting, Recursion, and Backtracking | 8 | L40-L47 |
+| Greedy, Dynamic Programming, and Bit Manipulation | 8 | L48-L55 |
+
+See the [curriculum roadmap](docs/curriculum-roadmap.md) for every lecture,
+prerequisite, reasoning pattern, and module path.
 
 Each lesson supports editable input, Previous, Next, Play/Pause, Reset, playback
 speed, source highlighting, plain-language explanations, and time and space
@@ -83,8 +93,10 @@ Every lesson uses the same product model:
    sync.
 
 This separation makes execution reversible without mixing animation concerns
-into the algorithm itself. The current array and linked-list renderers share
-the same lesson contract, player, navigation, and accessibility model.
+into the algorithm itself. Nine renderer adapters—array, sequence, lookup,
+grid, stack, queue, branching, graph, and linked list—share the same lesson
+contract, player, navigation, and accessibility model. Lessons can use one
+renderer or synchronize several ordered panels.
 
 ```mermaid
 flowchart LR
@@ -92,8 +104,9 @@ flowchart LR
   T --> P["Player state"]
   T --> C["Source highlighting"]
   T --> G["Pip guidance"]
-  P --> R1["Array renderer"]
-  P --> R2["Linked-list renderer"]
+  P --> RR["Renderer registry"]
+  RR --> R1["Single view"]
+  RR --> R2["Composite views"]
   P --> L["Accessible announcements"]
 ```
 
@@ -125,6 +138,8 @@ project prove its interaction model before adopting additional infrastructure.
   custom input, keyboard controls, and document overflow.
 - [`docs/product-vision.md`](docs/product-vision.md) explains the learning
   model, experience principles, and roadmap.
+- [`docs/curriculum-roadmap.md`](docs/curriculum-roadmap.md) is the ordered,
+  lecture-by-lecture delivery plan for expanding the interactive studio.
 - [`docs/studio-architecture.md`](docs/studio-architecture.md) documents the
   implementation, lesson contract, verification standard, and extension
   workflow.
@@ -153,5 +168,8 @@ project subpath. `npm run preview` rebuilds and serves that release locally;
 the Playwright suite exercises it at the same `/dsa-dojo/` subpath used by
 GitHub Pages.
 
-Pushes to `main` deploy the verified `dist/` artifact through
-`.github/workflows/pages.yml` to the live URL above.
+Pushes to `main` run CI across Node.js 22 and 24, including unit/integration
+tests, coverage collection, a static build, and a separate Playwright browser
+smoke job. The Pages workflow independently runs the fast syntax, unit, and
+build checks before deploying `dist/`; making browser verification a direct
+deployment gate is part of the post-curriculum hardening phase.

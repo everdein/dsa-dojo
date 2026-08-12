@@ -30,3 +30,8 @@ console.log(queue.shift());
 - Implement a queue
 - Sliding window maximum
 - Binary tree level order traversal
+
+## Interactive Lessons
+
+- [Queue Operations](queue-operations.mjs) makes FIFO endpoints explicit.
+- [Sliding Window Maximum](sliding-window-maximum.mjs) maintains a decreasing deque of candidates.

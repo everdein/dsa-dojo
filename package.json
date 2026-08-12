@@ -14,7 +14,7 @@
     "preview": "node scripts/preview-static.mjs",
     "studio": "node studio/server.mjs",
     "test": "npm run test:unit",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/run-e2e.mjs",
     "test:unit": "node --test"
   },
   "repository": {
