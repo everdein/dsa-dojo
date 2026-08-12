@@ -34,13 +34,13 @@ export const climbingStairsLesson = {
     filename: "climbing-stairs.mjs",
     sourcePath: "dynamic-programming/climbing-stairs.mjs",
     lines: [
-      { number: 10, text: "export function climbStairs(steps) {", steps: ["initialize"] },
-      { number: 12, text: "  if (steps <= 1) return 1;", steps: ["base-zero", "base-one"] },
-      { number: 13, text: "  let twoBack = 1;", steps: ["initialize"] },
-      { number: 14, text: "  let oneBack = 1;", steps: ["base-one"] },
-      { number: 15, text: "  for (let current = 2; current <= steps; current += 1) {", steps: ["loop"] },
-      { number: 16, text: "    [twoBack, oneBack] = [oneBack, twoBack + oneBack];", steps: ["add-dependencies", "compress-state"] },
-      { number: 18, text: "  return oneBack;", steps: ["return"] }
+      { number: 17, text: "export function climbStairs(steps) {", steps: ["initialize"] },
+      { number: 19, text: "  if (steps <= 1) return 1;", steps: ["base-zero", "base-one"] },
+      { number: 20, text: "  let twoBack = 1;", steps: ["initialize"] },
+      { number: 21, text: "  let oneBack = 1;", steps: ["base-one"] },
+      { number: 22, text: "  for (let current = 2; current <= steps; current += 1) {", steps: ["loop"] },
+      { number: 23, text: "    [twoBack, oneBack] = [oneBack, twoBack + oneBack];", steps: ["add-dependencies", "compress-state"] },
+      { number: 25, text: "  return oneBack;", steps: ["return"] }
     ]
   },
   stats: [

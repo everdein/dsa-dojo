@@ -39,17 +39,17 @@ export const traverseMatrixLesson = {
     filename: "traverse-matrix.mjs",
     sourcePath: "matrices/traverse-matrix.mjs",
     lines: [
-      { number: 1, text: "export function traverseMatrix(matrix) {", steps: ["function"] },
-      { number: 2, text: "  validateMatrixInput(matrix);", steps: ["initialize"] },
+      { number: 40, text: "export function traverseMatrix(matrix) {", steps: ["function"] },
+      { number: 41, text: "  validateMatrixInput(matrix);", steps: ["initialize"] },
       { number: 3, text: "", steps: ["initialize"] },
-      { number: 4, text: "  const values = [];", steps: ["initialize"] },
-      { number: 5, text: "  for (let row = 0; row < matrix.length; row += 1) {", steps: ["iterate-row"] },
-      { number: 6, text: "    for (let column = 0; column < matrix[row].length; column += 1) {", steps: ["iterate-column"] },
-      { number: 7, text: "      values.push(matrix[row][column]);", steps: ["record-value"] },
-      { number: 8, text: "    }", steps: ["iterate-column"] },
-      { number: 9, text: "  }", steps: ["iterate-row"] },
-      { number: 10, text: "  return values;", steps: ["return"] },
-      { number: 11, text: "}", steps: ["function"] }
+      { number: 43, text: "  const values = [];", steps: ["initialize"] },
+      { number: 13, text: "  for (let row = 0; row < matrix.length; row += 1) {", steps: ["iterate-row"] },
+      { number: 45, text: "    for (let column = 0; column < matrix[row].length; column += 1) {", steps: ["iterate-column"] },
+      { number: 46, text: "      values.push(matrix[row][column]);", steps: ["record-value"] },
+      { number: 16, text: "    }", steps: ["iterate-column"] },
+      { number: 7, text: "  }", steps: ["iterate-row"] },
+      { number: 49, text: "  return values;", steps: ["return"] },
+      { number: 38, text: "}", steps: ["function"] }
     ]
   },
   stats: [

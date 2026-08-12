@@ -34,16 +34,16 @@ export const mergeSortLesson = {
     filename: "merge-sort.mjs",
     sourcePath: "sorting/merge-sort.mjs",
     lines: [
-      { number: 26, text: "export function mergeSort(values) {", steps: ["check-base"] },
-      { number: 28, text: "  if (values.length === 1) return [...values];", steps: ["return-singleton"] },
-      { number: 29, text: "  const middle = Math.floor(values.length / 2);", steps: ["split"] },
-      { number: 30, text: "  return mergeSortedValues(", steps: ["copy-halves", "return-merged"] },
-      { number: 31, text: "    mergeSort(values.slice(0, middle)),", steps: ["recurse-left"] },
-      { number: 32, text: "    mergeSort(values.slice(middle))", steps: ["recurse-right"] },
-      { number: 33, text: "  );", steps: ["return-merged"] },
-      { number: 16, text: "  while (leftIndex < left.length && rightIndex < right.length) {", steps: ["compare-fronts"] },
-      { number: 17, text: "    if (left[leftIndex] <= right[rightIndex]) merged.push(left[leftIndex++]);", steps: ["write-left"] },
-      { number: 18, text: "    else merged.push(right[rightIndex++]);", steps: ["write-right"] }
+      { number: 27, text: "export function mergeSort(values) {", steps: ["check-base"] },
+      { number: 29, text: "  if (values.length === 1) return [...values];", steps: ["return-singleton"] },
+      { number: 30, text: "  const middle = Math.floor(values.length / 2);", steps: ["split"] },
+      { number: 31, text: "  return mergeSortedValues(", steps: ["copy-halves", "return-merged"] },
+      { number: 32, text: "    mergeSort(values.slice(0, middle)),", steps: ["recurse-left"] },
+      { number: 33, text: "    mergeSort(values.slice(middle))", steps: ["recurse-right"] },
+      { number: 34, text: "  );", steps: ["return-merged"] },
+      { number: 19, text: "  while (leftIndex < left.length && rightIndex < right.length) {", steps: ["compare-fronts"] },
+      { number: 20, text: "    if (left[leftIndex] <= right[rightIndex]) merged.push(left[leftIndex++]);", steps: ["write-left"] },
+      { number: 21, text: "    else merged.push(right[rightIndex++]);", steps: ["write-right"] }
     ]
   },
   stats: [

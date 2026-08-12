@@ -37,15 +37,15 @@ export const nQueensLesson = {
     filename: "n-queens.mjs",
     sourcePath: "backtracking/n-queens.mjs",
     lines: [
-      { number: 17, text: "  const search = (row) => {", steps: ["initialize"] },
+      { number: 18, text: "  const search = (row) => {", steps: ["initialize"] },
       { number: 18, text: "    if (row === size) { solutions.push([...placement]); return; }", steps: ["record"] },
-      { number: 22, text: "    for (let column = 0; column < size; column += 1) {", steps: ["try-column"] },
+      { number: 23, text: "    for (let column = 0; column < size; column += 1) {", steps: ["try-column"] },
       { number: 25, text: "      if (columns.has(column) || falling.has(row - column)", steps: ["check-safe"] },
       { number: 26, text: "        || rising.has(row + column)) continue;", steps: ["skip-unsafe"] },
       { number: 27, text: "      placement.push(column);", steps: ["choose"] },
       { number: 31, text: "      search(row + 1);", steps: ["recurse"] },
       { number: 32, text: "      placement.pop();", steps: ["undo"] },
-      { number: 38, text: "  return solutions;", steps: ["return"] }
+      { number: 39, text: "  return solutions;", steps: ["return"] }
     ]
   },
   stats: [

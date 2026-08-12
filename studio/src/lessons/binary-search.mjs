@@ -55,18 +55,18 @@ export const binarySearchLesson = {
     filename: "binary-search.mjs",
     sourcePath: "searching/binary-search.mjs",
     lines: [
-      { number: 18, text: "export function binarySearch(values, target) {", steps: ["function"] },
-      { number: 19, text: "  validateBinarySearchInput(values, target);", steps: ["initialize"] },
-      { number: 20, text: "  let left = 0;", steps: ["initialize"] },
-      { number: 21, text: "  let right = values.length - 1;", steps: ["initialize"] },
-      { number: 22, text: "  while (left <= right) {", steps: ["loop"] },
-      { number: 23, text: "    const middle = left + Math.floor((right - left) / 2);", steps: ["middle"] },
-      { number: 24, text: "    if (values[middle] === target) return middle;", steps: ["compare", "return-found"] },
-      { number: 25, text: "    if (values[middle] < target) left = middle + 1;", steps: ["compare", "move-left"] },
-      { number: 26, text: "    else right = middle - 1;", steps: ["compare", "move-right"] },
-      { number: 27, text: "  }", steps: ["loop"] },
-      { number: 28, text: "  return -1;", steps: ["return-missing"] },
-      { number: 29, text: "}", steps: ["function"] }
+      { number: 19, text: "export function binarySearch(values, target) {", steps: ["function"] },
+      { number: 20, text: "  validateBinarySearchInput(values, target);", steps: ["initialize"] },
+      { number: 21, text: "  let left = 0;", steps: ["initialize"] },
+      { number: 22, text: "  let right = values.length - 1;", steps: ["initialize"] },
+      { number: 23, text: "  while (left <= right) {", steps: ["loop"] },
+      { number: 24, text: "    const middle = left + Math.floor((right - left) / 2);", steps: ["middle"] },
+      { number: 25, text: "    if (values[middle] === target) return middle;", steps: ["compare", "return-found"] },
+      { number: 26, text: "    if (values[middle] < target) left = middle + 1;", steps: ["compare", "move-left"] },
+      { number: 27, text: "    else right = middle - 1;", steps: ["compare", "move-right"] },
+      { number: 6, text: "  }", steps: ["loop"] },
+      { number: 29, text: "  return -1;", steps: ["return-missing"] },
+      { number: 17, text: "}", steps: ["function"] }
     ]
   },
   stats: [

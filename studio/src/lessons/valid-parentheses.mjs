@@ -45,19 +45,19 @@ export const validParenthesesLesson = {
     filename: "valid-parentheses.mjs",
     sourcePath: "stacks/valid-parentheses.mjs",
     lines: [
-      { number: 25, text: "export function isValidParentheses(text) {", steps: ["function"] },
-      { number: 26, text: "  validateParenthesesInput(text);", steps: ["initialize"] },
-      { number: 27, text: "  const stack = [];", steps: ["initialize"] },
-      { number: 28, text: "  for (const character of Array.from(text)) {", steps: ["scan"] },
-      { number: 29, text: "    if (/^\\s$/u.test(character)) continue;", steps: ["skip-space"] },
-      { number: 30, text: "    if (!matchingOpener.has(character)) {", steps: ["scan"] },
-      { number: 31, text: "      stack.push(character);", steps: ["push-opener"] },
-      { number: 32, text: "      continue;", steps: ["push-opener"] },
-      { number: 33, text: "    }", steps: ["check-closer"] },
-      { number: 34, text: "    if (stack.pop() !== matchingOpener.get(character)) return false;", steps: ["check-closer", "pop-match", "return-false"] },
-      { number: 35, text: "  }", steps: ["scan"] },
-      { number: 36, text: "  return stack.length === 0;", steps: ["return-empty", "return-false"] },
-      { number: 37, text: "}", steps: ["function"] }
+      { number: 23, text: "export function isValidParentheses(text) {", steps: ["function"] },
+      { number: 24, text: "  validateParenthesesInput(text);", steps: ["initialize"] },
+      { number: 25, text: "  const stack = [];", steps: ["initialize"] },
+      { number: 26, text: "  for (const character of Array.from(text)) {", steps: ["scan"] },
+      { number: 27, text: "    if (/^\s$/u.test(character)) continue;", steps: ["skip-space"] },
+      { number: 28, text: "    if (!matchingOpener.has(character)) {", steps: ["scan"] },
+      { number: 29, text: "      stack.push(character);", steps: ["push-opener"] },
+      { number: 30, text: "      continue;", steps: ["push-opener"] },
+      { number: 17, text: "    }", steps: ["check-closer"] },
+      { number: 32, text: "    if (stack.pop() !== matchingOpener.get(character)) return false;", steps: ["check-closer", "pop-match", "return-false"] },
+      { number: 10, text: "  }", steps: ["scan"] },
+      { number: 34, text: "  return stack.length === 0;", steps: ["return-empty", "return-false"] },
+      { number: 21, text: "}", steps: ["function"] }
     ]
   },
   stats: [

@@ -60,17 +60,17 @@ export const activitySelectionLesson = {
     filename: "activity-selection.mjs",
     sourcePath: "greedy/activity-selection.mjs",
     lines: [
-      { number: 71, text: "export function selectActivities(intervals) {", steps: ["function"] },
-      { number: 72, text: "  const sorted = sortActivitiesByFinish(intervals);", steps: ["sort-by-finish"] },
-      { number: 73, text: "  const selected = [];", steps: ["sort-by-finish"] },
-      { number: 74, text: "  let lastFinish = null;", steps: ["sort-by-finish"] },
-      { number: 76, text: "  for (const activity of sorted) {", steps: ["scan"] },
-      { number: 77, text: "    if (lastFinish === null || activity.start >= lastFinish) {", steps: ["check-compatible", "reject"] },
-      { number: 78, text: "      selected.push({ ...activity });", steps: ["accept"] },
-      { number: 79, text: "      lastFinish = activity.end;", steps: ["advance-finish"] },
-      { number: 80, text: "    }", steps: ["check-compatible"] },
-      { number: 82, text: "  return selected;", steps: ["return-selected"] },
-      { number: 83, text: "}", steps: ["function"] }
+      { number: 70, text: "export function selectActivities(intervals) {", steps: ["function"] },
+      { number: 71, text: "  const sorted = sortActivitiesByFinish(intervals);", steps: ["sort-by-finish"] },
+      { number: 72, text: "  const selected = [];", steps: ["sort-by-finish"] },
+      { number: 73, text: "  let lastFinish = null;", steps: ["sort-by-finish"] },
+      { number: 75, text: "  for (const activity of sorted) {", steps: ["scan"] },
+      { number: 76, text: "    if (lastFinish === null || activity.start >= lastFinish) {", steps: ["check-compatible", "reject"] },
+      { number: 77, text: "      selected.push({ ...activity });", steps: ["accept"] },
+      { number: 78, text: "      lastFinish = activity.end;", steps: ["advance-finish"] },
+      { number: 38, text: "    }", steps: ["check-compatible"] },
+      { number: 81, text: "  return selected;", steps: ["return-selected"] },
+      { number: 11, text: "}", steps: ["function"] }
     ]
   },
   stats: [

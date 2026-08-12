@@ -42,8 +42,8 @@ export const greedyCoinChangeLesson = {
     sourcePath: "greedy/coin-change.mjs",
     lines: [
       { number: 25, text: "  const ordered = [...coins].sort((a, b) => b - a);", steps: ["sort-coins", "initialize"] },
-      { number: 28, text: "  for (const coin of ordered) {", steps: ["greedy-loop"] },
-      { number: 29, text: "    while (coin <= remaining) {", steps: ["greedy-loop"] },
+      { number: 27, text: "  for (const coin of ordered) {", steps: ["greedy-loop"] },
+      { number: 28, text: "    while (coin <= remaining) {", steps: ["greedy-loop"] },
       { number: 30, text: "      selected.push(coin); remaining -= coin;", steps: ["take-largest"] },
       { number: 42, text: "  for (let subtotal = 1; subtotal <= amount; subtotal += 1) {", steps: ["optimal-loop"] },
       { number: 45, text: "      const candidateCount = counts[subtotal - coin] + 1;", steps: ["extend-best"] },
