@@ -56,7 +56,11 @@ studio/
   index.html                Semantic lesson-studio shell
   server.mjs                Manifest-aware local static-file server
   src/
-    app.mjs                 Browser adapter and event wiring
+    app.mjs                 Composition root and feature event wiring
+    browser-runtime.mjs     Storage boundary and single playback clock
+    lesson-session.mjs      Lesson restore, fallback, and persistence controller
+    share-controller.mjs    URL/native-share browser controller
+    visualization-view.mjs  Renderer model to semantic DOM presentation
     curriculum-map.mjs      Pure prerequisite graph and selection projection
     curriculum-manifest.mjs Authoritative catalog and runtime-module data
     renderer-registry.mjs   Adapters and composite-panel resolution
@@ -100,10 +104,12 @@ lesson registry
   -> semantic DOM, code highlighting, Pip narration, and live announcements
 ```
 
-The browser controller does not contain algorithm-specific branches. It reads
-the selected lesson definition and renders its inputs, source mapping,
-complexity, statistics, guide content, trace, and reflection. Visual state is
-projected through the renderer registry. A lesson declares either one legacy
+The composition root does not contain algorithm-specific branches. It reads the
+selected lesson definition and coordinates inputs, source mapping, complexity,
+statistics, guide content, trace, and reflection. Lesson-session, sharing,
+playback timing, and renderer-to-DOM presentation live behind focused browser
+modules with injected browser boundaries. Visual state is projected through
+the renderer registry. A lesson declares either one legacy
 `renderer` or an ordered `views` panel list; composite trace steps provide one
 keyed snapshot for every declared panel. The built-in adapters are `array`,
 `sequence`, `lookup`, `grid`, `stack`, `queue`, `branching`, `graph`, and
@@ -484,6 +490,6 @@ The 55-lesson core curriculum now spans 20 topics and nine renderer families.
 Every lesson shares the validated registry, deterministic traces, player, code
 mapping, Pip guidance, and accessibility model. The next checkpoint is the
 post-curriculum stabilization phase: consolidate fixtures, fill targeted
-coverage gaps, broaden per-renderer browser assertions, and reduce central
-browser-controller and runtime pressure. That work is tracked in
+coverage gaps, broaden per-renderer browser assertions, and reduce runtime
+validation and loading pressure. That work is tracked in
 [`curriculum-roadmap.md`](curriculum-roadmap.md).
