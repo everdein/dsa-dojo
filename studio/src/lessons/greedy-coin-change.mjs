@@ -41,13 +41,17 @@ export const greedyCoinChangeLesson = {
     filename: "coin-change.mjs",
     sourcePath: "greedy/coin-change.mjs",
     lines: [
-      { number: 25, text: "  const ordered = [...coins].sort((a, b) => b - a);", steps: ["sort-coins", "initialize"] },
+      { number: 24, text: "  const ordered = [...coins].sort((left, right) => right - left);", steps: ["sort-coins", "initialize"] },
       { number: 27, text: "  for (const coin of ordered) {", steps: ["greedy-loop"] },
       { number: 28, text: "    while (coin <= remaining) {", steps: ["greedy-loop"] },
-      { number: 30, text: "      selected.push(coin); remaining -= coin;", steps: ["take-largest"] },
+      { number: 29, text: "      selected.push(coin);", steps: ["take-largest"] },
+      { number: 30, text: "      remaining -= coin;", steps: ["take-largest"] },
       { number: 42, text: "  for (let subtotal = 1; subtotal <= amount; subtotal += 1) {", steps: ["optimal-loop"] },
       { number: 45, text: "      const candidateCount = counts[subtotal - coin] + 1;", steps: ["extend-best"] },
-      { number: 78, text: "  return { greedy, optimal, outcome, greedyIsOptimal };", steps: ["compare-results"] }
+      { number: 75, text: "  return {", steps: ["compare-results"] },
+      { number: 78, text: "    outcome,", steps: ["compare-results"] },
+      { number: 79, text: "    greedyIsOptimal: outcome === \"unreachable\" ? null : outcome === \"optimal\"", steps: ["compare-results"] },
+      { number: 80, text: "  };", steps: ["compare-results"] }
     ]
   },
   stats: [

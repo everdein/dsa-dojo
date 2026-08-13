@@ -37,10 +37,8 @@ export const singleNumberLesson = {
     lines: [
       { number: 22, text: "export function singleNumber(values) {", steps: ["initialize"] },
       { number: 23, text: "  validateSingleNumberInput(values);", steps: ["initialize"] },
-      { number: 28, text: "  return values.reduce(", steps: ["loop"] },
-      { number: 28, text: "    (accumulator, value) => accumulator ^ value,", steps: ["xor-accumulator"] },
-      { number: 28, text: "    0", steps: ["return"] },
-      { number: 28, text: "  );", steps: ["return"] }
+      { number: 24, text: "  return values.reduce((accumulator, value) => accumulator ^ value, 0);", steps: ["loop", "xor-accumulator", "return"] },
+      { number: 25, text: "}", steps: ["return"] }
     ]
   },
   stats: [

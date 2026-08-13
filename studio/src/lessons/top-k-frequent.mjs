@@ -64,11 +64,11 @@ export const topKFrequentLesson = {
       { number: 27, text: "    heap.push(entry);", steps: ["offer-entry"] },
       { number: 28, text: "    siftUp(heap, heap.length - 1);", steps: ["sift-up"] },
       { number: 29, text: "    if (heap.length > k) removeMinimum(heap);", steps: ["trim-heap", "sift-down"] },
-      { number: 8, text: "  }", steps: ["offer-entry"] },
+      { number: 30, text: "  }", steps: ["offer-entry"] },
       { number: 31, text: "  return [...heap]", steps: ["return"] },
-      { number: 34, text: "    .sort((a, b) => b.count - a.count || a.firstIndex - b.firstIndex)", steps: ["return"] },
+      { number: 32, text: "    .sort((left, right) => right.count - left.count || left.firstIndex - right.firstIndex)", steps: ["return"] },
       { number: 33, text: "    .map(({ value }) => value);", steps: ["return"] },
-      { number: 20, text: "}", steps: ["return"] }
+      { number: 34, text: "}", steps: ["return"] }
     ]
   },
   stats: [
