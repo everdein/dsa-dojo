@@ -319,6 +319,43 @@ test("studio catalog groups every lesson by topic while preserving lesson number
   }
 });
 
+test("catalog search and filters compose, persist in the URL, and recover from empty results", async ({ page }) => {
+  await page.goto("./studio/#catalog");
+  const search = page.locator("#catalog-search");
+  await search.fill("L24");
+  await expect(page.locator(".lesson-card:visible")).toHaveCount(1);
+  await expect(page.locator(".lesson-card:visible")).toContainText("Binary Search");
+  await expect(page.locator("#catalog-results-summary")).toHaveText("Showing 1 of 55 lessons.");
+  await expect(page).toHaveURL(/q=L24/);
+
+  await page.locator("#catalog-progress-filter").selectOption("complete");
+  await expect(page.locator("#catalog-empty")).toBeVisible();
+  await expect(page.locator(".lesson-card:visible")).toHaveCount(0);
+  await page.reload();
+  await expect(search).toHaveValue("L24");
+  await expect(page.locator("#catalog-progress-filter")).toHaveValue("complete");
+  await expect(page.locator("#catalog-empty")).toBeVisible();
+
+  await page.locator("#catalog-empty-clear").click();
+  await expect(page.locator(".lesson-card:visible")).toHaveCount(55);
+  await expect(page.locator("#catalog-results-summary")).toHaveText("Showing all 55 lessons.");
+  await expect(page).not.toHaveURL(/q=|progress=/);
+
+  await page.goto("./");
+  const homeSearch = page.locator("#home-catalog-search");
+  await homeSearch.fill("shortest path");
+  await page.locator("#home-topic-filter").selectOption("Graphs");
+  await expect(page.locator(".home-lesson-card:visible")).toHaveCount(1);
+  await expect(page.locator(".home-lesson-card:visible")).toContainText("Unweighted Shortest Path");
+  await expect(page.locator("#home-filter-summary")).toHaveText("Showing 1 of 55 lessons.");
+  await expect(page.locator("#home-topic-nav li:visible")).toHaveCount(1);
+
+  await page.locator("#home-pattern-filter").selectOption("depth-first-search");
+  await expect(page.locator("#home-filter-empty")).toBeVisible();
+  await page.locator("#home-empty-clear").click();
+  await expect(page.locator(".home-lesson-card:visible")).toHaveCount(55);
+});
+
 test("the sequence renderer supports custom text and accessible stepping", async ({ page }) => {
   const errors = collectPageErrors(page);
   await page.emulateMedia({ reducedMotion: "reduce" });

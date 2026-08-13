@@ -3,6 +3,13 @@ import { groupCurriculumByTopic } from "./home-catalog.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
+  catalogFilterOptions,
+  catalogFilterStateFromUrl,
+  catalogFilterUrl,
+  filterCatalogLessons,
+  hasActiveCatalogFilters
+} from "./catalog-filters.mjs";
+import {
   clearLearningProgress,
   learningProgressSummary,
   lessonProgressState,
@@ -30,6 +37,7 @@ const lessonIds = lessons.map((item) => item.id);
 const topicCount = new Set(lessons.map((item) => item.topic)).size;
 const progressStorage = getBrowserStorage();
 let progress = readLearningProgress(progressStorage, lessons);
+let catalogFilters = catalogFilterStateFromUrl(window.location.href);
 const initialLessonIdFromHash = readLessonIdFromHash(window.location.hash, lessonIds);
 const initialLessonId = initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
@@ -41,6 +49,14 @@ const elements = {
   headerStatus: document.querySelector("#header-status"),
   catalogCount: document.querySelector("#catalog-count"),
   catalogSummary: document.querySelector("#catalog-summary"),
+  catalogSearch: document.querySelector("#catalog-search"),
+  catalogTopicFilter: document.querySelector("#catalog-topic-filter"),
+  catalogPatternFilter: document.querySelector("#catalog-pattern-filter"),
+  catalogProgressFilter: document.querySelector("#catalog-progress-filter"),
+  clearCatalogFilters: document.querySelector("#clear-catalog-filters"),
+  catalogResultsSummary: document.querySelector("#catalog-results-summary"),
+  catalogEmpty: document.querySelector("#catalog-empty"),
+  catalogEmptyClear: document.querySelector("#catalog-empty-clear"),
   progressSummary: document.querySelector("#progress-summary"),
   progressMeter: document.querySelector("#progress-meter"),
   progressMeterFill: document.querySelector("#progress-meter-fill"),
@@ -108,6 +124,7 @@ const elements = {
 };
 
 function initializeCatalog() {
+  initializeCatalogFilters();
   const groups = groupCurriculumByTopic(lessons);
   elements.lessonList.replaceChildren(...groups.map((group, groupIndex) => {
     const topicId = `studio-topic-${String(groupIndex + 1).padStart(2, "0")}`;
@@ -171,6 +188,11 @@ function createLessonButton(item) {
 
 function renderCatalogState() {
   const summary = learningProgressSummary(progress, lessons);
+  const visibleIds = new Set(filterCatalogLessons(
+    lessons,
+    catalogFilters,
+    (id) => lessonProgressState(progress, id).status
+  ).map(({ id }) => id));
   elements.lessonList.querySelectorAll(".lesson-card").forEach((button) => {
     const state = lessonProgressState(progress, button.dataset.lessonId);
     button.setAttribute("aria-current", button.dataset.lessonId === lesson.id ? "true" : "false");
@@ -178,12 +200,14 @@ function renderCatalogState() {
     button.querySelector(".lesson-card-progress").textContent = state.status === "complete"
       ? "✓ Complete"
       : state.label;
+    button.hidden = !visibleIds.has(button.dataset.lessonId);
   });
   elements.lessonList.querySelectorAll(".lesson-topic-group").forEach((section) => {
     section.classList.toggle("is-current", section.dataset.topic === lesson.topic);
     const topicLessons = lessons.filter((item) => item.topic === section.dataset.topic);
     const complete = topicLessons.filter((item) => summary.completedIds.has(item.id)).length;
     section.querySelector(".lesson-topic-count").textContent = `${complete} of ${topicLessons.length} complete`;
+    section.hidden = !topicLessons.some((item) => visibleIds.has(item.id));
   });
   elements.progressSummary.textContent = `${summary.completed} of ${summary.total} lessons complete · ${summary.percent}%`;
   elements.progressMeter.setAttribute("aria-valuemax", String(summary.total));
@@ -192,6 +216,53 @@ function renderCatalogState() {
   const continuedLesson = summary.lastLessonId ? getLesson(summary.lastLessonId) : null;
   elements.continueLearning.hidden = continuedLesson === null;
   if (continuedLesson) elements.continueLearning.textContent = `Continue ${continuedLesson.catalogLabel} →`;
+  elements.catalogResultsSummary.textContent = visibleIds.size === lessons.length
+    ? `Showing all ${lessons.length} lessons.`
+    : `Showing ${visibleIds.size} of ${lessons.length} lessons.`;
+  elements.catalogEmpty.hidden = visibleIds.size !== 0;
+  elements.clearCatalogFilters.hidden = !hasActiveCatalogFilters(catalogFilters);
+}
+
+function initializeCatalogFilters() {
+  const options = catalogFilterOptions(lessons);
+  elements.catalogTopicFilter.append(...options.topics.map((topic) => createFilterOption(topic, topic)));
+  elements.catalogPatternFilter.append(...options.patterns.map((pattern) => createFilterOption(pattern, pattern.replaceAll("-", " "))));
+  if (!options.topics.includes(catalogFilters.topic)) catalogFilters.topic = "all";
+  if (!options.patterns.includes(catalogFilters.pattern)) catalogFilters.pattern = "all";
+  syncCatalogFilterControls();
+}
+
+function createFilterOption(value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  return option;
+}
+
+function syncCatalogFilterControls() {
+  elements.catalogSearch.value = catalogFilters.query;
+  elements.catalogTopicFilter.value = catalogFilters.topic;
+  elements.catalogPatternFilter.value = catalogFilters.pattern;
+  elements.catalogProgressFilter.value = catalogFilters.progress;
+}
+
+function updateCatalogFilters() {
+  catalogFilters = {
+    query: elements.catalogSearch.value,
+    topic: elements.catalogTopicFilter.value,
+    pattern: elements.catalogPatternFilter.value,
+    progress: elements.catalogProgressFilter.value
+  };
+  const nextUrl = catalogFilterUrl(window.location.href, catalogFilters);
+  window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+  renderCatalogState();
+}
+
+function clearCatalogFilters() {
+  catalogFilters = catalogFilterStateFromUrl(new URL(window.location.pathname + window.location.hash, window.location.origin));
+  syncCatalogFilterControls();
+  updateCatalogFilters();
+  elements.catalogSearch.focus();
 }
 
 function renderLessonChrome() {
@@ -1001,7 +1072,7 @@ function loadLesson(id, { enter = true } = {}) {
       player = playerReducer(player, { type: "STEP", index: restored.stepIndex });
     }
     resetPrediction();
-    window.history.replaceState(null, "", lessonHash(lesson.id));
+    replaceLessonUrl(lesson.id);
     renderLessonChrome();
     render();
   }
@@ -1137,8 +1208,20 @@ function getBrowserStorage() {
   }
 }
 
+function replaceLessonUrl(lessonId) {
+  const nextUrl = new URL(window.location.href);
+  nextUrl.hash = lessonHash(lessonId);
+  window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+}
+
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
+elements.catalogSearch.addEventListener("input", updateCatalogFilters);
+elements.catalogTopicFilter.addEventListener("change", updateCatalogFilters);
+elements.catalogPatternFilter.addEventListener("change", updateCatalogFilters);
+elements.catalogProgressFilter.addEventListener("change", updateCatalogFilters);
+elements.clearCatalogFilters.addEventListener("click", clearCatalogFilters);
+elements.catalogEmptyClear.addEventListener("click", clearCatalogFilters);
 elements.continueLearning.addEventListener("click", () => {
   if (progress.lastLessonId) loadLesson(progress.lastLessonId);
 });
@@ -1228,5 +1311,5 @@ render();
 if (initialLessonIdFromHash) {
   window.requestAnimationFrame(enterLesson);
 } else {
-  window.history.replaceState(null, "", lessonHash(lesson.id));
+  replaceLessonUrl(lesson.id);
 }

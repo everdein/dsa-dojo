@@ -247,6 +247,31 @@
           <a class="home-button home-button--primary" id="home-progress-continue" href="./studio/" hidden>Continue learning →</a>
         </section>
 
+        <form class="home-catalog-tools" id="home-catalog-tools" role="search" aria-label="Filter lessons">
+          <label class="home-catalog-search">
+            <span>Search lessons</span>
+            <input id="home-catalog-search" type="search" maxlength="80" autocomplete="off" placeholder="Try recursion, queues, or L31" />
+          </label>
+          <label><span>Topic</span><select id="home-topic-filter"><option value="all">All topics</option></select></label>
+          <label><span>Pattern</span><select id="home-pattern-filter"><option value="all">All patterns</option></select></label>
+          <label>
+            <span>Progress</span>
+            <select id="home-progress-filter">
+              <option value="all">Any progress</option>
+              <option value="not-started">Not started</option>
+              <option value="started">Started</option>
+              <option value="complete">Complete</option>
+            </select>
+          </label>
+          <button class="home-filter-clear" id="home-clear-filters" type="button">Clear filters</button>
+        </form>
+        <div class="home-filter-results" aria-live="polite"><p id="home-filter-summary">Showing all 55 lessons.</p></div>
+        <section class="home-filter-empty" id="home-filter-empty" hidden>
+          <h3>No lessons match yet.</h3>
+          <p>Try another phrase or clear the filters.</p>
+          <button class="home-button home-button--primary" id="home-empty-clear" type="button">Show all lessons</button>
+        </section>
+
         <nav class="home-topic-nav" id="home-topic-nav" aria-label="Curriculum topics" tabindex="-1">
           <p>Topic navigation loads from the curriculum manifest when JavaScript is available.</p>
         </nav>
