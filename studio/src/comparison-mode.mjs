@@ -1,5 +1,5 @@
 import { parseRecursiveFibonacciInput } from "../../recursion/fibonacci.mjs";
-import { buildValidatedTrace } from "./lesson-contract.mjs";
+import { buildTrace } from "./lesson-contract.mjs";
 import { parseNumberList } from "./input.mjs";
 
 export const comparisonFamilies = Object.freeze([
@@ -79,8 +79,8 @@ export function createComparisonRun({ family, leftLesson, rightLesson, input, sp
   const sharedInput = clone(input);
   const leftInput = clone(sharedInput);
   const rightInput = clone(sharedInput);
-  const leftTrace = buildValidatedTrace(leftLesson, leftInput);
-  const rightTrace = buildValidatedTrace(rightLesson, rightInput);
+  const leftTrace = buildTrace(leftLesson, leftInput);
+  const rightTrace = buildTrace(rightLesson, rightInput);
   const leftResult = leftLesson.solve(clone(sharedInput));
   const rightResult = rightLesson.solve(clone(sharedInput));
   if (!deepEqual(leftResult, rightResult)) {

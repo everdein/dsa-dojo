@@ -2,7 +2,7 @@
 
 - **Status:** Living product direction
 - **Implemented foundation:** 55 lessons across 20 topics
-- **Current checkpoint:** Release hardening and browser decomposition delivered; runtime efficiency next
+- **Current checkpoint:** Runtime trace verification separated; loading and source-pane scalability next
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -391,8 +391,9 @@ floors, desktop/mobile Playwright checks, axe accessibility checks,
 prediction-before-reveal, and explicit lesson-completion actions. Pages deploys
 from that CI workflow only after browser verification succeeds. Browser
 orchestration is now split across focused session, sharing, timing, and
-visualization modules. The next phase reduces runtime validation and loading
-cost and broadens targeted renderer assertions.
+visualization modules. Production traces build once with structural validation,
+while CI retains repeated determinism, mutation, and solver-agreement proofs.
+The next phase improves lesson loading and source-pane scalability.
 
 ## Introductory story checkpoint
 

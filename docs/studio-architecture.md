@@ -115,6 +115,20 @@ keyed snapshot for every declared panel. The built-in adapters are `array`,
 `sequence`, `lookup`, `grid`, `stack`, `queue`, `branching`, `graph`, and
 `linked-list`.
 
+### Runtime construction and CI verification
+
+`buildTrace()` is the production path. It clones learner input, constructs one
+trace, and retains the structural contract on every step: finite values, known
+code-step references, exact renderer panels, valid projected snapshots, deep
+snapshot ownership, sequential steps, and a complete final phase.
+
+`buildVerifiedTrace()` is the test/build path, with `buildValidatedTrace` kept
+as a compatibility alias for lesson tests. It additionally constructs the trace
+twice, proves deterministic equality, checks trace-builder and solver input
+immutability, runs the independent solver, and proves final-result agreement.
+The registry no longer builds all 55 default traces during browser module
+startup; CI verifies every lesson's default and sample instead.
+
 The local server keeps the two product surfaces explicit, serves only GET and
 HEAD requests, and applies a restrictive set of browser security headers:
 
@@ -448,6 +462,7 @@ The current automated suite checks:
   registry agreement
 - registry uniqueness and complete lesson contracts
 - default and sample trace determinism
+- production construction builds once without running the independent solver
 - solver/trace result agreement
 - input parsing and validation
 - algorithm correctness and input immutability

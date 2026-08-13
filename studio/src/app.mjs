@@ -1,4 +1,4 @@
-import { buildValidatedTrace } from "./lesson-contract.mjs";
+import { buildTrace } from "./lesson-contract.mjs";
 import { buildCurriculumMap, curriculumMapSelection } from "./curriculum-map.mjs";
 import { groupCurriculumByTopic } from "./home-catalog.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
@@ -1225,7 +1225,7 @@ function applyCurrentInput() {
   clearSharedUrlState();
   try {
     const input = lesson.input.parse(collectFields());
-    const trace = buildValidatedTrace(lesson, input);
+    const trace = buildTrace(lesson, input);
     player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
     challenge = createChallengeSession(lesson.id, trace);
     resetPrediction();
@@ -1240,7 +1240,7 @@ function loadSample() {
   stopTimer();
   clearSharedUrlState();
   const input = structuredClone(lesson.input.sampleValue);
-  const trace = buildValidatedTrace(lesson, input);
+  const trace = buildTrace(lesson, input);
   player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
   challenge = createChallengeSession(lesson.id, trace);
   resetPrediction();

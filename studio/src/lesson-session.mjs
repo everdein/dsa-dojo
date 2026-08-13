@@ -1,8 +1,8 @@
-import { buildValidatedTrace } from "./lesson-contract.mjs";
+import { buildTrace as buildRuntimeTrace } from "./lesson-contract.mjs";
 import { recordLearningSession, writeLearningProgress } from "./learning-progress.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
 
-export function restoreLessonPlayer(lesson, progress, buildTrace = buildValidatedTrace) {
+export function restoreLessonPlayer(lesson, progress, buildTrace = buildRuntimeTrace) {
   const restored = restoreLessonState(lesson, progress, buildTrace);
   let player = createPlayerState({
     lessonId: lesson.id,
@@ -15,7 +15,7 @@ export function restoreLessonPlayer(lesson, progress, buildTrace = buildValidate
   return player;
 }
 
-export function restoreSharedLessonPlayer(lesson, state, progress, buildTrace = buildValidatedTrace) {
+export function restoreSharedLessonPlayer(lesson, state, progress, buildTrace = buildRuntimeTrace) {
   try {
     if (state.lessonId !== lesson.id) throw new Error("The shared lesson does not match the link.");
     const input = lesson.input.parse(state.fields);
@@ -29,7 +29,7 @@ export function restoreSharedLessonPlayer(lesson, state, progress, buildTrace = 
   }
 }
 
-export function restoreLessonState(lesson, progress, buildTrace = buildValidatedTrace) {
+export function restoreLessonState(lesson, progress, buildTrace = buildRuntimeTrace) {
   const session = progress.lessons[lesson.id];
   const savedInput = session?.input === null || session?.input === undefined
     ? structuredClone(lesson.input.defaultValue)

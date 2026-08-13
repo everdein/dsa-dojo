@@ -70,12 +70,11 @@ branching, and graph adapters at the lectures that first needed them.
 
 Remaining architecture work belongs to the verification phase:
 
-- Separate production trace construction
-  and structural validation from test/build-only determinism and solver-result
-  equivalence checks. This applies to initial load, lesson switching, custom
-  input, and sample input, not only startup. Enforce input, step-count, and
-  snapshot-size budgets at runtime. Full fresh snapshots remain the default
-  until profiling demonstrates that patch-based history is necessary.
+- **Complete:** production trace construction and structural validation are
+  separate from test/build-only determinism, mutation, and solver-result
+  equivalence checks. Initial load, lesson switching, custom input, samples,
+  comparisons, and shared-state restoration build once; CI verifies twice and
+  solves independently. Full fresh snapshots remain the runtime default.
 - The central browser controller has been split at its highest-pressure seams:
   visualization presentation, lesson sessions, sharing, storage, and playback
   timing. Continue migrating the monolithic legacy suite into focused contract,
