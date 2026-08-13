@@ -61,6 +61,18 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .catalog-heading { display: flex; align-items: end; justify-content: space-between; gap: 36px; margin-bottom: 30px; }
 .catalog-heading h2 { margin-bottom: 0; }
 .catalog-heading > p { max-width: 410px; margin-bottom: 6px; color: var(--ink-soft); line-height: 1.55; }
+.progress-dashboard { display: grid; grid-template-columns: minmax(210px, 0.8fr) minmax(260px, 1.2fr) auto; gap: 22px; align-items: center; margin-bottom: 42px; padding: 24px; border: 1px solid #a9c2b3; border-radius: 26px; background: var(--mint); }
+.progress-dashboard-copy .eyebrow { margin-bottom: 5px; }
+.progress-dashboard-copy h3 { font-size: 1.2rem; }
+.progress-dashboard-copy > p:last-child { margin: 7px 0 0; color: var(--ink-soft); font-size: 0.78rem; }
+.progress-meter { height: 12px; overflow: hidden; border-radius: 999px; background: rgba(16,37,31,0.12); }
+.progress-meter > span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green-dark), var(--green)); transition: width 260ms ease; }
+.progress-actions { display: flex; gap: 9px; align-items: center; justify-content: flex-end; }
+.progress-actions .primary-button { white-space: nowrap; }
+.progress-reset-confirmation { grid-column: 1 / -1; display: flex; gap: 10px; align-items: center; justify-content: flex-end; padding-top: 18px; border-top: 1px solid rgba(16,37,31,0.14); }
+.progress-reset-confirmation[hidden] { display: none; }
+.progress-reset-confirmation p { margin: 0 auto 0 0; color: var(--ink-soft); font-size: 0.78rem; }
+.quiet-button--danger { border-color: #d8aaa4; color: #8c3024; }
 .lesson-list { display: grid; gap: 64px; }
 .lesson-topic-group { min-width: 0; }
 .lesson-topic-group.is-current { padding: 24px; border: 1px solid #a9c2b3; border-radius: 30px; background: rgba(217, 239, 228, 0.34); }
@@ -77,6 +89,9 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .lesson-card-copy small { color: var(--green); font-size: 0.65rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; }
 .lesson-card-copy strong { font-size: 1.1rem; }
 .lesson-card-copy > span { color: var(--ink-soft); font-size: 0.82rem; line-height: 1.45; }
+.lesson-card-copy .lesson-card-progress { justify-self: start; margin-top: 5px; padding: 4px 8px; border-radius: 999px; background: #eef2ef; color: var(--ink-soft); font-size: 0.62rem; font-weight: 850; letter-spacing: 0.04em; line-height: 1; text-transform: uppercase; }
+.lesson-card[data-progress="complete"] .lesson-card-progress { background: #c9ead9; color: var(--green-dark); }
+.lesson-card[data-progress="in-progress"] .lesson-card-progress { background: var(--blue-soft); color: #3f4b9e; }
 .lesson-card-arrow { color: var(--green); font-size: 1.35rem; }
 
 .lesson-shell { padding-top: 78px; padding-bottom: 92px; border-top: 1px solid var(--line); }
@@ -339,6 +354,10 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
   .pip-intro { max-width: none; }
   .catalog-heading { display: block; }
   .catalog-heading > p { margin-top: 18px; }
+  .progress-dashboard { grid-template-columns: 1fr; }
+  .progress-actions { justify-content: flex-start; }
+  .progress-reset-confirmation { align-items: stretch; flex-direction: column; }
+  .progress-reset-confirmation p { margin-bottom: 4px; }
   .lesson-heading { display: block; }
   .lesson-meta { margin-top: 18px; }
   .lesson-grid { grid-template-columns: 1fr; }

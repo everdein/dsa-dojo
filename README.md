@@ -13,6 +13,8 @@ algorithms visible, inspectable, and explainable with JavaScript. Learners can
 move through an execution one decision at a time, connect each state change to
 the code that caused it, and use Pip, an emotionally responsive original guide
 companion, to reinforce predictions, discoveries, and reusable patterns.
+Lesson completion, custom input, and the last visible step are saved locally so
+learners can continue where they stopped without creating an account.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser
@@ -131,7 +133,7 @@ project prove its interaction model before adopting additional infrastructure.
 - Files containing `Write your solution here` are intentional starter prompts;
   the `.mjs` modules used by the studio are complete, reusable implementations.
 - `studio/` contains the introduction, lesson application, shared player,
-  renderers, lesson definitions, and Pip.
+  renderers, lesson definitions, Pip, and the versioned local-progress adapter.
 - `test/` verifies algorithms, trace contracts, rendering state, navigation,
   input rules, player transitions, and the local HTTP boundary.
 - `e2e/` verifies real desktop and mobile flows, accessibility, deep links,

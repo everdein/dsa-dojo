@@ -68,6 +68,25 @@
           </div>
           <p id="catalog-summary">55 focused lessons build reusable reasoning patterns one state change at a time.</p>
         </div>
+        <section class="progress-dashboard" aria-labelledby="progress-title">
+          <div class="progress-dashboard-copy">
+            <p class="eyebrow">SAVED ON THIS DEVICE</p>
+            <h3 id="progress-title">Your learning progress</h3>
+            <p id="progress-summary">0 of 55 lessons complete.</p>
+          </div>
+          <div class="progress-meter" role="progressbar" aria-labelledby="progress-title" aria-valuemin="0" aria-valuemax="55" aria-valuenow="0" id="progress-meter">
+            <span id="progress-meter-fill"></span>
+          </div>
+          <div class="progress-actions">
+            <button class="primary-button" id="continue-learning-button" type="button" hidden></button>
+            <button class="quiet-button" id="reset-progress-button" type="button">Reset progress</button>
+          </div>
+          <div class="progress-reset-confirmation" id="progress-reset-confirmation" hidden>
+            <p>This removes completed lessons and saved positions from this browser.</p>
+            <button class="quiet-button" id="cancel-reset-progress-button" type="button">Keep progress</button>
+            <button class="quiet-button quiet-button--danger" id="confirm-reset-progress-button" type="button">Reset everything</button>
+          </div>
+        </section>
         <div class="lesson-list" id="lesson-list" aria-label="Available lessons"></div>
       </section>
 

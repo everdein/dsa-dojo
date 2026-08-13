@@ -3,6 +3,14 @@ import { groupCurriculumByTopic } from "./home-catalog.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
+  clearLearningProgress,
+  learningProgressSummary,
+  lessonProgressState,
+  readLearningProgress,
+  recordLearningSession,
+  writeLearningProgress
+} from "./learning-progress.mjs";
+import {
   mountPips,
   observePipVisibility,
   pipEmotionForLearning,
@@ -20,14 +28,12 @@ import {
 const lessons = listLessons();
 const lessonIds = lessons.map((item) => item.id);
 const topicCount = new Set(lessons.map((item) => item.topic)).size;
+const progressStorage = getBrowserStorage();
+let progress = readLearningProgress(progressStorage, lessons);
 const initialLessonIdFromHash = readLessonIdFromHash(window.location.hash, lessonIds);
-const initialLessonId = initialLessonIdFromHash ?? lessons[0].id;
+const initialLessonId = initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
-let player = createPlayerState({
-  lessonId: lesson.id,
-  trace: buildValidatedTrace(lesson, lesson.input.defaultValue),
-  input: structuredClone(lesson.input.defaultValue)
-});
+let player = createRestoredPlayer(lesson);
 let timerId = null;
 let prediction = createPredictionState(lesson.id);
 
@@ -35,6 +41,14 @@ const elements = {
   headerStatus: document.querySelector("#header-status"),
   catalogCount: document.querySelector("#catalog-count"),
   catalogSummary: document.querySelector("#catalog-summary"),
+  progressSummary: document.querySelector("#progress-summary"),
+  progressMeter: document.querySelector("#progress-meter"),
+  progressMeterFill: document.querySelector("#progress-meter-fill"),
+  continueLearning: document.querySelector("#continue-learning-button"),
+  resetProgress: document.querySelector("#reset-progress-button"),
+  resetProgressConfirmation: document.querySelector("#progress-reset-confirmation"),
+  cancelResetProgress: document.querySelector("#cancel-reset-progress-button"),
+  confirmResetProgress: document.querySelector("#confirm-reset-progress-button"),
   lessonList: document.querySelector("#lesson-list"),
   lessonSection: document.querySelector("#lesson"),
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
@@ -143,7 +157,9 @@ function createLessonButton(item) {
   title.textContent = item.catalogLabel;
   const description = document.createElement("span");
   description.textContent = item.catalogDescription;
-  copy.append(pattern, title, description);
+  const progressLabel = document.createElement("span");
+  progressLabel.className = "lesson-card-progress";
+  copy.append(pattern, title, description, progressLabel);
   const arrow = document.createElement("span");
   arrow.className = "lesson-card-arrow";
   arrow.setAttribute("aria-hidden", "true");
@@ -154,12 +170,28 @@ function createLessonButton(item) {
 }
 
 function renderCatalogState() {
+  const summary = learningProgressSummary(progress, lessons);
   elements.lessonList.querySelectorAll(".lesson-card").forEach((button) => {
+    const state = lessonProgressState(progress, button.dataset.lessonId);
     button.setAttribute("aria-current", button.dataset.lessonId === lesson.id ? "true" : "false");
+    button.dataset.progress = state.status;
+    button.querySelector(".lesson-card-progress").textContent = state.status === "complete"
+      ? "✓ Complete"
+      : state.label;
   });
   elements.lessonList.querySelectorAll(".lesson-topic-group").forEach((section) => {
     section.classList.toggle("is-current", section.dataset.topic === lesson.topic);
+    const topicLessons = lessons.filter((item) => item.topic === section.dataset.topic);
+    const complete = topicLessons.filter((item) => summary.completedIds.has(item.id)).length;
+    section.querySelector(".lesson-topic-count").textContent = `${complete} of ${topicLessons.length} complete`;
   });
+  elements.progressSummary.textContent = `${summary.completed} of ${summary.total} lessons complete · ${summary.percent}%`;
+  elements.progressMeter.setAttribute("aria-valuemax", String(summary.total));
+  elements.progressMeter.setAttribute("aria-valuenow", String(summary.completed));
+  elements.progressMeterFill.style.width = `${summary.percent}%`;
+  const continuedLesson = summary.lastLessonId ? getLesson(summary.lastLessonId) : null;
+  elements.continueLearning.hidden = continuedLesson === null;
+  if (continuedLesson) elements.continueLearning.textContent = `Continue ${continuedLesson.catalogLabel} →`;
 }
 
 function renderLessonChrome() {
@@ -241,6 +273,7 @@ function renderCode() {
 }
 
 function render() {
+  persistCurrentProgress();
   const step = player.trace[player.index];
   renderCatalogState();
   renderVisualization(step);
@@ -957,9 +990,16 @@ function loadLesson(id, { enter = true } = {}) {
   if (id !== lesson.id) {
     stopTimer();
     lesson = getLesson(id);
-    const input = structuredClone(lesson.input.defaultValue);
-    const trace = buildValidatedTrace(lesson, input);
-    player = playerReducer(player, { type: "LOAD_LESSON", lessonId: lesson.id, trace, input });
+    const restored = restoreLessonState(lesson);
+    player = playerReducer(player, {
+      type: "LOAD_LESSON",
+      lessonId: lesson.id,
+      trace: restored.trace,
+      input: restored.input
+    });
+    if (restored.stepIndex > 0) {
+      player = playerReducer(player, { type: "STEP", index: restored.stepIndex });
+    }
     resetPrediction();
     window.history.replaceState(null, "", lessonHash(lesson.id));
     renderLessonChrome();
@@ -1047,8 +1087,79 @@ function move(action) {
   render();
 }
 
+function createRestoredPlayer(currentLesson) {
+  const restored = restoreLessonState(currentLesson);
+  let restoredPlayer = createPlayerState({
+    lessonId: currentLesson.id,
+    trace: restored.trace,
+    input: restored.input
+  });
+  if (restored.stepIndex > 0) {
+    restoredPlayer = playerReducer(restoredPlayer, { type: "STEP", index: restored.stepIndex });
+  }
+  return restoredPlayer;
+}
+
+function restoreLessonState(currentLesson) {
+  const session = progress.lessons[currentLesson.id];
+  const savedInput = session?.input === null || session?.input === undefined
+    ? structuredClone(currentLesson.input.defaultValue)
+    : structuredClone(session.input);
+  try {
+    const trace = buildValidatedTrace(currentLesson, savedInput);
+    return {
+      input: savedInput,
+      trace,
+      stepIndex: Math.max(0, Math.min(session?.stepIndex ?? 0, trace.length - 1))
+    };
+  } catch {
+    const input = structuredClone(currentLesson.input.defaultValue);
+    return { input, trace: buildValidatedTrace(currentLesson, input), stepIndex: 0 };
+  }
+}
+
+function persistCurrentProgress() {
+  progress = recordLearningSession(progress, {
+    lessonId: lesson.id,
+    input: player.input,
+    stepIndex: player.index,
+    traceLength: player.trace.length,
+    completed: player.status === "complete"
+  }, lessons);
+  progress = writeLearningProgress(progressStorage, progress, lessons);
+}
+
+function getBrowserStorage() {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
+
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
+elements.continueLearning.addEventListener("click", () => {
+  if (progress.lastLessonId) loadLesson(progress.lastLessonId);
+});
+elements.resetProgress.addEventListener("click", () => {
+  elements.resetProgressConfirmation.hidden = false;
+  elements.cancelResetProgress.focus();
+});
+elements.cancelResetProgress.addEventListener("click", () => {
+  elements.resetProgressConfirmation.hidden = true;
+  elements.resetProgress.focus();
+});
+elements.confirmResetProgress.addEventListener("click", () => {
+  stopTimer();
+  progress = clearLearningProgress(progressStorage);
+  player = playerReducer(player, { type: "RESET" });
+  resetPrediction();
+  elements.resetProgressConfirmation.hidden = true;
+  render();
+  elements.resetProgress.focus();
+  elements.live.textContent = "Learning progress was reset on this device.";
+});
 elements.predictionForm.addEventListener("submit", (event) => {
   event.preventDefault();
   const text = elements.predictionInput.value.trim();
