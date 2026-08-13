@@ -30,9 +30,9 @@ algorithm comparison—in a validated URL that can be copied or sent with the
 device's native share sheet.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
-lessons across 20 topics. The next phase strengthens coverage, browser
-verification, and release-pipeline gating rather than adding another core
-lecture.
+lessons across 20 topics. Coverage floors and browser-gated deployment now
+protect releases; the next stabilization work focuses on browser-controller
+boundaries and runtime efficiency rather than another core lecture.
 
 ## Try It Locally
 
@@ -193,7 +193,6 @@ the Playwright suite exercises it at the same `/dsa-dojo/` subpath used by
 GitHub Pages.
 
 Pushes to `main` run CI across Node.js 22 and 24, including unit/integration
-tests, coverage collection, a static build, and a separate Playwright browser
-smoke job. The Pages workflow independently runs the fast syntax, unit, and
-build checks before deploying `dist/`; making browser verification a direct
-deployment gate is part of the post-curriculum hardening phase.
+tests, enforced coverage floors, a static build, and a separate Playwright
+browser smoke job. GitHub Pages is built and deployed by that same workflow
+only after the browser job succeeds, so a browser regression cannot publish.
