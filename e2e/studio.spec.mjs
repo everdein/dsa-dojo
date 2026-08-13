@@ -231,6 +231,48 @@ test("a learner can commit a prediction before revealing the next state", async 
   await expect(page.locator("#step-count")).toHaveText("1 / 5");
 });
 
+test("Challenge Mode gates each reveal, scores predictions, and remembers a personal best", async ({ page }) => {
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+  await page.locator("#challenge-toggle").click();
+
+  await expect(page.locator("#challenge-toggle")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#challenge-card")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Autoplay unavailable in Challenge Mode" })).toBeDisabled();
+  await expect(page.locator("#prediction-checkpoint")).toBeHidden();
+  await expect(page.locator("#next-button")).toBeDisabled();
+  await expect(page.locator('.challenge-option input[type="radio"]')).toHaveCount(3);
+  await expectNoSeriousAccessibilityViolations(page);
+
+  const correctOutcomes = [
+    /2 becomes the new largest value/,
+    /3 becomes the new largest value/,
+    /4 becomes the new largest value/,
+    /5 becomes the new largest value/,
+    /scan is complete.*5 is the largest value/i
+  ];
+  for (let index = 0; index < correctOutcomes.length; index += 1) {
+    await page.locator(".challenge-option", { hasText: correctOutcomes[index] }).click();
+    await page.getByRole("button", { name: "Check answer" }).click();
+    await expect(page.locator("#challenge-feedback-label")).toHaveText("CORRECT");
+    await expect(page.locator("#challenge-score")).toHaveText(`${index + 1} / ${index + 1}`);
+    await page.locator("#next-button").click();
+  }
+
+  await expect(page.locator("#step-count")).toHaveText("5 / 5");
+  await expect(page.locator("#challenge-title")).toHaveText("Challenge complete.");
+  await expect(page.locator("#challenge-best")).toHaveText("5 / 5");
+
+  await page.reload();
+  await expect(page.locator("#challenge-toggle")).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator("#challenge-best")).toHaveText("5 / 5");
+  await expect(page.locator("#step-count")).toHaveText("0 / 5");
+
+  await page.locator("#challenge-toggle").click();
+  await expect(page.locator("#challenge-card")).toBeHidden();
+  await expect(page.getByRole("button", { name: "Play lesson" })).toBeEnabled();
+  await expect(page.locator("#prediction-checkpoint")).toBeVisible();
+});
+
 test("learning progress survives reloads, appears across pages, and can be reset", async ({ page }) => {
   await page.goto("./studio/#lesson=arrays%2Ffind-largest");
   const values = page.locator('[data-field-id="values"]');

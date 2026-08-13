@@ -10,6 +10,17 @@ import {
   hasActiveCatalogFilters
 } from "./catalog-filters.mjs";
 import {
+  answerChallenge,
+  buildChallengeQuestion,
+  challengeSummary,
+  createChallengeSession,
+  readChallengePreferences,
+  recordChallengeBest,
+  setChallengePreference,
+  skipChallenge,
+  writeChallengePreferences
+} from "./challenge-mode.mjs";
+import {
   clearLearningProgress,
   learningProgressSummary,
   lessonProgressState,
@@ -37,11 +48,14 @@ const lessonIds = lessons.map((item) => item.id);
 const topicCount = new Set(lessons.map((item) => item.topic)).size;
 const progressStorage = getBrowserStorage();
 let progress = readLearningProgress(progressStorage, lessons);
+let challengePreferences = readChallengePreferences(progressStorage, lessons);
 let catalogFilters = catalogFilterStateFromUrl(window.location.href);
 const initialLessonIdFromHash = readLessonIdFromHash(window.location.hash, lessonIds);
 const initialLessonId = initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
 let player = createRestoredPlayer(lesson);
+if (challengePreferences.enabled) player = playerReducer(player, { type: "RESET" });
+let challenge = createChallengeSession(lesson.id, player.trace);
 let timerId = null;
 let prediction = createPredictionState(lesson.id);
 
@@ -70,6 +84,23 @@ const elements = {
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
   lessonTitle: document.querySelector("#lesson-title"),
   lessonSummary: document.querySelector("#lesson-summary"),
+  challengeToggle: document.querySelector("#challenge-toggle"),
+  challengeToggleStatus: document.querySelector("#challenge-toggle-status"),
+  challengeCard: document.querySelector("#challenge-card"),
+  challengeTitle: document.querySelector("#challenge-title"),
+  challengeProgress: document.querySelector("#challenge-progress"),
+  challengePrompt: document.querySelector("#challenge-prompt"),
+  challengeForm: document.querySelector("#challenge-form"),
+  challengeOptions: document.querySelector("#challenge-options"),
+  challengeError: document.querySelector("#challenge-error"),
+  challengeSkip: document.querySelector("#challenge-skip"),
+  challengeFeedback: document.querySelector("#challenge-feedback"),
+  challengeFeedbackLabel: document.querySelector("#challenge-feedback-label"),
+  challengeFeedbackTitle: document.querySelector("#challenge-feedback-title"),
+  challengeFeedbackCopy: document.querySelector("#challenge-feedback-copy"),
+  challengeScore: document.querySelector("#challenge-score"),
+  challengeStreak: document.querySelector("#challenge-streak"),
+  challengeBest: document.querySelector("#challenge-best"),
   fields: document.querySelector("#lesson-fields"),
   apply: document.querySelector("#apply-button"),
   sample: document.querySelector("#sample-button"),
@@ -350,6 +381,7 @@ function render() {
   renderVisualization(step);
   renderStats(step);
   renderCodeState(step);
+  renderChallenge();
   renderPip(step);
   renderPrediction();
   renderCompletion();
@@ -361,17 +393,25 @@ function render() {
   elements.stepLabel.textContent = player.status.toUpperCase();
   elements.stepCount.textContent = `${player.index} / ${player.trace.length - 1}`;
   elements.previous.disabled = player.index === 0;
-  elements.next.disabled = player.index === player.trace.length - 1;
-  elements.next.textContent = player.index === 0 && prediction.locked
-    ? "Reveal next step →"
-    : "Next →";
+  const challengeAnswer = currentChallengeAnswer();
+  elements.next.disabled = player.index === player.trace.length - 1
+    || (challengePreferences.enabled && challengeAnswer === null);
+  elements.next.textContent = challengePreferences.enabled
+    ? player.index === player.trace.length - 1
+      ? "Round complete"
+      : challengeAnswer === null ? "Choose an answer" : "Reveal next state →"
+    : player.index === 0 && prediction.locked ? "Reveal next step →" : "Next →";
   const playing = player.status === "playing";
   elements.play.innerHTML = playing ? "Ⅱ <span>Pause</span>" : "▶ <span>Play</span>";
-  elements.play.setAttribute("aria-label", playing ? "Pause lesson" : "Play lesson");
+  elements.play.disabled = challengePreferences.enabled;
+  elements.play.setAttribute("aria-label", challengePreferences.enabled
+    ? "Autoplay unavailable in Challenge Mode"
+    : playing ? "Pause lesson" : "Play lesson");
   const speedText = playbackSpeedLabel(player.speed);
   elements.speed.value = String(playbackDelayToControlValue(player.speed));
   elements.speedLabel.textContent = speedText;
   elements.speed.setAttribute("aria-valuetext", `${speedText} speed`);
+  elements.speed.disabled = challengePreferences.enabled;
   elements.pipCard.classList.toggle("is-minimized", player.guideMinimized);
   elements.pipToggle.textContent = player.guideMinimized ? "+" : "−";
   elements.pipToggle.setAttribute("aria-label", player.guideMinimized ? "Expand Pip" : "Minimize Pip");
@@ -1011,17 +1051,98 @@ function renderCompletion() {
   );
 }
 
+function renderChallenge() {
+  const enabled = challengePreferences.enabled;
+  elements.challengeToggle.setAttribute("aria-pressed", String(enabled));
+  elements.challengeToggleStatus.textContent = enabled ? "On" : "Off";
+  elements.challengeCard.hidden = !enabled;
+  if (!enabled) return;
+
+  const summary = challengeSummary(challenge);
+  const best = challengePreferences.bestByLesson[lesson.id];
+  elements.challengeScore.textContent = `${summary.correct} / ${summary.answered + summary.skipped}`;
+  elements.challengeStreak.textContent = String(challenge.streak);
+  elements.challengeBest.textContent = best ? `${best.correct} / ${best.total}` : "—";
+  elements.challengeError.textContent = "";
+
+  if (player.index === player.trace.length - 1) {
+    elements.challengeProgress.textContent = "ROUND COMPLETE";
+    elements.challengeTitle.textContent = summary.complete ? "Challenge complete." : "Lesson complete.";
+    elements.challengePrompt.textContent = summary.complete
+      ? `${summary.correct} of ${summary.total} transitions correct · ${summary.accuracy}% of answered predictions · best streak ${summary.bestStreak}.`
+      : `${summary.correct} correct and ${summary.skipped} skipped. Replay to challenge every transition.`;
+    elements.challengeForm.hidden = true;
+    elements.challengeFeedback.hidden = true;
+    return;
+  }
+
+  const question = currentChallengeQuestion();
+  const outcome = challenge.answers[question.targetIndex] ?? null;
+  elements.challengeProgress.textContent = `${question.number} OF ${question.total}`;
+  elements.challengeTitle.textContent = "What happens on the next state change?";
+  elements.challengePrompt.textContent = question.prompt;
+  elements.challengeForm.hidden = outcome !== null;
+  elements.challengeFeedback.hidden = outcome === null;
+
+  if (!outcome) {
+    renderChallengeOptions(question);
+    return;
+  }
+
+  elements.challengeFeedback.dataset.result = outcome.skipped
+    ? "skipped"
+    : outcome.correct ? "correct" : "incorrect";
+  elements.challengeFeedbackLabel.textContent = outcome.skipped
+    ? "ANSWER REVEALED"
+    : outcome.correct ? "CORRECT" : "NOT THIS TIME";
+  elements.challengeFeedbackTitle.textContent = outcome.skipped
+    ? "Study the transition, then reveal the state."
+    : outcome.correct ? "Your mental model matched the trace." : "Use the difference to update your model.";
+  elements.challengeFeedbackCopy.textContent = question.answerText;
+}
+
+function renderChallengeOptions(question) {
+  const legend = document.createElement("legend");
+  legend.className = "sr-only";
+  legend.textContent = "Choose the next algorithm outcome";
+  const options = question.options.map((option) => {
+    const label = document.createElement("label");
+    label.className = "challenge-option";
+    const input = document.createElement("input");
+    input.type = "radio";
+    input.name = "challenge-outcome";
+    input.value = option.id;
+    const text = document.createElement("span");
+    text.textContent = option.text;
+    label.append(input, text);
+    return label;
+  });
+  elements.challengeOptions.replaceChildren(legend, ...options);
+}
+
+function currentChallengeQuestion() {
+  return buildChallengeQuestion(lesson.id, player.trace, player.index);
+}
+
+function currentChallengeAnswer() {
+  if (!challengePreferences.enabled || player.index >= player.trace.length - 1) return null;
+  return challenge.answers[player.index + 1] ?? null;
+}
+
 function getNextLesson() {
   const currentIndex = lessons.findIndex((item) => item.id === lesson.id);
   return lessons[currentIndex + 1] ?? null;
 }
 
 function renderPip(step) {
+  const challengeAnswer = currentChallengeAnswer();
   const emotion = pipEmotionForLearning({
     status: player.status,
     stepIndex: player.index,
     predictionLocked: prediction.locked,
-    cue: step.pipCue,
+    cue: challengeAnswer
+      ? challengeAnswer.skipped ? "thinking" : challengeAnswer.correct ? "cool" : "caution"
+      : step.pipCue,
     hasError: Boolean(player.error)
   });
   setPipState(elements.pipAvatar, emotion);
@@ -1041,7 +1162,7 @@ function resetPrediction() {
 }
 
 function renderPrediction() {
-  const available = player.index === 0 || prediction.locked;
+  const available = !challengePreferences.enabled && (player.index === 0 || prediction.locked);
   elements.prediction.hidden = !available;
   if (!available) return;
 
@@ -1071,6 +1192,8 @@ function loadLesson(id, { enter = true } = {}) {
     if (restored.stepIndex > 0) {
       player = playerReducer(player, { type: "STEP", index: restored.stepIndex });
     }
+    if (challengePreferences.enabled) player = playerReducer(player, { type: "RESET" });
+    challenge = createChallengeSession(lesson.id, player.trace);
     resetPrediction();
     replaceLessonUrl(lesson.id);
     renderLessonChrome();
@@ -1101,6 +1224,7 @@ function applyCurrentInput() {
     const input = lesson.input.parse(collectFields());
     const trace = buildValidatedTrace(lesson, input);
     player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
+    challenge = createChallengeSession(lesson.id, trace);
     resetPrediction();
     renderFields();
   } catch (error) {
@@ -1114,12 +1238,14 @@ function loadSample() {
   const input = structuredClone(lesson.input.sampleValue);
   const trace = buildValidatedTrace(lesson, input);
   player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
+  challenge = createChallengeSession(lesson.id, trace);
   resetPrediction();
   renderFields();
   render();
 }
 
 function startPlayback() {
+  if (challengePreferences.enabled) return;
   player = playerReducer(player, { type: "PLAY" });
   restartTimer();
   render();
@@ -1154,8 +1280,24 @@ function stopTimer() {
 
 function move(action) {
   stopTimer();
+  if (challengePreferences.enabled && action.type === "NEXT" && currentChallengeAnswer() === null) {
+    elements.challengeOptions.querySelector("input")?.focus();
+    return;
+  }
   player = playerReducer(player, action);
+  if (action.type === "RESET") challenge = createChallengeSession(lesson.id, player.trace);
+  finalizeChallenge();
   render();
+}
+
+function finalizeChallenge() {
+  const summary = challengeSummary(challenge);
+  if (!challengePreferences.enabled || player.status !== "complete" || !summary.complete) return;
+  challengePreferences = recordChallengeBest(challengePreferences, lesson.id, {
+    ...summary,
+    completedAt: new Date().toISOString()
+  }, lessons);
+  challengePreferences = writeChallengePreferences(progressStorage, challengePreferences, lessons);
 }
 
 function createRestoredPlayer(currentLesson) {
@@ -1222,6 +1364,38 @@ elements.catalogPatternFilter.addEventListener("change", updateCatalogFilters);
 elements.catalogProgressFilter.addEventListener("change", updateCatalogFilters);
 elements.clearCatalogFilters.addEventListener("click", clearCatalogFilters);
 elements.catalogEmptyClear.addEventListener("click", clearCatalogFilters);
+elements.challengeToggle.addEventListener("click", () => {
+  stopTimer();
+  const enabled = !challengePreferences.enabled;
+  challengePreferences = setChallengePreference(challengePreferences, enabled, lessons);
+  challengePreferences = writeChallengePreferences(progressStorage, challengePreferences, lessons);
+  player = playerReducer(player, { type: "RESET" });
+  challenge = createChallengeSession(lesson.id, player.trace);
+  resetPrediction();
+  render();
+  elements.live.textContent = enabled
+    ? "Challenge Mode on. The lesson restarted so you can predict every state transition."
+    : "Challenge Mode off. Guided playback is available again.";
+  if (enabled) elements.challengeOptions.querySelector("input")?.focus();
+});
+elements.challengeForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const question = currentChallengeQuestion();
+  const selected = elements.challengeOptions.querySelector('input[name="challenge-outcome"]:checked');
+  if (!selected) {
+    elements.challengeError.textContent = "Choose an outcome before checking your answer.";
+    elements.challengeOptions.querySelector("input")?.focus();
+    return;
+  }
+  challenge = answerChallenge(challenge, question, selected.value);
+  render();
+  elements.next.focus({ preventScroll: true });
+});
+elements.challengeSkip.addEventListener("click", () => {
+  challenge = skipChallenge(challenge, currentChallengeQuestion());
+  render();
+  elements.next.focus({ preventScroll: true });
+});
 elements.continueLearning.addEventListener("click", () => {
   if (progress.lastLessonId) loadLesson(progress.lastLessonId);
 });
@@ -1237,6 +1411,7 @@ elements.confirmResetProgress.addEventListener("click", () => {
   stopTimer();
   progress = clearLearningProgress(progressStorage);
   player = playerReducer(player, { type: "RESET" });
+  challenge = createChallengeSession(lesson.id, player.trace);
   resetPrediction();
   elements.resetProgressConfirmation.hidden = true;
   render();
@@ -1260,8 +1435,13 @@ elements.completionSample.addEventListener("click", () => {
   elements.play.focus({ preventScroll: true });
 });
 elements.replay.addEventListener("click", () => {
-  startPlayback();
-  elements.play.focus({ preventScroll: true });
+  if (challengePreferences.enabled) {
+    move({ type: "RESET" });
+    elements.challengeOptions.querySelector("input")?.focus();
+  } else {
+    startPlayback();
+    elements.play.focus({ preventScroll: true });
+  }
 });
 elements.nextLesson.addEventListener("click", () => {
   const nextLesson = getNextLesson();

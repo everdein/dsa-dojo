@@ -67,6 +67,21 @@ lesson numbers, names, descriptions, topics, and reusable pattern tags. Active
 filters produce a live result count, a useful empty state, and URL parameters
 that survive reloads without interfering with Studio lesson deep links.
 
+## Challenge Mode
+
+Challenge Mode converts deterministic lesson traces into active-recall rounds
+without requiring a second set of hand-authored exercises. Before each state
+transition, the learner chooses among three plausible outcomes drawn from the
+lesson's own execution. The next state remains gated until the learner checks
+an answer or deliberately reveals it.
+
+Scoring rewards accurate reasoning rather than speed: first answers determine
+accuracy and streaks, while reveal remains available so a learner is never
+trapped. Autoplay is disabled during a challenge, Pip responds to correct and
+incorrect predictions, and the standard guided player returns unchanged when
+the mode is off. The preference and strongest completed result per lesson are
+stored only on the learner's device.
+
 ## The Guide Companion
 
 - **Working name:** Pip

@@ -17,6 +17,9 @@ Lesson completion, custom input, and the last visible step are saved locally so
 learners can continue where they stopped without creating an account.
 Both catalogs can be searched and narrowed by topic, reusable pattern, and
 local progress; active filters are reflected in the URL for reloadable views.
+Challenge Mode turns any lesson into an active recall round: predict each next
+state, reveal the real transition, build a streak, and keep a device-local
+personal best.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser
@@ -82,8 +85,8 @@ See the [curriculum roadmap](docs/curriculum-roadmap.md) for every lecture,
 prerequisite, reasoning pattern, and module path.
 
 Each lesson supports editable input, Previous, Next, Play/Pause, Reset, playback
-speed, source highlighting, plain-language explanations, and time and space
-complexity.
+speed, source highlighting, plain-language explanations, time and space
+complexity, and an optional scored Challenge Mode.
 
 ## How It Works
 
@@ -135,7 +138,8 @@ project prove its interaction model before adopting additional infrastructure.
 - Files containing `Write your solution here` are intentional starter prompts;
   the `.mjs` modules used by the studio are complete, reusable implementations.
 - `studio/` contains the introduction, lesson application, shared player,
-  renderers, lesson definitions, Pip, and the versioned local-progress adapter.
+  renderers, lesson definitions, Pip, and versioned local progress and challenge
+  adapters.
 - `test/` verifies algorithms, trace contracts, rendering state, navigation,
   input rules, player transitions, and the local HTTP boundary.
 - `e2e/` verifies real desktop and mobile flows, accessibility, deep links,
