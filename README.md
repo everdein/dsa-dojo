@@ -6,7 +6,7 @@
 
 [Open the live DSA Dojo](https://everdein.github.io/dsa-dojo/)
 
-![DSA Dojo landing page with Pip and an animated Find Largest example](studio/social-preview.jpg)
+![DSA Dojo curriculum map showing the 55-lesson learning path](studio/social-preview.jpg)
 
 DSA Dojo is a framework-free learning product that makes data structures and
 algorithms visible, inspectable, and explainable with JavaScript. Learners can
