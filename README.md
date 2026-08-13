@@ -20,6 +20,9 @@ local progress; active filters are reflected in the URL for reloadable views.
 Challenge Mode turns any lesson into an active recall round: predict each next
 state, reveal the real transition, build a streak, and keep a device-local
 personal best.
+Algorithm Comparison Mode runs compatible lessons on shared input with
+synchronized or independent stepping, projected visual state, active source
+lines, complexity labels, and matching-result verification.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser
@@ -86,7 +89,8 @@ prerequisite, reasoning pattern, and module path.
 
 Each lesson supports editable input, Previous, Next, Play/Pause, Reset, playback
 speed, source highlighting, plain-language explanations, time and space
-complexity, and an optional scored Challenge Mode.
+complexity, an optional scored Challenge Mode, and side-by-side comparison for
+the sorting and Fibonacci strategy families.
 
 ## How It Works
 
@@ -115,6 +119,8 @@ flowchart LR
   RR --> R1["Single view"]
   RR --> R2["Composite views"]
   P --> L["Accessible announcements"]
+  T --> CM["Comparison lab"]
+  CM --> RR
 ```
 
 ## Tech Stack

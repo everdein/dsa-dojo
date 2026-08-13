@@ -273,6 +273,49 @@ test("Challenge Mode gates each reveal, scores predictions, and remembers a pers
   await expect(page.locator("#prediction-checkpoint")).toBeVisible();
 });
 
+test("Algorithm Comparison Mode synchronizes compatible lessons without hiding their tradeoffs", async ({ page }) => {
+  const errors = collectPageErrors(page);
+  await page.goto("./studio/#lesson=sorting%2Fbubble-sort");
+  await page.getByRole("button", { name: /Compare Bubble Sort/ }).click();
+
+  const workspace = page.locator("#comparison-workspace");
+  await expect(workspace).toBeVisible();
+  await expect(page.locator("#lesson-grid")).toBeHidden();
+  await expect(page.locator("#challenge-toggle")).toBeHidden();
+  await expect(page.locator("#comparison-family")).toHaveValue("sorting-strategies");
+  await expect(page.getByLabel("Left algorithm")).toHaveValue("sorting/bubble-sort");
+  await expect(page.getByLabel("Right algorithm")).toHaveValue("sorting/merge-sort");
+  await expect(page.locator("#comparison-result")).toContainText("Same result");
+  await expect(page.locator("#comparison-result")).toContainText("17 vs 29 recorded transitions");
+  await expect(page.locator("[data-comparison-side=left]")).toContainText("O(n²) time");
+  await expect(page.locator("[data-comparison-side=right]")).toContainText("O(n log n) time");
+
+  await page.getByRole("button", { name: "Left forward →" }).click();
+  await expect(page.locator("#comparison-left-step")).toHaveText("1 / 17");
+  await expect(page.locator("#comparison-right-step")).toHaveText("0 / 29");
+  await page.getByRole("button", { name: "Next beat →" }).click();
+  await expect(page.locator("#comparison-left-step")).toHaveText("2 / 17");
+  await expect(page.locator("#comparison-right-step")).toHaveText("1 / 29");
+  await page.getByRole("button", { name: "Play comparison" }).click();
+  await expect(page.getByRole("button", { name: "Pause comparison" })).toBeVisible();
+  await page.getByRole("button", { name: "Pause comparison" }).click();
+
+  await page.locator("#comparison-family").selectOption("fibonacci-strategies");
+  await expect(page.getByLabel("Left algorithm")).toHaveValue("recursion/recursive-fibonacci");
+  await expect(page.getByLabel("Right algorithm")).toHaveValue("dynamic-programming/memoized-fibonacci");
+  await expect(page.locator("#comparison-result")).toContainText("Same result");
+  await expect(page.locator("[data-comparison-side=left]")).toContainText("O(2^n) time");
+  await expect(page.locator("[data-comparison-side=right]")).toContainText("O(n) time");
+
+  const sharedInput = page.getByLabel("Shared Fibonacci input (0-6)");
+  await sharedInput.fill("3");
+  await page.getByRole("button", { name: "Apply shared input" }).click();
+  await expect(page.locator("#comparison-result")).toContainText("2");
+  await expectNoDocumentOverflow(page);
+  await expectNoSeriousAccessibilityViolations(page);
+  expect(errors).toEqual([]);
+});
+
 test("learning progress survives reloads, appears across pages, and can be reset", async ({ page }) => {
   await page.goto("./studio/#lesson=arrays%2Ffind-largest");
   const values = page.locator('[data-field-id="values"]');

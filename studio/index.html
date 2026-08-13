@@ -48,7 +48,10 @@
           <p class="eyebrow">LEARN BY WATCHING STATE CHANGE</p>
           <h1 id="hero-title">See the algorithm <em>think.</em></h1>
           <p class="hero-lede">A calm, step-by-step space for turning data structures and algorithms into decisions you can explain.</p>
-          <a class="text-link" href="#catalog">Choose a lesson <span aria-hidden="true">↓</span></a>
+          <div class="hero-actions">
+            <a class="text-link" href="#catalog">Choose a lesson <span aria-hidden="true">↓</span></a>
+            <button class="text-link text-link-button" id="open-comparison-button" type="button">Compare algorithms <span aria-hidden="true">↔</span></button>
+          </div>
         </div>
         <aside class="pip-intro" aria-label="Meet Pip">
           <div class="pip-avatar pip-avatar--large" data-pip data-pip-pose="intro" data-state="curious"></div>
@@ -140,10 +143,85 @@
               <span>Challenge mode</span>
               <strong id="challenge-toggle-status">Off</strong>
             </button>
+            <button class="comparison-launch" id="comparison-launch" type="button" hidden>
+              <span aria-hidden="true">↔</span>
+              Compare with another algorithm
+            </button>
           </div>
         </div>
 
-        <div class="lesson-grid">
+        <section class="comparison-workspace" id="comparison-workspace" aria-labelledby="comparison-title" hidden>
+          <div class="comparison-header">
+            <div>
+              <p class="eyebrow" id="comparison-eyebrow"></p>
+              <h3 id="comparison-title" tabindex="-1">Compare algorithms</h3>
+              <p id="comparison-summary"></p>
+            </div>
+            <button class="quiet-button" id="comparison-exit" type="button">Exit comparison</button>
+          </div>
+
+          <form class="comparison-setup" id="comparison-form">
+            <label><span>Comparison</span><select id="comparison-family"></select></label>
+            <label><span>Left algorithm</span><select id="comparison-left"></select></label>
+            <label><span>Right algorithm</span><select id="comparison-right"></select></label>
+            <div class="comparison-fields" id="comparison-fields"></div>
+            <div class="comparison-input-actions">
+              <button class="primary-button" type="submit">Apply shared input</button>
+              <button class="quiet-button" id="comparison-sample" type="button">Load comparison sample</button>
+            </div>
+            <p class="field-help" id="comparison-help"></p>
+            <p class="field-error" id="comparison-error" role="alert"></p>
+          </form>
+
+          <div class="comparison-result" id="comparison-result" aria-label="Comparison result verification"></div>
+
+          <div class="comparison-grid">
+            <article class="comparison-lane" data-comparison-side="left" aria-labelledby="comparison-left-title">
+              <div class="comparison-lane-header">
+                <div><p class="eyebrow" id="comparison-left-topic"></p><h4 id="comparison-left-title"></h4></div>
+                <span class="comparison-step" id="comparison-left-step"></span>
+              </div>
+              <div class="comparison-complexity" id="comparison-left-complexity"></div>
+              <div class="comparison-visual" id="comparison-left-visual"></div>
+              <p class="comparison-narration" id="comparison-left-narration"></p>
+              <div class="comparison-code" id="comparison-left-code"></div>
+              <div class="comparison-side-controls">
+                <button class="quiet-button" data-comparison-action="previous" data-side="left" type="button">← Left back</button>
+                <button class="quiet-button" data-comparison-action="next" data-side="left" type="button">Left forward →</button>
+              </div>
+            </article>
+
+            <article class="comparison-lane" data-comparison-side="right" aria-labelledby="comparison-right-title">
+              <div class="comparison-lane-header">
+                <div><p class="eyebrow" id="comparison-right-topic"></p><h4 id="comparison-right-title"></h4></div>
+                <span class="comparison-step" id="comparison-right-step"></span>
+              </div>
+              <div class="comparison-complexity" id="comparison-right-complexity"></div>
+              <div class="comparison-visual" id="comparison-right-visual"></div>
+              <p class="comparison-narration" id="comparison-right-narration"></p>
+              <div class="comparison-code" id="comparison-right-code"></div>
+              <div class="comparison-side-controls">
+                <button class="quiet-button" data-comparison-action="previous" data-side="right" type="button">← Right back</button>
+                <button class="quiet-button" data-comparison-action="next" data-side="right" type="button">Right forward →</button>
+              </div>
+            </article>
+          </div>
+
+          <div class="comparison-controls" aria-label="Synchronized comparison controls">
+            <button class="secondary-button" id="comparison-previous" type="button">← Previous beat</button>
+            <button class="primary-button primary-button--play" id="comparison-play" type="button" aria-label="Play comparison">▶ <span>Play together</span></button>
+            <button class="secondary-button" id="comparison-next" type="button">Next beat →</button>
+            <button class="icon-button" id="comparison-reset" type="button" aria-label="Reset comparison">↻</button>
+            <label class="speed-control" for="comparison-speed">
+              Speed
+              <input id="comparison-speed" type="range" min="350" max="1400" step="50" value="900" />
+              <span id="comparison-speed-label">1×</span>
+            </label>
+          </div>
+          <p class="comparison-note">Recorded transitions describe each teaching trace; they are not runtime benchmarks or raw operation counts.</p>
+        </section>
+
+        <div class="lesson-grid" id="lesson-grid">
           <div class="visual-column">
             <section class="visualization-card" aria-labelledby="input-title">
               <div class="card-topline">
@@ -301,7 +379,7 @@
         </div>
       </section>
 
-      <section class="reflection" aria-labelledby="reflection-title">
+      <section class="reflection" id="reflection" aria-labelledby="reflection-title">
         <p class="eyebrow" id="reflection-eyebrow"></p>
         <h2 id="reflection-title"></h2>
         <p id="reflection-body"></p>

@@ -63,6 +63,7 @@ studio/
     lesson-contract.mjs     Lesson and deterministic trace validation
     player.mjs              Framework-free player state machine
     challenge-mode.mjs      Trace-derived questions, scoring, and local bests
+    comparison-mode.mjs     Compatible families and dual-trace state machine
     *.mjs                   Lesson-specific deterministic trace builders
     lessons/
       index.mjs             Validated lesson registry
@@ -284,6 +285,38 @@ curriculum; scores, totals, and streaks are bounded; unavailable storage falls
 back to an in-memory round. A personal best is recorded only after all trace
 transitions have been answered or deliberately skipped and the lesson reaches
 its final state.
+
+### Algorithm comparison
+
+`studio/src/comparison-mode.mjs` declares the small set of semantically valid
+comparison families and owns a pure dual-trace state machine. A family defines
+compatible lesson ids, shared input fields and bounds, a default pair, and
+teaching copy. Creating a run sends deep-cloned shared input through the normal
+validated trace builder and both pure solvers; a result mismatch rejects the
+comparison before anything is rendered.
+
+The reducer supports synchronized previous/next/play/reset actions and bounded
+independent stepping for either lane. It never merges or resamples trace steps:
+when one algorithm finishes first, that lane remains on its final state while
+the other continues. This preserves the actual instructional history instead
+of fabricating aligned operations.
+
+The browser reuses the renderer registry and existing DOM projections for each
+lane, including composite views. Each side also derives its active physical
+source line and complexity directly from the lesson definition. Comparison
+mode does not write lesson progress, challenge scores, or a second copy of
+player state. Exiting restores the current lesson exactly as it was.
+
+The currently registered families are:
+
+- sorting strategies: Bubble, Insertion, Merge, and Quick Sort, capped at the
+  shared Merge Sort bound of eight values;
+- Fibonacci recursion: naive recursive and memoized recursion, capped at their
+  shared visible-call-tree bound of six.
+
+Recorded transition counts are shown as trace-shape context only. The UI avoids
+calling them operation counts or benchmarks because trace granularity varies by
+lesson and renderer.
 
 ### Array renderer
 

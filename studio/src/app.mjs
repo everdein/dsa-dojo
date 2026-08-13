@@ -21,6 +21,14 @@ import {
   writeChallengePreferences
 } from "./challenge-mode.mjs";
 import {
+  comparisonFamilies,
+  comparisonFamilyForLesson,
+  comparisonReducer,
+  comparisonSummary,
+  createComparisonRun,
+  getComparisonFamily
+} from "./comparison-mode.mjs";
+import {
   clearLearningProgress,
   learningProgressSummary,
   lessonProgressState,
@@ -56,6 +64,8 @@ let lesson = getLesson(initialLessonId);
 let player = createRestoredPlayer(lesson);
 if (challengePreferences.enabled) player = playerReducer(player, { type: "RESET" });
 let challenge = createChallengeSession(lesson.id, player.trace);
+let comparisonFamily = getComparisonFamily("sorting-strategies");
+let comparisonRun = null;
 let timerId = null;
 let prediction = createPredictionState(lesson.id);
 
@@ -84,6 +94,30 @@ const elements = {
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
   lessonTitle: document.querySelector("#lesson-title"),
   lessonSummary: document.querySelector("#lesson-summary"),
+  lessonGrid: document.querySelector("#lesson-grid"),
+  reflection: document.querySelector("#reflection"),
+  openComparison: document.querySelector("#open-comparison-button"),
+  comparisonLaunch: document.querySelector("#comparison-launch"),
+  comparisonWorkspace: document.querySelector("#comparison-workspace"),
+  comparisonEyebrow: document.querySelector("#comparison-eyebrow"),
+  comparisonTitle: document.querySelector("#comparison-title"),
+  comparisonSummary: document.querySelector("#comparison-summary"),
+  comparisonExit: document.querySelector("#comparison-exit"),
+  comparisonForm: document.querySelector("#comparison-form"),
+  comparisonFamily: document.querySelector("#comparison-family"),
+  comparisonLeft: document.querySelector("#comparison-left"),
+  comparisonRight: document.querySelector("#comparison-right"),
+  comparisonFields: document.querySelector("#comparison-fields"),
+  comparisonSample: document.querySelector("#comparison-sample"),
+  comparisonHelp: document.querySelector("#comparison-help"),
+  comparisonError: document.querySelector("#comparison-error"),
+  comparisonResult: document.querySelector("#comparison-result"),
+  comparisonPrevious: document.querySelector("#comparison-previous"),
+  comparisonPlay: document.querySelector("#comparison-play"),
+  comparisonNext: document.querySelector("#comparison-next"),
+  comparisonReset: document.querySelector("#comparison-reset"),
+  comparisonSpeed: document.querySelector("#comparison-speed"),
+  comparisonSpeedLabel: document.querySelector("#comparison-speed-label"),
   challengeToggle: document.querySelector("#challenge-toggle"),
   challengeToggleStatus: document.querySelector("#challenge-toggle-status"),
   challengeCard: document.querySelector("#challenge-card"),
@@ -317,6 +351,11 @@ function renderLessonChrome() {
   elements.reflectionEyebrow.textContent = lesson.reflection.eyebrow;
   elements.reflectionTitle.textContent = lesson.reflection.title;
   elements.reflectionBody.textContent = lesson.reflection.body;
+  const comparable = comparisonFamilyForLesson(lesson.id);
+  elements.comparisonLaunch.hidden = comparable === null;
+  if (comparable) {
+    elements.comparisonLaunch.setAttribute("aria-label", `Compare ${lesson.catalogLabel} with another ${comparable.label.toLowerCase()} algorithm`);
+  }
   renderFields();
   renderLegend();
   renderCode();
@@ -375,6 +414,10 @@ function renderCode() {
 }
 
 function render() {
+  if (comparisonRun) {
+    renderComparison();
+    return;
+  }
   persistCurrentProgress();
   const step = player.trace[player.index];
   renderCatalogState();
@@ -420,9 +463,13 @@ function render() {
 }
 
 function renderVisualization(step) {
-  const panels = projectLessonStepViews(lesson, step);
+  renderLessonVisualization(lesson, step, elements.visualizationRoot);
+}
+
+function renderLessonVisualization(currentLesson, step, root, { panelHeadingLevel = 3 } = {}) {
+  const panels = projectLessonStepViews(currentLesson, step);
   if (panels.length === 1 && panels[0].legacy) {
-    renderProjectedView(panels[0], elements.visualizationRoot);
+    renderProjectedView(panels[0], root);
     return;
   }
 
@@ -432,7 +479,7 @@ function renderVisualization(step) {
     const section = document.createElement("section");
     section.className = "visualization-panel";
     section.dataset.panelId = panel.id;
-    const heading = document.createElement("h3");
+    const heading = document.createElement(`h${panelHeadingLevel}`);
     heading.className = "visualization-panel-heading";
     heading.textContent = panel.heading;
     const body = document.createElement("div");
@@ -441,7 +488,7 @@ function renderVisualization(step) {
     panelGrid.append(section);
     renderProjectedView(panel, body);
   }
-  elements.visualizationRoot.replaceChildren(panelGrid);
+  root.replaceChildren(panelGrid);
 }
 
 function renderProjectedView(panel, root) {
@@ -831,6 +878,7 @@ function renderBranchingModel(model, root) {
   region.setAttribute("role", "tree");
   region.setAttribute("aria-label", model.ariaLabel);
   if (model.nodes.length === 0) {
+    region.setAttribute("role", "region");
     const empty = document.createElement("p");
     empty.className = "branching-empty";
     empty.textContent = "Empty tree";
@@ -1034,6 +1082,251 @@ function renderCodeState(step) {
   elements.mobileCodeLine.textContent = representativeLine.text.trim() || "Code block boundary";
 }
 
+function initializeComparisonMode() {
+  elements.comparisonFamily.replaceChildren(...comparisonFamilies.map((family) => {
+    const option = document.createElement("option");
+    option.value = family.id;
+    option.textContent = family.label;
+    return option;
+  }));
+}
+
+function openComparison(familyId = null, preferredLessonId = null) {
+  stopTimer();
+  comparisonFamily = getComparisonFamily(
+    familyId ?? comparisonFamilyForLesson(preferredLessonId ?? lesson.id)?.id ?? "sorting-strategies"
+  );
+  const preferred = comparisonFamily.lessonIds.includes(preferredLessonId ?? lesson.id)
+    ? preferredLessonId ?? lesson.id
+    : comparisonFamily.defaultPair[0];
+  const other = comparisonFamily.defaultPair.find((id) => id !== preferred)
+    ?? comparisonFamily.lessonIds.find((id) => id !== preferred);
+  populateComparisonAlgorithms(preferred, other);
+  comparisonRun = buildComparisonRun(comparisonInputForLaunch(preferredLessonId));
+  renderComparisonFields();
+  renderComparison();
+  elements.lessonSection.scrollIntoView({
+    behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+    block: "start"
+  });
+  elements.comparisonTitle.focus?.({ preventScroll: true });
+}
+
+function comparisonInputForLaunch(preferredLessonId) {
+  if (preferredLessonId === lesson.id && comparisonFamily.lessonIds.includes(lesson.id)) {
+    try {
+      return comparisonFamily.input.parse(comparisonFamily.input.serialize(player.input));
+    } catch {
+      // The shared family bound can be narrower than one lesson's standalone bound.
+    }
+  }
+  return structuredClone(comparisonFamily.input.defaultValue);
+}
+
+function closeComparison() {
+  stopTimer();
+  comparisonRun = null;
+  elements.comparisonWorkspace.hidden = true;
+  elements.lessonGrid.hidden = false;
+  elements.reflection.hidden = false;
+  elements.challengeToggle.hidden = false;
+  renderLessonChrome();
+  render();
+  const returnTarget = comparisonFamilyForLesson(lesson.id)
+    ? elements.comparisonLaunch
+    : elements.openComparison;
+  returnTarget.focus({ preventScroll: true });
+}
+
+function populateComparisonAlgorithms(leftId, rightId) {
+  const createOptions = () => comparisonFamily.lessonIds.map((id) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = getLesson(id).catalogLabel;
+    return option;
+  });
+  elements.comparisonLeft.replaceChildren(...createOptions());
+  elements.comparisonRight.replaceChildren(...createOptions());
+  elements.comparisonFamily.value = comparisonFamily.id;
+  elements.comparisonLeft.value = leftId;
+  elements.comparisonRight.value = rightId;
+  syncComparisonAlgorithmOptions();
+}
+
+function syncComparisonAlgorithmOptions() {
+  for (const option of elements.comparisonLeft.options) {
+    option.disabled = option.value === elements.comparisonRight.value;
+  }
+  for (const option of elements.comparisonRight.options) {
+    option.disabled = option.value === elements.comparisonLeft.value;
+  }
+}
+
+function renderComparisonFields() {
+  const serialized = comparisonFamily.input.serialize(comparisonRun.input);
+  elements.comparisonFields.replaceChildren(...comparisonFamily.input.fields.map((field) => {
+    const label = document.createElement("label");
+    const text = document.createElement("span");
+    text.textContent = field.label;
+    const input = document.createElement("input");
+    input.dataset.comparisonField = field.id;
+    input.type = field.type;
+    input.inputMode = field.inputMode;
+    input.autocomplete = "off";
+    input.spellcheck = false;
+    input.value = serialized[field.id] ?? "";
+    if (field.placeholder) input.placeholder = field.placeholder;
+    if (field.min !== undefined) input.min = field.min;
+    if (field.max !== undefined) input.max = field.max;
+    if (field.step !== undefined) input.step = field.step;
+    label.append(text, input);
+    return label;
+  }));
+  elements.comparisonHelp.textContent = comparisonFamily.input.help;
+}
+
+function collectComparisonFields() {
+  return Object.fromEntries(
+    [...elements.comparisonFields.querySelectorAll("[data-comparison-field]")]
+      .map((input) => [input.dataset.comparisonField, input.value])
+  );
+}
+
+function buildComparisonRun(input) {
+  return createComparisonRun({
+    family: comparisonFamily,
+    leftLesson: getLesson(elements.comparisonLeft.value),
+    rightLesson: getLesson(elements.comparisonRight.value),
+    input,
+    speed: comparisonRun?.speed ?? player.speed
+  });
+}
+
+function rebuildComparison(input = comparisonRun.input) {
+  stopTimer();
+  try {
+    comparisonRun = buildComparisonRun(structuredClone(input));
+    elements.comparisonError.textContent = "";
+    syncComparisonAlgorithmOptions();
+    renderComparisonFields();
+    renderComparison();
+  } catch (error) {
+    elements.comparisonError.textContent = error.message;
+  }
+}
+
+function renderComparison() {
+  const summary = comparisonSummary(comparisonRun);
+  elements.comparisonWorkspace.hidden = false;
+  elements.lessonGrid.hidden = true;
+  elements.reflection.hidden = true;
+  elements.challengeToggle.hidden = true;
+  elements.comparisonLaunch.hidden = true;
+  elements.lessonEyebrow.textContent = "COMPARISON LAB";
+  elements.lessonTitle.textContent = comparisonFamily.label;
+  elements.lessonSummary.textContent = comparisonFamily.summary;
+  elements.stepLabel.textContent = comparisonRun.status.toUpperCase();
+  elements.stepCount.textContent = `${comparisonRun.left.index}/${summary.leftTransitions} · ${comparisonRun.right.index}/${summary.rightTransitions}`;
+  elements.comparisonEyebrow.textContent = comparisonFamily.eyebrow;
+  elements.comparisonTitle.textContent = comparisonFamily.label;
+  elements.comparisonSummary.textContent = comparisonFamily.summary;
+  elements.comparisonFamily.value = comparisonFamily.id;
+
+  renderComparisonResult(summary);
+  renderComparisonLane("left");
+  renderComparisonLane("right");
+
+  const atStart = comparisonRun.left.index === 0 && comparisonRun.right.index === 0;
+  elements.comparisonPrevious.disabled = atStart;
+  elements.comparisonNext.disabled = summary.bothComplete;
+  const playing = comparisonRun.status === "playing";
+  elements.comparisonPlay.innerHTML = playing ? "Ⅱ <span>Pause together</span>" : "▶ <span>Play together</span>";
+  elements.comparisonPlay.setAttribute("aria-label", playing ? "Pause comparison" : "Play comparison");
+  const speedText = playbackSpeedLabel(comparisonRun.speed);
+  elements.comparisonSpeed.value = String(playbackDelayToControlValue(comparisonRun.speed));
+  elements.comparisonSpeedLabel.textContent = speedText;
+  elements.live.textContent = `${comparisonFamily.label}. Left step ${comparisonRun.left.index} of ${summary.leftTransitions}: ${comparisonRun.left.trace[comparisonRun.left.index].narration} Right step ${comparisonRun.right.index} of ${summary.rightTransitions}: ${comparisonRun.right.trace[comparisonRun.right.index].narration}`;
+}
+
+function renderComparisonResult(summary) {
+  const match = document.createElement("strong");
+  match.textContent = summary.resultsMatch ? "Same result ✓" : "Results differ";
+  const result = document.createElement("span");
+  result.textContent = summary.resultText;
+  const transition = document.createElement("span");
+  transition.textContent = summary.leftTransitions === summary.rightTransitions
+    ? `${summary.leftTransitions} recorded transitions on each trace`
+    : `${summary.leftTransitions} vs ${summary.rightTransitions} recorded transitions`;
+  elements.comparisonResult.replaceChildren(match, result, transition);
+}
+
+function renderComparisonLane(side) {
+  const state = comparisonRun[side];
+  const currentLesson = getLesson(state.lessonId);
+  const step = state.trace[state.index];
+  const lastIndex = state.trace.length - 1;
+  comparisonElement(side, "topic").textContent = `${currentLesson.topic.toUpperCase()} · ${currentLesson.complexity.chip}`;
+  comparisonElement(side, "title").textContent = currentLesson.catalogLabel;
+  comparisonElement(side, "step").textContent = `${state.index} / ${lastIndex}`;
+  const time = document.createElement("span");
+  time.textContent = `${currentLesson.complexity.time} time`;
+  const space = document.createElement("span");
+  space.textContent = `${currentLesson.complexity.space} ${currentLesson.complexity.spaceLabel ?? "space"}`;
+  const transitions = document.createElement("span");
+  transitions.textContent = `${lastIndex} recorded transitions`;
+  comparisonElement(side, "complexity").replaceChildren(time, space, transitions);
+  renderLessonVisualization(currentLesson, step, comparisonElement(side, "visual"), { panelHeadingLevel: 5 });
+  comparisonElement(side, "narration").textContent = step.narration;
+  renderComparisonCode(currentLesson, step, comparisonElement(side, "code"));
+
+  const previous = elements.comparisonWorkspace.querySelector(`[data-comparison-action="previous"][data-side="${side}"]`);
+  const next = elements.comparisonWorkspace.querySelector(`[data-comparison-action="next"][data-side="${side}"]`);
+  previous.disabled = state.index === 0;
+  next.disabled = state.index === lastIndex;
+}
+
+function renderComparisonCode(currentLesson, step, root) {
+  const lines = currentLesson.code.lines.filter((line) => (
+    line.steps.some((codeStep) => step.codeSteps.includes(codeStep))
+  ));
+  const line = lines.find((item) => item.text.trim()) ?? lines[0];
+  const number = document.createElement("strong");
+  number.textContent = `L${line.number}`;
+  root.replaceChildren(number, document.createTextNode(line.text.trim() || "Code block boundary"));
+}
+
+function comparisonElement(side, suffix) {
+  return document.querySelector(`#comparison-${side}-${suffix}`);
+}
+
+function moveComparison(action) {
+  stopTimer();
+  comparisonRun = comparisonReducer(comparisonRun, action);
+  renderComparison();
+}
+
+function startComparisonPlayback() {
+  comparisonRun = comparisonReducer(comparisonRun, { type: "PLAY" });
+  restartComparisonTimer();
+  renderComparison();
+}
+
+function pauseComparisonPlayback() {
+  stopTimer();
+  comparisonRun = comparisonReducer(comparisonRun, { type: "PAUSE" });
+  renderComparison();
+}
+
+function restartComparisonTimer() {
+  stopTimer();
+  if (comparisonRun.status !== "playing") return;
+  timerId = window.setInterval(() => {
+    comparisonRun = comparisonReducer(comparisonRun, { type: "TICK" });
+    if (comparisonRun.status !== "playing") stopTimer();
+    renderComparison();
+  }, comparisonRun.speed);
+}
+
 function renderCompletion() {
   const complete = player.status === "complete";
   elements.completion.hidden = !complete;
@@ -1179,6 +1472,14 @@ function renderPrediction() {
 }
 
 function loadLesson(id, { enter = true } = {}) {
+  if (comparisonRun) {
+    stopTimer();
+    comparisonRun = null;
+    elements.comparisonWorkspace.hidden = true;
+    elements.lessonGrid.hidden = false;
+    elements.reflection.hidden = false;
+    elements.challengeToggle.hidden = false;
+  }
   if (id !== lesson.id) {
     stopTimer();
     lesson = getLesson(id);
@@ -1358,6 +1659,51 @@ function replaceLessonUrl(lessonId) {
 
 elements.apply.addEventListener("click", applyCurrentInput);
 elements.sample.addEventListener("click", loadSample);
+elements.openComparison.addEventListener("click", () => openComparison("sorting-strategies"));
+elements.comparisonLaunch.addEventListener("click", () => openComparison(null, lesson.id));
+elements.comparisonExit.addEventListener("click", closeComparison);
+elements.comparisonFamily.addEventListener("change", () => openComparison(elements.comparisonFamily.value));
+elements.comparisonLeft.addEventListener("change", () => rebuildComparison());
+elements.comparisonRight.addEventListener("change", () => rebuildComparison());
+elements.comparisonForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  try {
+    rebuildComparison(comparisonFamily.input.parse(collectComparisonFields()));
+  } catch (error) {
+    elements.comparisonError.textContent = error.message;
+    elements.comparisonFields.querySelector("input")?.focus();
+  }
+});
+elements.comparisonSample.addEventListener("click", () => {
+  rebuildComparison(structuredClone(comparisonFamily.input.sampleValue));
+});
+elements.comparisonPrevious.addEventListener("click", () => moveComparison({ type: "PREVIOUS" }));
+elements.comparisonNext.addEventListener("click", () => moveComparison({ type: "NEXT" }));
+elements.comparisonReset.addEventListener("click", () => moveComparison({ type: "RESET" }));
+elements.comparisonPlay.addEventListener("click", () => {
+  if (comparisonRun.status === "playing") pauseComparisonPlayback();
+  else startComparisonPlayback();
+});
+elements.comparisonSpeed.addEventListener("input", () => {
+  const wasPlaying = comparisonRun.status === "playing";
+  comparisonRun = comparisonReducer(comparisonRun, {
+    type: "SET_SPEED",
+    speed: controlValueToPlaybackDelay(Number(elements.comparisonSpeed.value))
+  });
+  if (wasPlaying) restartComparisonTimer();
+  renderComparison();
+});
+elements.comparisonWorkspace.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-comparison-action]");
+  if (!button) return;
+  const state = comparisonRun[button.dataset.side];
+  const direction = button.dataset.comparisonAction === "next" ? 1 : -1;
+  moveComparison({
+    type: "STEP_SIDE",
+    side: button.dataset.side,
+    index: state.index + direction
+  });
+});
 elements.catalogSearch.addEventListener("input", updateCatalogFilters);
 elements.catalogTopicFilter.addEventListener("change", updateCatalogFilters);
 elements.catalogPatternFilter.addEventListener("change", updateCatalogFilters);
@@ -1469,6 +1815,16 @@ elements.pipToggle.addEventListener("click", () => {
 });
 document.addEventListener("keydown", (event) => {
   if (event.defaultPrevented || event.target.matches("input, button, textarea, select, a[href], [contenteditable='true']")) return;
+  if (comparisonRun) {
+    if (event.key === "ArrowRight") moveComparison({ type: "NEXT" });
+    if (event.key === "ArrowLeft") moveComparison({ type: "PREVIOUS" });
+    if (event.key === " ") {
+      event.preventDefault();
+      comparisonRun.status === "playing" ? pauseComparisonPlayback() : startComparisonPlayback();
+    }
+    if (event.key.toLowerCase() === "r") moveComparison({ type: "RESET" });
+    return;
+  }
   if (event.key === "ArrowRight") move({ type: "NEXT" });
   if (event.key === "ArrowLeft") move({ type: "PREVIOUS" });
   if (event.key === " ") {
@@ -1486,6 +1842,7 @@ window.addEventListener("hashchange", () => {
 mountPips();
 observePipVisibility();
 initializeCatalog();
+initializeComparisonMode();
 renderLessonChrome();
 render();
 if (initialLessonIdFromHash) {
