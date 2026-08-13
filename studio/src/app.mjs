@@ -48,6 +48,13 @@ import {
 import { createPlayerState, playerReducer } from "./player.mjs";
 import { projectLessonStepViews } from "./renderer-registry.mjs";
 import {
+  createComparisonShareState,
+  createLessonShareState,
+  readShareStateFromUrl,
+  removeShareStateFromUrl,
+  shareStateUrl
+} from "./shareable-state.mjs";
+import {
   controlValueToPlaybackDelay,
   playbackDelayToControlValue,
   playbackSpeedLabel
@@ -61,10 +68,20 @@ const progressStorage = getBrowserStorage();
 let progress = readLearningProgress(progressStorage, lessons);
 let challengePreferences = readChallengePreferences(progressStorage, lessons);
 let catalogFilters = catalogFilterStateFromUrl(window.location.href);
+const initialShared = readShareStateFromUrl(window.location.href);
 const initialLessonIdFromHash = readLessonIdFromHash(window.location.hash, lessonIds);
-const initialLessonId = initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
+const initialSharedLessonId = initialShared.state?.kind === "lesson" && lessonIds.includes(initialShared.state.lessonId)
+  ? initialShared.state.lessonId
+  : null;
+const initialLessonId = initialSharedLessonId ?? initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
 let lesson = getLesson(initialLessonId);
-let player = createRestoredPlayer(lesson);
+const sharedLessonRestore = initialSharedLessonId ? restoreSharedLessonPlayer(lesson, initialShared.state) : null;
+let shareRestoreError = initialShared.error
+  ?? (initialShared.state?.kind === "lesson" && !initialSharedLessonId ? "The shared lesson is not in this curriculum." : null)
+  ?? sharedLessonRestore?.error
+  ?? null;
+let player = sharedLessonRestore?.player ?? createRestoredPlayer(lesson);
+if (initialShared.state) challengePreferences = { ...challengePreferences, enabled: false };
 if (challengePreferences.enabled) player = playerReducer(player, { type: "RESET" });
 let challenge = createChallengeSession(lesson.id, player.trace);
 let comparisonFamily = getComparisonFamily("sorting-strategies");
@@ -136,6 +153,11 @@ const elements = {
   comparisonReset: document.querySelector("#comparison-reset"),
   comparisonSpeed: document.querySelector("#comparison-speed"),
   comparisonSpeedLabel: document.querySelector("#comparison-speed-label"),
+  shareStateButton: document.querySelector("#share-state-button"),
+  shareStateStatus: document.querySelector("#share-state-status"),
+  shareStateNotice: document.querySelector("#share-state-notice"),
+  shareStateNoticeCopy: document.querySelector("#share-state-notice-copy"),
+  dismissShareStateNotice: document.querySelector("#dismiss-share-state-notice"),
   challengeToggle: document.querySelector("#challenge-toggle"),
   challengeToggleStatus: document.querySelector("#challenge-toggle-status"),
   challengeCard: document.querySelector("#challenge-card"),
@@ -1294,6 +1316,7 @@ function initializeComparisonMode() {
 
 function openComparison(familyId = null, preferredLessonId = null) {
   stopTimer();
+  clearSharedUrlState();
   comparisonFamily = getComparisonFamily(
     familyId ?? comparisonFamilyForLesson(preferredLessonId ?? lesson.id)?.id ?? "sorting-strategies"
   );
@@ -1313,6 +1336,30 @@ function openComparison(familyId = null, preferredLessonId = null) {
   elements.comparisonTitle.focus?.({ preventScroll: true });
 }
 
+function restoreSharedComparison(state) {
+  try {
+    comparisonFamily = getComparisonFamily(state.familyId);
+    if (!comparisonFamily.lessonIds.includes(state.leftLessonId)
+      || !comparisonFamily.lessonIds.includes(state.rightLessonId)) {
+      throw new Error("The shared algorithms do not belong to this comparison.");
+    }
+    populateComparisonAlgorithms(state.leftLessonId, state.rightLessonId);
+    const input = comparisonFamily.input.parse(state.fields);
+    comparisonRun = buildComparisonRun(input);
+    if (state.leftIndex >= comparisonRun.left.trace.length || state.rightIndex >= comparisonRun.right.trace.length) {
+      throw new Error("A shared comparison step is outside its trace.");
+    }
+    comparisonRun = comparisonReducer(comparisonRun, { type: "STEP_SIDE", side: "left", index: state.leftIndex });
+    comparisonRun = comparisonReducer(comparisonRun, { type: "STEP_SIDE", side: "right", index: state.rightIndex });
+    renderComparisonFields();
+    renderComparison();
+    return null;
+  } catch (error) {
+    comparisonRun = null;
+    return error.message;
+  }
+}
+
 function comparisonInputForLaunch(preferredLessonId) {
   if (preferredLessonId === lesson.id && comparisonFamily.lessonIds.includes(lesson.id)) {
     try {
@@ -1326,6 +1373,7 @@ function comparisonInputForLaunch(preferredLessonId) {
 
 function closeComparison() {
   stopTimer();
+  clearSharedUrlState();
   comparisonRun = null;
   elements.comparisonWorkspace.hidden = true;
   elements.lessonGrid.hidden = false;
@@ -1405,6 +1453,7 @@ function buildComparisonRun(input) {
 
 function rebuildComparison(input = comparisonRun.input) {
   stopTimer();
+  clearSharedUrlState();
   try {
     comparisonRun = buildComparisonRun(structuredClone(input));
     elements.comparisonError.textContent = "";
@@ -1502,11 +1551,13 @@ function comparisonElement(side, suffix) {
 
 function moveComparison(action) {
   stopTimer();
+  clearSharedUrlState();
   comparisonRun = comparisonReducer(comparisonRun, action);
   renderComparison();
 }
 
 function startComparisonPlayback() {
+  clearSharedUrlState();
   comparisonRun = comparisonReducer(comparisonRun, { type: "PLAY" });
   restartComparisonTimer();
   renderComparison();
@@ -1674,6 +1725,7 @@ function renderPrediction() {
 }
 
 function loadLesson(id, { enter = true } = {}) {
+  clearSharedUrlState();
   if (comparisonRun) {
     stopTimer();
     comparisonRun = null;
@@ -1724,6 +1776,7 @@ function collectFields() {
 
 function applyCurrentInput() {
   stopTimer();
+  clearSharedUrlState();
   try {
     const input = lesson.input.parse(collectFields());
     const trace = buildValidatedTrace(lesson, input);
@@ -1739,6 +1792,7 @@ function applyCurrentInput() {
 
 function loadSample() {
   stopTimer();
+  clearSharedUrlState();
   const input = structuredClone(lesson.input.sampleValue);
   const trace = buildValidatedTrace(lesson, input);
   player = playerReducer(player, { type: "LOAD_INPUT", trace, input });
@@ -1750,6 +1804,7 @@ function loadSample() {
 
 function startPlayback() {
   if (challengePreferences.enabled) return;
+  clearSharedUrlState();
   player = playerReducer(player, { type: "PLAY" });
   restartTimer();
   render();
@@ -1788,6 +1843,7 @@ function move(action) {
     elements.challengeOptions.querySelector("input")?.focus();
     return;
   }
+  clearSharedUrlState();
   player = playerReducer(player, action);
   if (action.type === "RESET") challenge = createChallengeSession(lesson.id, player.trace);
   finalizeChallenge();
@@ -1815,6 +1871,20 @@ function createRestoredPlayer(currentLesson) {
     restoredPlayer = playerReducer(restoredPlayer, { type: "STEP", index: restored.stepIndex });
   }
   return restoredPlayer;
+}
+
+function restoreSharedLessonPlayer(currentLesson, state) {
+  try {
+    if (state.lessonId !== currentLesson.id) throw new Error("The shared lesson does not match the link.");
+    const input = currentLesson.input.parse(state.fields);
+    const trace = buildValidatedTrace(currentLesson, input);
+    if (state.stepIndex >= trace.length) throw new Error("The shared step is outside this lesson trace.");
+    let restoredPlayer = createPlayerState({ lessonId: currentLesson.id, trace, input });
+    if (state.stepIndex > 0) restoredPlayer = playerReducer(restoredPlayer, { type: "STEP", index: state.stepIndex });
+    return { player: restoredPlayer, error: null };
+  } catch (error) {
+    return { player: createRestoredPlayer(currentLesson), error: error.message };
+  }
 }
 
 function restoreLessonState(currentLesson) {
@@ -1855,12 +1925,92 @@ function getBrowserStorage() {
 }
 
 function replaceLessonUrl(lessonId) {
-  const nextUrl = new URL(window.location.href);
+  const nextUrl = removeShareStateFromUrl(window.location.href);
   nextUrl.hash = lessonHash(lessonId);
   window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
 }
 
+function clearSharedUrlState() {
+  const current = new URL(window.location.href);
+  if (!current.searchParams.has("share")) return;
+  const next = removeShareStateFromUrl(current);
+  window.history.replaceState(null, "", `${next.pathname}${next.search}${next.hash}`);
+  elements.shareStateStatus.textContent = "";
+}
+
+function currentShareState() {
+  if (comparisonRun) {
+    return createComparisonShareState({
+      familyId: comparisonFamily.id,
+      leftLessonId: comparisonRun.left.lessonId,
+      rightLessonId: comparisonRun.right.lessonId,
+      fields: comparisonFamily.input.serialize(comparisonRun.input),
+      leftIndex: comparisonRun.left.index,
+      rightIndex: comparisonRun.right.index
+    });
+  }
+  return createLessonShareState({
+    lessonId: lesson.id,
+    fields: lesson.input.serialize(player.input),
+    stepIndex: player.index
+  });
+}
+
+async function shareCurrentState() {
+  const state = currentShareState();
+  const base = new URL(window.location.pathname, window.location.origin);
+  const url = shareStateUrl(base, state).href;
+  const title = comparisonRun ? `${comparisonFamily.label} comparison` : lesson.catalogLabel;
+  const shareData = { title: `${title} · DSA Dojo`, text: "Continue from this exact algorithm state.", url };
+  elements.shareStateStatus.textContent = "";
+  try {
+    const canUseNativeShare = typeof navigator.share === "function"
+      && (typeof navigator.canShare !== "function" || navigator.canShare(shareData));
+    if (canUseNativeShare) {
+      await navigator.share(shareData);
+      elements.shareStateStatus.textContent = "State shared.";
+    } else {
+      await copyShareUrl(url);
+      elements.shareStateStatus.textContent = "Link copied — input and step included.";
+    }
+  } catch (error) {
+    if (error?.name === "AbortError") return;
+    elements.shareStateStatus.textContent = "Could not share this state. Try again.";
+  }
+}
+
+async function copyShareUrl(url) {
+  if (navigator.clipboard?.writeText) {
+    try {
+      await navigator.clipboard.writeText(url);
+      return;
+    } catch {
+      // Older or restricted browsers may expose Clipboard without granting writes.
+    }
+  }
+  const input = document.createElement("textarea");
+  input.value = url;
+  input.setAttribute("readonly", "");
+  input.className = "sr-only";
+  document.body.append(input);
+  input.select();
+  const copied = document.execCommand?.("copy");
+  input.remove();
+  if (!copied) throw new Error("Clipboard unavailable.");
+}
+
+function renderShareRestoreNotice() {
+  elements.shareStateNotice.hidden = !shareRestoreError;
+  elements.shareStateNoticeCopy.textContent = shareRestoreError ?? "";
+}
+
 elements.apply.addEventListener("click", applyCurrentInput);
+elements.shareStateButton.addEventListener("click", shareCurrentState);
+elements.dismissShareStateNotice.addEventListener("click", () => {
+  shareRestoreError = null;
+  elements.shareStateNotice.hidden = true;
+  clearSharedUrlState();
+});
 elements.sample.addEventListener("click", loadSample);
 elements.openComparison.addEventListener("click", () => openComparison("sorting-strategies"));
 elements.comparisonLaunch.addEventListener("click", () => openComparison(null, lesson.id));
@@ -1920,6 +2070,7 @@ elements.catalogProgressFilter.addEventListener("change", updateCatalogFilters);
 elements.clearCatalogFilters.addEventListener("click", clearCatalogFilters);
 elements.catalogEmptyClear.addEventListener("click", clearCatalogFilters);
 elements.challengeToggle.addEventListener("click", () => {
+  clearSharedUrlState();
   stopTimer();
   const enabled = !challengePreferences.enabled;
   challengePreferences = setChallengePreference(challengePreferences, enabled, lessons);
@@ -2054,9 +2205,20 @@ observePipVisibility();
 initializeCatalog();
 initializeComparisonMode();
 renderLessonChrome();
-render();
-if (initialLessonIdFromHash) {
-  window.requestAnimationFrame(enterLesson);
+if (initialShared.state?.kind === "comparison") {
+  shareRestoreError = restoreSharedComparison(initialShared.state) ?? shareRestoreError;
+  if (!comparisonRun) render();
 } else {
+  render();
+}
+renderShareRestoreNotice();
+if (initialShared.state && !shareRestoreError) {
+  elements.shareStateStatus.textContent = initialShared.state.kind === "comparison"
+    ? "Shared comparison restored."
+    : "Shared input and step restored.";
+}
+if (initialLessonIdFromHash || initialSharedLessonId) {
+  window.requestAnimationFrame(enterLesson);
+} else if (!comparisonRun && !initialShared.error) {
   replaceLessonUrl(lesson.id);
 }

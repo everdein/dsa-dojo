@@ -65,6 +65,7 @@ studio/
     player.mjs              Framework-free player state machine
     challenge-mode.mjs      Trace-derived questions, scoring, and local bests
     comparison-mode.mjs     Compatible families and dual-trace state machine
+    shareable-state.mjs     Versioned URL payload validation and encoding
     *.mjs                   Lesson-specific deterministic trace builders
     lessons/
       index.mjs             Validated lesson registry
@@ -331,6 +332,23 @@ The currently registered families are:
   shared Merge Sort bound of eight values;
 - Fibonacci recursion: naive recursive and memoized recursion, capped at their
   shared visible-call-tree bound of six.
+
+### Shareable states
+
+`studio/src/shareable-state.mjs` defines a versioned, browser-safe payload for
+lesson and comparison snapshots. It accepts only bounded string fields, safe
+curriculum identifiers, and nonnegative integer positions, then encodes the
+validated JSON as UTF-8 base64url in the `share` query parameter. Lesson links
+retain a human-readable lesson hash; comparison links use `#comparison`.
+
+The URL payload is a request to reconstruct state, never trusted trace data.
+The browser resolves lesson and family identifiers against the live registries,
+runs serialized fields through the normal input parser, rebuilds validated
+deterministic traces, and rejects positions beyond those traces. A bad payload
+leaves the default lesson operational and surfaces a dismissible alert. The
+share action prefers the Web Share API when available and otherwise copies the
+same absolute URL to the clipboard. Progress, challenge outcomes, preferences,
+and playback timers are not serialized.
 
 Recorded transition counts are shown as trace-shape context only. The UI avoids
 calling them operation counts or benchmarks because trace granularity varies by

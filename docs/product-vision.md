@@ -107,6 +107,21 @@ The mode intentionally excludes algorithms that are merely adjacent in the
 curriculum but solve different problems. More comparison families should be
 added only when the input and result semantics are honestly compatible.
 
+## Shareable Algorithm States
+
+Every lesson and comparison can produce a portable URL for its current visible
+state. A lesson link includes the lesson id, serialized input fields, and trace
+index. A comparison link includes its family, algorithm pair, shared fields,
+and each lane's independent index. Opening the link rebuilds both algorithm and
+trace state through the ordinary validated parsers; trace snapshots themselves
+are never embedded or trusted.
+
+The payload is versioned, bounded, Unicode-safe, and URL-safe. Malformed, stale,
+unknown, or out-of-range state falls back to a usable lesson with a dismissible
+explanation. Native device sharing is used when supported, with clipboard copy
+as the desktop fallback. Links intentionally exclude local progress history,
+challenge answers, best scores, and preferences.
+
 ## The Guide Companion
 
 - **Name:** Sensei Pip

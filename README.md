@@ -25,6 +25,9 @@ synchronized or independent stepping, projected visual state, active source
 lines, complexity labels, and matching-result verification.
 The Learning Map turns manifest prerequisites into an explorable left-to-right
 path with pattern highlighting, local progress, and direct lesson entry.
+Shareable states capture an exact lesson input and step—or both sides of an
+algorithm comparison—in a validated URL that can be copied or sent with the
+device's native share sheet.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser
@@ -69,7 +72,9 @@ builds the static site and runs Playwright browser and accessibility tests.
 3. Open **Detect a Cycle** to see the same player drive a connected-node renderer.
 4. Open the **Learning map**, select Sliding Window Maximum, and inspect the two
    earlier ideas that unlock it.
-5. Finish either lesson to reveal replay, sample, and next-lesson actions.
+5. Step into a custom input, choose **Share this state**, and reopen the copied
+   link to continue from that exact decision.
+6. Finish either lesson to reveal replay, sample, and next-lesson actions.
 
 ## Interactive Curriculum
 
