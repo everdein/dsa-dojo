@@ -17,6 +17,7 @@ import { projectLinkedListView } from "../studio/src/linked-list-renderer.mjs";
 import {
   assertLesson,
   assertTrace,
+  buildTrace,
   buildValidatedTrace
 } from "../studio/src/lesson-contract.mjs";
 import { getLesson, listLessons } from "../studio/src/lessons/index.mjs";
@@ -347,6 +348,33 @@ test("trace validation rejects non-finite derived fields and compares data witho
     () => buildValidatedTrace(subtlyMutatingSolverLesson, { values: [1, 2, 3] }),
     /mutated its input while solving/
   );
+});
+
+test("runtime trace construction builds once while CI verification repeats and solves", () => {
+  const sourceLesson = getLesson("arrays/find-largest");
+  let builds = 0;
+  let solves = 0;
+  const measuredLesson = {
+    ...sourceLesson,
+    buildTrace(input) {
+      builds += 1;
+      return sourceLesson.buildTrace(input);
+    },
+    solve(input) {
+      solves += 1;
+      return sourceLesson.solve(input);
+    }
+  };
+  const input = { values: [3, 1, 5] };
+
+  assert.equal(buildTrace(measuredLesson, input).at(-1).result, 5);
+  assert.equal(builds, 1);
+  assert.equal(solves, 0);
+  assert.deepEqual(input, { values: [3, 1, 5] });
+
+  assert.equal(buildValidatedTrace(measuredLesson, input).at(-1).result, 5);
+  assert.equal(builds, 3);
+  assert.equal(solves, 1);
 });
 
 test("every lesson default and sample produces a valid deterministic trace", () => {

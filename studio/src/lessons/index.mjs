@@ -1,4 +1,4 @@
-import { assertLesson, buildValidatedTrace } from "../lesson-contract.mjs";
+import { assertLesson } from "../lesson-contract.mjs";
 import { curriculumLessons, getCurriculumLesson } from "../curriculum-manifest.mjs";
 import { activitySelectionLesson } from "./activity-selection.mjs";
 import { detectCycleLesson } from "./detect-cycle.mjs";
@@ -126,10 +126,6 @@ if (
   || lessons.some((lesson, index) => lesson.id !== curriculumLessons[index].id)
 ) {
   throw new Error("Registered lessons must match the ordered curriculum manifest.");
-}
-
-for (const lesson of lessons) {
-  buildValidatedTrace(lesson, lesson.input.defaultValue);
 }
 
 export function listLessons() {

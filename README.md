@@ -30,9 +30,10 @@ algorithm comparison—in a validated URL that can be copied or sent with the
 device's native share sheet.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
-lessons across 20 topics. Coverage floors, browser-gated deployment, and focused
-browser controllers now protect releases and maintenance; the next stabilization
-work focuses on runtime efficiency rather than another core lecture.
+lessons across 20 topics. Coverage floors, browser-gated deployment, focused
+browser controllers, and single-pass runtime traces now protect releases and
+maintenance; the next stabilization work focuses on curriculum loading and
+source-pane scalability rather than another core lecture.
 
 ## Try It Locally
 

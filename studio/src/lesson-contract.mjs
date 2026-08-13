@@ -175,7 +175,19 @@ export function assertTrace(trace, lesson) {
   return trace;
 }
 
-export function buildValidatedTrace(lesson, input) {
+/**
+ * Production trace construction. This keeps structural, renderer, finite-value,
+ * and completion checks on every learner input while building the trace once.
+ */
+export function buildTrace(lesson, input) {
+  return assertTrace(lesson.buildTrace(structuredClone(input)), lesson);
+}
+
+/**
+ * Test/build verification. In addition to runtime safety, this proves trace
+ * determinism, input immutability, and agreement with the independent solver.
+ */
+export function buildVerifiedTrace(lesson, input) {
   const firstInput = structuredClone(input);
   const secondInput = structuredClone(input);
   const first = assertTrace(lesson.buildTrace(firstInput), lesson);
@@ -197,6 +209,9 @@ export function buildValidatedTrace(lesson, input) {
   }
   return first;
 }
+
+// Compatibility for lesson-focused tests and external contributors.
+export const buildValidatedTrace = buildVerifiedTrace;
 
 function assertSharedStep(step, index, codeSteps) {
   if (step.step !== index) throw new Error(`Trace step ${index} is out of order.`);
