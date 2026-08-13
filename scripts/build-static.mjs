@@ -30,26 +30,29 @@ await Promise.all(curriculumModulePaths.map(async (modulePath) => {
   await copyFile(source, destination);
 }));
 
-await versionLandingPageAssets();
-
-console.log(`Built static site at ${outputRoot}`);
-
-async function versionLandingPageAssets() {
-  const landingPath = path.join(outputRoot, "index.html");
-  let landing = await readFile(landingPath, "utf8");
-  const assets = [
+await Promise.all([
+  versionHtmlAssets(path.join(outputRoot, "index.html"), [
     ["./home.css", path.join(studioRoot, "home.css")],
     ["./pip.css", path.join(studioRoot, "pip.css")],
     ["./studio/src/home.mjs", path.join(studioRoot, "src", "home.mjs")]
-  ];
+  ]),
+  versionHtmlAssets(path.join(outputRoot, "studio", "index.html"), [
+    ["../styles.css", path.join(studioRoot, "styles.css")],
+    ["../pip.css", path.join(studioRoot, "pip.css")],
+    ["./src/app.mjs", path.join(studioRoot, "src", "app.mjs")]
+  ])
+]);
 
+console.log(`Built static site at ${outputRoot}`);
+
+async function versionHtmlAssets(htmlPath, assets) {
+  let html = await readFile(htmlPath, "utf8");
   for (const [publicPath, sourcePath] of assets) {
     const digest = createHash("sha256")
       .update(await readFile(sourcePath))
       .digest("hex")
       .slice(0, 12);
-    landing = landing.replace(publicPath, `${publicPath}?v=${digest}`);
+    html = html.replace(publicPath, `${publicPath}?v=${digest}`);
   }
-
-  await writeFile(landingPath, landing, "utf8");
+  await writeFile(htmlPath, html, "utf8");
 }
