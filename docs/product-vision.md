@@ -82,6 +82,25 @@ incorrect predictions, and the standard guided player returns unchanged when
 the mode is off. The preference and strongest completed result per lesson are
 stored only on the learner's device.
 
+## Algorithm Comparison Mode
+
+Comparison Mode makes tradeoffs visible by running two compatible lessons on
+independent copies of one shared input. The first comparison families are the
+four sorting strategiesâ€”Bubble, Insertion, Merge, and Quick Sortâ€”and the naive
+and memoized Fibonacci recurrences. These are genuine comparisons because each
+family shares a problem definition, accepted input, and expected result.
+
+The learner can advance both traces as synchronized beats, inspect either side
+independently, or play both until their different trace lengths complete. Each
+lane retains its renderer panels, narration, active physical source line, and
+time/space complexity. The lab verifies equal results before rendering and
+states plainly that recorded teaching transitions are not runtime benchmarks
+or raw operation counts.
+
+The mode intentionally excludes algorithms that are merely adjacent in the
+curriculum but solve different problems. More comparison families should be
+added only when the input and result semantics are honestly compatible.
+
 ## The Guide Companion
 
 - **Working name:** Pip
