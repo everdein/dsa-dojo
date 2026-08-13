@@ -1,4 +1,5 @@
-import { cp, copyFile, mkdir, rm } from "node:fs/promises";
+import { createHash } from "node:crypto";
+import { cp, copyFile, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { curriculumModulePaths } from "../studio/src/curriculum-manifest.mjs";
@@ -29,4 +30,26 @@ await Promise.all(curriculumModulePaths.map(async (modulePath) => {
   await copyFile(source, destination);
 }));
 
+await versionLandingPageAssets();
+
 console.log(`Built static site at ${outputRoot}`);
+
+async function versionLandingPageAssets() {
+  const landingPath = path.join(outputRoot, "index.html");
+  let landing = await readFile(landingPath, "utf8");
+  const assets = [
+    ["./home.css", path.join(studioRoot, "home.css")],
+    ["./pip.css", path.join(studioRoot, "pip.css")],
+    ["./studio/src/home.mjs", path.join(studioRoot, "src", "home.mjs")]
+  ];
+
+  for (const [publicPath, sourcePath] of assets) {
+    const digest = createHash("sha256")
+      .update(await readFile(sourcePath))
+      .digest("hex")
+      .slice(0, 12);
+    landing = landing.replace(publicPath, `${publicPath}?v=${digest}`);
+  }
+
+  await writeFile(landingPath, landing, "utf8");
+}

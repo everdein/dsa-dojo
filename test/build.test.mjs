@@ -34,6 +34,11 @@ test("static build keeps every browser module inside the Pages artifact", async 
   for (const modulePath of curriculumModulePaths) {
     await access(path.join(outputRoot, ...modulePath.split("/")));
   }
+
+  const landing = await readFile(path.join(outputRoot, "index.html"), "utf8");
+  assert.match(landing, /\.\/home\.css\?v=[a-f0-9]{12}/);
+  assert.match(landing, /\.\/pip\.css\?v=[a-f0-9]{12}/);
+  assert.match(landing, /\.\/studio\/src\/home\.mjs\?v=[a-f0-9]{12}/);
 });
 
 async function readModuleEntry(htmlPath) {
@@ -41,7 +46,7 @@ async function readModuleEntry(htmlPath) {
   const match = html.match(/<script\s+type="module"\s+src="([^"]+)"/);
   assert.ok(match, `Expected a module entry in ${path.relative(outputRoot, htmlPath)}`);
 
-  const entryPath = path.resolve(path.dirname(htmlPath), match[1]);
+  const entryPath = path.resolve(path.dirname(htmlPath), match[1].split("?", 1)[0]);
   assertInsideArtifact(entryPath, htmlPath);
   await access(entryPath);
   return entryPath;
