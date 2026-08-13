@@ -1040,6 +1040,16 @@ h3 {
 .home-progress-meter { height: 12px; overflow: hidden; border-radius: 999px; background: rgba(16,37,31,0.12); }
 .home-progress-meter span { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--green-dark), var(--green)); }
 .home-progress .home-button { white-space: nowrap; }
+.home-catalog-tools { display: grid; grid-template-columns: minmax(220px, 1.5fr) repeat(3, minmax(140px, 0.75fr)) auto; gap: 12px; align-items: end; max-width: var(--content); margin: 0 auto 14px; padding: 20px; border: 1px solid var(--line); border-radius: 22px; background: var(--surface); }
+.home-catalog-tools label { display: grid; gap: 7px; min-width: 0; color: var(--ink-soft); font-size: 0.7rem; font-weight: 800; }
+.home-catalog-tools input, .home-catalog-tools select { width: 100%; min-width: 0; height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 12px; background: #fbfcfa; color: var(--ink); font: inherit; }
+.home-filter-clear { min-height: 44px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; }
+.home-filter-clear[hidden] { display: none; }
+.home-filter-results { max-width: var(--content); min-height: 32px; margin: 0 auto 18px; color: var(--ink-soft); font-size: 0.75rem; font-weight: 700; }
+.home-filter-results p { margin: 0; }
+.home-filter-empty { max-width: var(--content); margin: 18px auto 34px; padding: 36px; border: 1px dashed #a9c2b3; border-radius: 24px; background: rgba(217,239,228,0.3); text-align: center; }
+.home-filter-empty[hidden] { display: none; }
+.home-filter-empty p { margin: 8px 0 18px; color: var(--ink-soft); }
 
 .home-topic-nav ul {
   display: flex;
@@ -1096,6 +1106,7 @@ h3 {
   display: grid;
   gap: clamp(72px, 10vw, 120px);
 }
+.home-lesson-topic[hidden], .home-topic-lessons > li[hidden], .home-topic-nav li[hidden] { display: none; }
 
 .home-lesson-topic {
   scroll-margin-top: 110px;
@@ -1634,6 +1645,9 @@ h3 {
 
   .home-progress { grid-template-columns: 1fr; }
   .home-progress .home-button { justify-self: start; }
+  .home-catalog-tools { grid-template-columns: 1fr 1fr; }
+  .home-catalog-search { grid-column: 1 / -1; }
+  .home-filter-clear { grid-column: 1 / -1; justify-self: start; }
 
   .home-lesson-topic-heading {
     display: grid;

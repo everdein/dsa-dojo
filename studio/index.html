@@ -87,6 +87,38 @@
             <button class="quiet-button quiet-button--danger" id="confirm-reset-progress-button" type="button">Reset everything</button>
           </div>
         </section>
+        <form class="catalog-tools" id="catalog-tools" role="search" aria-label="Filter lessons">
+          <label class="catalog-search">
+            <span>Search lessons</span>
+            <input id="catalog-search" type="search" maxlength="80" autocomplete="off" placeholder="Try binary search, graphs, or L24" />
+          </label>
+          <label>
+            <span>Topic</span>
+            <select id="catalog-topic-filter"><option value="all">All topics</option></select>
+          </label>
+          <label>
+            <span>Pattern</span>
+            <select id="catalog-pattern-filter"><option value="all">All patterns</option></select>
+          </label>
+          <label>
+            <span>Progress</span>
+            <select id="catalog-progress-filter">
+              <option value="all">Any progress</option>
+              <option value="not-started">Not started</option>
+              <option value="started">Started</option>
+              <option value="complete">Complete</option>
+            </select>
+          </label>
+          <button class="quiet-button" id="clear-catalog-filters" type="button">Clear filters</button>
+        </form>
+        <div class="catalog-results" aria-live="polite">
+          <p id="catalog-results-summary">Showing all 55 lessons.</p>
+        </div>
+        <section class="catalog-empty" id="catalog-empty" hidden>
+          <h3>No lessons match yet.</h3>
+          <p>Try a broader word or clear one of the filters.</p>
+          <button class="primary-button" id="catalog-empty-clear" type="button">Show all lessons</button>
+        </section>
         <div class="lesson-list" id="lesson-list" aria-label="Available lessons"></div>
       </section>
 

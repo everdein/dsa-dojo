@@ -15,6 +15,8 @@ the code that caused it, and use Pip, an emotionally responsive original guide
 companion, to reinforce predictions, discoveries, and reusable patterns.
 Lesson completion, custom input, and the last visible step are saved locally so
 learners can continue where they stopped without creating an account.
+Both catalogs can be searched and narrowed by topic, reusable pattern, and
+local progress; active filters are reflected in the URL for reloadable views.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser

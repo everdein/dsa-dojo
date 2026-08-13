@@ -54,6 +54,7 @@ export function renderCurriculumCatalog(documentRoot, lessons, progress = null) 
     const topicId = curriculumTopicId(group.topic);
     const navigationItem = documentRoot.createElement("li");
     const navigationLink = documentRoot.createElement("a");
+    navigationItem.dataset.topic = group.topic;
     navigationLink.href = `#${topicId}`;
     navigationLink.setAttribute(
       "aria-label",
@@ -86,6 +87,7 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount, progres
   const headingId = `${topicId}-title`;
   const section = documentRoot.createElement("section");
   section.className = "home-lesson-topic";
+  section.dataset.topic = group.topic;
   section.id = topicId;
   section.setAttribute("aria-labelledby", headingId);
   section.tabIndex = -1;
@@ -130,6 +132,7 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount, progres
 function createLessonCard(documentRoot, lesson, progress) {
   const card = documentRoot.createElement("a");
   card.className = "home-lesson-card";
+  card.dataset.lessonId = lesson.id;
   card.href = `./studio/#lesson=${encodeURIComponent(lesson.id)}`;
 
   const index = documentRoot.createElement("span");

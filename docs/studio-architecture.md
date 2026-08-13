@@ -250,6 +250,17 @@ instead of bypassing the lesson contract. Completion is monotonic until the
 learner uses the explicit reset flow. Both catalogs derive percentages, topic
 totals, continue links, and card badges from this one local model.
 
+### Catalog discovery
+
+`studio/src/catalog-filters.mjs` owns normalized filter state, option
+derivation, URL serialization, and lesson matching without depending on the
+DOM. Landing and Studio catalogs use the same query semantics across lesson
+number, title, description, topic, and every manifest pattern tag. Topic,
+pattern, and progress constraints compose with text search. The browser layers
+only synchronize form controls, visibility, live counts, and empty states;
+query parameters preserve the view while the hash continues to identify the
+active Studio lesson.
+
 ### Array renderer
 
 The pure array projection supports:

@@ -59,6 +59,14 @@ curriculum manifest, falls back safely when storage is unavailable or stale,
 and provides an explicit two-step reset. Completion remains durable when a
 learner replays or revisits an earlier step.
 
+## Curriculum Discovery
+
+The 55-lesson catalog remains browsable by topic while also supporting instant
+search and composable topic, pattern, and local-progress filters. Search covers
+lesson numbers, names, descriptions, topics, and reusable pattern tags. Active
+filters produce a live result count, a useful empty state, and URL parameters
+that survive reloads without interfering with Studio lesson deep links.
+
 ## The Guide Companion
 
 - **Working name:** Pip

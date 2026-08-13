@@ -3,9 +3,20 @@ import { buildFindLargestTrace } from "./find-largest.mjs";
 import { buildSlidingWindowTrace } from "./sliding-window.mjs";
 import { curriculumLessons } from "./curriculum-manifest.mjs";
 import { renderCurriculumCatalog } from "./home-catalog.mjs";
-import { readLearningProgress } from "./learning-progress.mjs";
+import { lessonProgressState, readLearningProgress } from "./learning-progress.mjs";
+import {
+  catalogFilterOptions,
+  catalogFilterStateFromUrl,
+  catalogFilterUrl,
+  filterCatalogLessons,
+  hasActiveCatalogFilters
+} from "./catalog-filters.mjs";
 
-renderCurriculumCatalog(document, curriculumLessons, readLearningProgress(getBrowserStorage(), curriculumLessons));
+const homeProgress = readLearningProgress(getBrowserStorage(), curriculumLessons);
+let homeFilters = catalogFilterStateFromUrl(window.location.href);
+renderCurriculumCatalog(document, curriculumLessons, homeProgress);
+initializeHomeFilters();
+renderHomeFilters();
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const header = document.querySelector("[data-home-header]");
@@ -92,6 +103,79 @@ function getBrowserStorage() {
   } catch {
     return null;
   }
+}
+
+function initializeHomeFilters() {
+  const options = catalogFilterOptions(curriculumLessons);
+  const topic = document.querySelector("#home-topic-filter");
+  const pattern = document.querySelector("#home-pattern-filter");
+  topic.append(...options.topics.map((value) => createOption(value, value)));
+  pattern.append(...options.patterns.map((value) => createOption(value, value.replaceAll("-", " "))));
+  if (!options.topics.includes(homeFilters.topic)) homeFilters.topic = "all";
+  if (!options.patterns.includes(homeFilters.pattern)) homeFilters.pattern = "all";
+  syncHomeFilterControls();
+  document.querySelector("#home-catalog-search").addEventListener("input", updateHomeFilters);
+  topic.addEventListener("change", updateHomeFilters);
+  pattern.addEventListener("change", updateHomeFilters);
+  document.querySelector("#home-progress-filter").addEventListener("change", updateHomeFilters);
+  document.querySelector("#home-clear-filters").addEventListener("click", clearHomeFilters);
+  document.querySelector("#home-empty-clear").addEventListener("click", clearHomeFilters);
+}
+
+function createOption(value, label) {
+  const option = document.createElement("option");
+  option.value = value;
+  option.textContent = label;
+  return option;
+}
+
+function syncHomeFilterControls() {
+  document.querySelector("#home-catalog-search").value = homeFilters.query;
+  document.querySelector("#home-topic-filter").value = homeFilters.topic;
+  document.querySelector("#home-pattern-filter").value = homeFilters.pattern;
+  document.querySelector("#home-progress-filter").value = homeFilters.progress;
+}
+
+function updateHomeFilters() {
+  homeFilters = {
+    query: document.querySelector("#home-catalog-search").value,
+    topic: document.querySelector("#home-topic-filter").value,
+    pattern: document.querySelector("#home-pattern-filter").value,
+    progress: document.querySelector("#home-progress-filter").value
+  };
+  const nextUrl = catalogFilterUrl(window.location.href, homeFilters);
+  window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
+  renderHomeFilters();
+}
+
+function renderHomeFilters() {
+  const visibleIds = new Set(filterCatalogLessons(
+    curriculumLessons,
+    homeFilters,
+    (id) => lessonProgressState(homeProgress, id).status
+  ).map(({ id }) => id));
+  document.querySelectorAll(".home-lesson-card").forEach((card) => {
+    card.closest("li").hidden = !visibleIds.has(card.dataset.lessonId);
+  });
+  document.querySelectorAll(".home-lesson-topic").forEach((section) => {
+    section.hidden = ![...section.querySelectorAll(".home-lesson-card")]
+      .some((card) => visibleIds.has(card.dataset.lessonId));
+  });
+  document.querySelectorAll("#home-topic-nav li").forEach((item) => {
+    item.hidden = !curriculumLessons.some((lesson) => lesson.topic === item.dataset.topic && visibleIds.has(lesson.id));
+  });
+  document.querySelector("#home-filter-summary").textContent = visibleIds.size === curriculumLessons.length
+    ? `Showing all ${curriculumLessons.length} lessons.`
+    : `Showing ${visibleIds.size} of ${curriculumLessons.length} lessons.`;
+  document.querySelector("#home-filter-empty").hidden = visibleIds.size !== 0;
+  document.querySelector("#home-clear-filters").hidden = !hasActiveCatalogFilters(homeFilters);
+}
+
+function clearHomeFilters() {
+  homeFilters = catalogFilterStateFromUrl(new URL(window.location.pathname + window.location.hash, window.location.origin));
+  syncHomeFilterControls();
+  updateHomeFilters();
+  document.querySelector("#home-catalog-search").focus();
 }
 
 function activateStoryChapter(chapter) {
