@@ -1,4 +1,5 @@
 import { buildValidatedTrace } from "./lesson-contract.mjs";
+import { groupCurriculumByTopic } from "./home-catalog.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
@@ -91,38 +92,71 @@ const elements = {
 };
 
 function initializeCatalog() {
-  elements.lessonList.replaceChildren(...lessons.map((item) => {
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "lesson-card";
-    button.dataset.lessonId = item.id;
-    button.setAttribute("aria-current", "false");
+  const groups = groupCurriculumByTopic(lessons);
+  elements.lessonList.replaceChildren(...groups.map((group, groupIndex) => {
+    const topicId = `studio-topic-${String(groupIndex + 1).padStart(2, "0")}`;
+    const section = document.createElement("section");
+    section.className = "lesson-topic-group";
+    section.dataset.topic = group.topic;
+    section.setAttribute("aria-labelledby", `${topicId}-title`);
 
-    const number = document.createElement("span");
-    number.className = "lesson-card-number";
-    number.textContent = String(item.order).padStart(2, "0");
-    const copy = document.createElement("span");
-    copy.className = "lesson-card-copy";
-    const topic = document.createElement("small");
-    topic.textContent = item.topic;
-    const title = document.createElement("strong");
-    title.textContent = item.catalogLabel;
-    const description = document.createElement("span");
-    description.textContent = item.catalogDescription;
-    copy.append(topic, title, description);
-    const arrow = document.createElement("span");
-    arrow.className = "lesson-card-arrow";
-    arrow.setAttribute("aria-hidden", "true");
-    arrow.textContent = "→";
-    button.append(number, copy, arrow);
-    button.addEventListener("click", () => loadLesson(item.id));
-    return button;
+    const heading = document.createElement("div");
+    heading.className = "lesson-topic-heading";
+    const headingCopy = document.createElement("div");
+    const eyebrow = document.createElement("p");
+    eyebrow.className = "eyebrow";
+    eyebrow.textContent = `TOPIC ${String(groupIndex + 1).padStart(2, "0")} OF ${String(groups.length).padStart(2, "0")}`;
+    const title = document.createElement("h3");
+    title.id = `${topicId}-title`;
+    title.textContent = group.topic;
+    headingCopy.append(eyebrow, title);
+    const count = document.createElement("span");
+    count.className = "lesson-topic-count";
+    count.textContent = `${group.lessons.length} ${group.lessons.length === 1 ? "lesson" : "lessons"}`;
+    heading.append(headingCopy, count);
+
+    const cards = document.createElement("div");
+    cards.className = "lesson-topic-cards";
+    cards.append(...group.lessons.map(createLessonButton));
+    section.append(heading, cards);
+    return section;
   }));
+}
+
+function createLessonButton(item) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "lesson-card";
+  button.dataset.lessonId = item.id;
+  button.setAttribute("aria-current", "false");
+
+  const number = document.createElement("span");
+  number.className = "lesson-card-number";
+  number.textContent = `L${String(item.order).padStart(2, "0")}`;
+  const copy = document.createElement("span");
+  copy.className = "lesson-card-copy";
+  const pattern = document.createElement("small");
+  pattern.textContent = (item.patterns[0] ?? item.topic).replaceAll("-", " ");
+  const title = document.createElement("strong");
+  title.textContent = item.catalogLabel;
+  const description = document.createElement("span");
+  description.textContent = item.catalogDescription;
+  copy.append(pattern, title, description);
+  const arrow = document.createElement("span");
+  arrow.className = "lesson-card-arrow";
+  arrow.setAttribute("aria-hidden", "true");
+  arrow.textContent = "→";
+  button.append(number, copy, arrow);
+  button.addEventListener("click", () => loadLesson(item.id));
+  return button;
 }
 
 function renderCatalogState() {
   elements.lessonList.querySelectorAll(".lesson-card").forEach((button) => {
     button.setAttribute("aria-current", button.dataset.lessonId === lesson.id ? "true" : "false");
+  });
+  elements.lessonList.querySelectorAll(".lesson-topic-group").forEach((section) => {
+    section.classList.toggle("is-current", section.dataset.topic === lesson.topic);
   });
 }
 

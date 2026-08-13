@@ -222,6 +222,30 @@ test("landing catalog groups every manifest lesson under accessible topic naviga
   );
 });
 
+test("studio catalog groups every lesson by topic while preserving lesson numbers", async ({ page }) => {
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+
+  const expectedTopics = [...new Set(curriculumLessons.map(({ topic }) => topic))];
+  const groups = page.locator(".lesson-topic-group");
+  await expect(groups).toHaveCount(expectedTopics.length);
+  await expect(page.locator("#lesson-list .lesson-card")).toHaveCount(curriculumLessons.length);
+  await expect(groups.first().getByRole("heading", { name: "Arrays" })).toBeVisible();
+  await expect(groups.first().locator(".lesson-card-number").first()).toHaveText("L01");
+  await expect(groups.first().locator(".lesson-card-number").last()).toHaveText("L15");
+  await expect(groups.first()).toHaveClass(/is-current/);
+
+  const renderedTopics = await groups.evaluateAll((sections) => sections.map((section) => ({
+    topic: section.querySelector("h3")?.textContent,
+    lessons: [...section.querySelectorAll(".lesson-card")].map((card) => card.dataset.lessonId)
+  })));
+  expect(renderedTopics.map(({ topic }) => topic)).toEqual(expectedTopics);
+  for (const group of renderedTopics) {
+    expect(group.lessons).toEqual(
+      curriculumLessons.filter(({ topic }) => topic === group.topic).map(({ id }) => id)
+    );
+  }
+});
+
 test("the sequence renderer supports custom text and accessible stepping", async ({ page }) => {
   const errors = collectPageErrors(page);
   await page.emulateMedia({ reducedMotion: "reduce" });

@@ -39,6 +39,11 @@ test("static build keeps every browser module inside the Pages artifact", async 
   assert.match(landing, /\.\/home\.css\?v=[a-f0-9]{12}/);
   assert.match(landing, /\.\/pip\.css\?v=[a-f0-9]{12}/);
   assert.match(landing, /\.\/studio\/src\/home\.mjs\?v=[a-f0-9]{12}/);
+
+  const studio = await readFile(path.join(outputRoot, "studio", "index.html"), "utf8");
+  assert.match(studio, /\.\.\/styles\.css\?v=[a-f0-9]{12}/);
+  assert.match(studio, /\.\.\/pip\.css\?v=[a-f0-9]{12}/);
+  assert.match(studio, /\.\/src\/app\.mjs\?v=[a-f0-9]{12}/);
 });
 
 async function readModuleEntry(htmlPath) {
