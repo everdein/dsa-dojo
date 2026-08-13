@@ -64,6 +64,7 @@ export function buildBinarySearchTrace({ values, target }) {
         middle,
         comparisons,
         result,
+        pipCue: "aha",
         narration: `The midpoint equals the target, so index ${middle} is the answer.`,
         prompt: "Why is no further search necessary?"
       }));
@@ -139,6 +140,7 @@ function createStep({
   middle,
   comparisons,
   result,
+  pipCue,
   narration,
   prompt
 }) {
@@ -155,6 +157,7 @@ function createStep({
     comparisons,
     foundIndex: result,
     candidateCount: hasRange ? right - left + 1 : 0,
+    ...(pipCue ? { pipCue } : {}),
     view: {
       values: [...values],
       activeIndices: activeMiddle ? [middle] : [],

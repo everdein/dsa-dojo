@@ -5,7 +5,8 @@ import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
   mountPips,
   observePipVisibility,
-  pipStateForPlayer,
+  pipEmotionForLearning,
+  pipEmotionLabel,
   setPipState
 } from "./pip.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
@@ -65,6 +66,7 @@ const elements = {
   pipAvatar: document.querySelector(".pip-card .pip-avatar"),
   pipToggle: document.querySelector("#pip-toggle"),
   pipHeading: document.querySelector("#pip-heading"),
+  pipEmotionLabel: document.querySelector("#pip-emotion-label"),
   pipMessage: document.querySelector("#pip-message"),
   pipPrompt: document.querySelector("#pip-prompt"),
   prediction: document.querySelector("#prediction-checkpoint"),
@@ -911,7 +913,16 @@ function getNextLesson() {
 }
 
 function renderPip(step) {
-  setPipState(elements.pipAvatar, pipStateForPlayer(player.status));
+  const emotion = pipEmotionForLearning({
+    status: player.status,
+    stepIndex: player.index,
+    predictionLocked: prediction.locked,
+    cue: step.pipCue,
+    hasError: Boolean(player.error)
+  });
+  setPipState(elements.pipAvatar, emotion);
+  elements.pipEmotionLabel.textContent = pipEmotionLabel(emotion);
+  elements.pipEmotionLabel.dataset.emotion = emotion;
   elements.pipMessage.textContent = step.narration;
   elements.pipPrompt.textContent = step.prompt;
 }

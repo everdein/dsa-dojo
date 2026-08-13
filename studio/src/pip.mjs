@@ -2,12 +2,31 @@ export const PIP_STATES = Object.freeze([
   "idle",
   "curious",
   "thinking",
+  "encouraging",
   "guiding",
+  "aha",
   "celebrating",
-  "caution"
+  "caution",
+  "cool"
 ]);
 
+export const PIP_EMOTION_LABELS = Object.freeze({
+  idle: "Ready",
+  curious: "Curious",
+  thinking: "Thinking",
+  encouraging: "You’ve got this",
+  guiding: "Guiding",
+  aha: "Aha!",
+  celebrating: "Celebrating",
+  caution: "Let’s check that",
+  cool: "Pattern spotted"
+});
+
 const pipStates = new Set(PIP_STATES);
+
+export function isPipEmotion(state) {
+  return typeof state === "string" && pipStates.has(state);
+}
 
 export function normalizePipState(state) {
   return pipStates.has(state) ? state : "idle";
@@ -28,6 +47,27 @@ export function pipStateForPlayer(status) {
     default:
       return "idle";
   }
+}
+
+export function pipEmotionForLearning({
+  status,
+  stepIndex = 0,
+  predictionLocked = false,
+  cue = null,
+  hasError = false
+}) {
+  if (hasError || status === "error") return "caution";
+  if (status === "complete") return "celebrating";
+
+  const normalizedCue = normalizePipState(cue);
+  if (cue && normalizedCue !== "idle") return normalizedCue;
+  if (stepIndex === 0) return predictionLocked ? "thinking" : "curious";
+  if (stepIndex === 1 && predictionLocked) return "encouraging";
+  return pipStateForPlayer(status);
+}
+
+export function pipEmotionLabel(state) {
+  return PIP_EMOTION_LABELS[normalizePipState(state)];
 }
 
 export function setPipState(element, state) {
@@ -82,8 +122,12 @@ function createPipParts(document) {
   const face = document.createElement("span");
   face.className = "pip-face";
   face.append(
+    makePart(document, "pip-brow pip-brow--left"),
+    makePart(document, "pip-brow pip-brow--right"),
     makePart(document, "pip-eye pip-eye--left"),
-    makePart(document, "pip-eye pip-eye--right")
+    makePart(document, "pip-eye pip-eye--right"),
+    makePart(document, "pip-mouth"),
+    makePart(document, "pip-glasses")
   );
 
   body.append(
@@ -98,6 +142,7 @@ function createPipParts(document) {
   fragment.append(
     body,
     orbit,
+    makePart(document, "pip-emotion-mark"),
     makePart(document, "pip-spark pip-spark--one"),
     makePart(document, "pip-spark pip-spark--two"),
     makePart(document, "pip-spark pip-spark--three")

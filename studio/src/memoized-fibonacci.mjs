@@ -31,6 +31,7 @@ export function buildMemoizedFibonacciTrace(value) {
     memoKey = null,
     memoAnnotation = null,
     memoResult = false,
+    pipCue,
     narration,
     prompt,
     result
@@ -65,6 +66,7 @@ export function buildMemoizedFibonacciTrace(value) {
       memoSize: memo.size,
       workSaved: phase === "complete" ? naiveCalls - calls : null,
       currentDepth: activePath.length,
+      ...(pipCue ? { pipCue } : {}),
       currentValue: activeId === null
         ? null
         : nodes.find(({ id }) => id === activeId).value,
@@ -156,6 +158,7 @@ export function buildMemoizedFibonacciTrace(value) {
         memoKey: current,
         memoAnnotation: `cache hit: return ${result}`,
         memoResult: true,
+        pipCue: "cool",
         narration: `Memo hit: fib(${current}) is ${result}, so this call returns without creating a repeated subtree.`,
         prompt: "Which waiting call receives this cached result?"
       });

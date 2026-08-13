@@ -133,27 +133,34 @@ remains visible and the page still links directly to the studio.
 
 ## Pip Motion System
 
-Pip is a shared, code-native companion with six states:
+Pip is a shared, code-native companion with nine emotions:
 
 - `idle`
 - `curious`
 - `thinking`
+- `encouraging`
 - `guiding`
+- `aha`
 - `celebrating`
 - `caution`
+- `cool`
 
-Every instance mounts the same body, eyes, two arms, orbit marker, and sparks.
+Every instance mounts the same body, brows, eyes, mouth, two arms, orbit marker,
+emotion mark, optional glasses, and sparks.
 Placement poses give the landing hero, story guide, finale, studio intro, and
-lesson guide different arm rhythms; player state then layers on curious,
-thinking, guiding, celebrating, or caution behavior. The arms remain visible
-in every state.
+lesson guide different arm rhythms; learning context then layers on a readable
+expression, accessory, motion, and text label. The arms remain visible in every
+state.
 
-The studio maps player behavior to those states: ready is curious, paused is
-thinking, playing is guiding, complete is celebrating, and an input error is
-caution. Pip remains decorative; narration, prompts, and player status are
-always available as semantic text. An observer pauses Pip whenever it leaves
-the viewport. Reduced-motion preferences remove travel, bouncing, and
-continuous motion while preserving each visible state.
+The studio derives emotion from both player behavior and the learning moment:
+ready is curious, a locked prediction is thinking, the first reveal is
+encouraging, playback is guiding, completion is celebrating, and an input error
+is caution. Trace steps may opt into a validated `pipCue` for a genuinely useful
+`aha`, `cool`, encouraging, or caution moment; most steps intentionally do not.
+Pip's artwork remains decorative, while the current emotion, narration,
+prompts, and player status are available as semantic text. An observer pauses
+Pip whenever it leaves the viewport. Reduced-motion preferences remove travel,
+bouncing, and continuous motion while preserving every expression and label.
 
 ## Separation of Responsibilities
 

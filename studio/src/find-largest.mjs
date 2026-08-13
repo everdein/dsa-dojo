@@ -43,6 +43,7 @@ export function buildFindLargestTrace(values) {
       bestValue: largest,
       bestIndex: changed ? index : trace[trace.length - 1].bestIndex,
       codeSteps: changed ? ["compare", "update-largest"] : ["compare"],
+      ...(changed ? { pipCue: "aha" } : {}),
       narration: changed
         ? `${formatValue(values[index])} becomes the new largest value because it is greater than ${formatValue(previousBestValue)}.`
         : `${formatValue(values[index])} is not greater than ${formatValue(previousBestValue)}, so the best value stays the same.`,

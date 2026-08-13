@@ -132,6 +132,46 @@ test("every Pip has two visible animated arms and a distinct placement pose", as
   }
 });
 
+test("lesson Pip responds to prediction, insight, validation, and completion moments", async ({ page }) => {
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+
+  const avatar = page.locator(".pip-card .pip-avatar");
+  const emotion = page.locator("#pip-emotion-label");
+  await expect(avatar).toHaveAttribute("data-state", "curious");
+  await expect(emotion).toHaveText("Curious");
+
+  const values = page.locator('[data-field-id="values"]');
+  await values.fill("4, 1, 7, 3");
+  await page.locator("#apply-button").click();
+  await page.locator("#prediction-input").fill("The best stays 4 until 7 appears.");
+  await page.locator("#prediction-form button[type=submit]").click();
+  await expect(avatar).toHaveAttribute("data-state", "thinking");
+  await expect(emotion).toHaveText("Thinking");
+
+  await page.locator("#next-button").click();
+  await expect(avatar).toHaveAttribute("data-state", "encouraging");
+  await expect(emotion).toHaveText("You’ve got this");
+
+  await page.locator("#next-button").click();
+  await expect(avatar).toHaveAttribute("data-state", "aha");
+  await expect(emotion).toHaveText("Aha!");
+
+  await values.fill("1,,2");
+  await page.locator("#apply-button").click();
+  await expect(avatar).toHaveAttribute("data-state", "caution");
+  await expect(emotion).toHaveText("Let’s check that");
+
+  await values.fill("4, 1, 7, 3");
+  await page.locator("#apply-button").click();
+  await page.locator("#prediction-input").fill("Seven should win.");
+  await page.locator("#prediction-form button[type=submit]").click();
+  for (let step = 0; step < 4; step += 1) {
+    await page.locator("#next-button").click();
+  }
+  await expect(avatar).toHaveAttribute("data-state", "celebrating");
+  await expect(emotion).toHaveText("Celebrating");
+});
+
 test("every lesson deep link renders its expected interactive surface", async ({ page }) => {
   const errors = collectPageErrors(page);
 
