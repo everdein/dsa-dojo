@@ -94,6 +94,7 @@ export function buildValidParenthesesTrace(text) {
         valid,
         activeItemIds: top ? [top.id] : [],
         stackAnnotations: top ? [{ itemId: top.id, label: `expected ${expected}` }] : [],
+        pipCue: "caution",
         narration: top
           ? `${character} needs ${expected}, but ${top.value} is on top. The nesting order is invalid.`
           : `${character} needs ${expected}, but the stack is empty. The sequence is invalid.`,
@@ -115,6 +116,7 @@ export function buildValidParenthesesTrace(text) {
       valid,
       activeItemIds: [top.id],
       stackAnnotations: [{ itemId: top.id, label: `matches ${character}` }],
+      pipCue: "encouraging",
       narration: `${character} matches the top opener ${top.value}.`,
       prompt: "What should happen to this matched opener now?"
     }));
@@ -173,6 +175,7 @@ function createStep({
   currentIndex,
   pairs,
   valid,
+  pipCue,
   narration,
   prompt,
   activeItemIds = [],
@@ -188,6 +191,7 @@ function createStep({
     stackSize: items.length,
     pairs,
     valid,
+    ...(pipCue ? { pipCue } : {}),
     views: {
       characters: {
         values: [...characters],

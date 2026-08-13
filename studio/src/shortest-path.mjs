@@ -146,6 +146,7 @@ export function buildShortestPathTrace({ nodes, edges, start, target }) {
         resultPath: [],
         resultEdgeIndices: [],
         reconstructionNode: null,
+        pipCue: isTarget ? "aha" : undefined,
         narration: isTarget
           ? `Discover target ${target} from ${current}. Its first BFS parent fixes a shortest path, so the search can stop.`
           : `Discover ${neighbor.node} from ${current}, record that parent, and enqueue the node once.`,
@@ -296,6 +297,7 @@ function createStep({
   resultPath,
   resultEdgeIndices,
   reconstructionNode,
+  pipCue,
   narration,
   prompt
 }) {
@@ -315,6 +317,7 @@ function createStep({
     resultPath: [...resultPath],
     resultEdgeIndices: [...resultEdgeIndices],
     reconstructionNode,
+    ...(pipCue ? { pipCue } : {}),
     views: {
       graph: buildGraphView({
         nodes,

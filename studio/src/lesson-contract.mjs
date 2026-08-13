@@ -4,6 +4,7 @@ import {
   resolveStepViewPanels
 } from "./renderer-registry.mjs";
 import { isSafeRendererToken } from "./renderer-validation.mjs";
+import { isPipEmotion } from "./pip.mjs";
 
 /**
  * The small contract every interactive lesson should satisfy.
@@ -207,6 +208,9 @@ function assertSharedStep(step, index, codeSteps) {
     || typeof step.prompt !== "string"
   ) {
     throw new Error(`Trace step ${index} is missing phase, codeSteps, narration, or prompt.`);
+  }
+  if (step.pipCue !== undefined && !isPipEmotion(step.pipCue)) {
+    throw new Error(`Trace step ${index} has an unknown Pip emotion cue: ${step.pipCue}.`);
   }
   for (const codeStep of step.codeSteps) {
     if (codeSteps && !codeSteps.has(codeStep)) {

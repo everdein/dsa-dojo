@@ -11,8 +11,8 @@
 DSA Dojo is a framework-free learning product that makes data structures and
 algorithms visible, inspectable, and explainable with JavaScript. Learners can
 move through an execution one decision at a time, connect each state change to
-the code that caused it, and use Pip, an original guide companion, to reinforce
-the underlying pattern.
+the code that caused it, and use Pip, an emotionally responsive original guide
+companion, to reinforce predictions, discoveries, and reusable patterns.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser

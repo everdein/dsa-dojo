@@ -59,6 +59,13 @@ expressive arms and one small orbiting index marker. Arm poses, expressions,
 colors, and topic-specific accessories can change, but the recognizable
 cell-and-marker shape remains consistent.
 
+The implemented emotion system gives that silhouette nine readable modes:
+ready, curious, thinking, encouraging, guiding, aha, celebrating, caution, and
+pattern-spotted cool. Player and prediction state choose the everyday modes;
+lesson traces reserve stronger reactions for meaningful discoveries. Each
+visual expression is paired with a short visible text label and remains legible
+without motion.
+
 ### Responsibilities
 
 Pip should:

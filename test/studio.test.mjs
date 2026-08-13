@@ -22,9 +22,12 @@ import {
 import { getLesson, listLessons } from "../studio/src/lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "../studio/src/navigation.mjs";
 import {
+  isPipEmotion,
   mountPips,
   normalizePipState,
   observePipVisibility,
+  pipEmotionForLearning,
+  pipEmotionLabel,
   pipStateForPlayer
 } from "../studio/src/pip.mjs";
 import { createPlayerState, playerReducer } from "../studio/src/player.mjs";
@@ -230,6 +233,10 @@ test("trace contract rejects unsafe mutable renderer state", () => {
   const unsafeKind = lesson.buildTrace({ values: [1, 2, 3] });
   unsafeKind[0].view.markers = [{ index: 0, kind: "bad kind", label: "bad" }];
   assert.throws(() => assertTrace(unsafeKind, lesson), /marker/);
+
+  const unknownPipCue = lesson.buildTrace({ values: [1, 2, 3] });
+  unknownPipCue[0].pipCue = "confounded";
+  assert.throws(() => assertTrace(unknownPipCue, lesson), /unknown Pip emotion cue/);
 });
 
 test("an explicitly selected array renderer can represent an empty derived structure", () => {
@@ -922,7 +929,7 @@ test("lesson navigation accepts safe encoded hashes and rejects malformed values
   assert.equal(lessonHash("arrays/find-largest"), "#lesson=arrays%2Ffind-largest");
 });
 
-test("Pip maps player states to a small, resilient motion vocabulary", () => {
+test("Pip maps player and learning states to an expressive, resilient emotion vocabulary", () => {
   assert.equal(pipStateForPlayer("ready"), "curious");
   assert.equal(pipStateForPlayer("paused"), "thinking");
   assert.equal(pipStateForPlayer("playing"), "guiding");
@@ -930,7 +937,36 @@ test("Pip maps player states to a small, resilient motion vocabulary", () => {
   assert.equal(pipStateForPlayer("error"), "caution");
   assert.equal(pipStateForPlayer("unknown"), "idle");
   assert.equal(normalizePipState("guiding"), "guiding");
+  assert.equal(normalizePipState("cool"), "cool");
   assert.equal(normalizePipState("invented"), "idle");
+  assert.equal(isPipEmotion("aha"), true);
+  assert.equal(isPipEmotion("invented"), false);
+
+  assert.equal(pipEmotionForLearning({ status: "ready" }), "curious");
+  assert.equal(pipEmotionForLearning({ status: "ready", predictionLocked: true }), "thinking");
+  assert.equal(pipEmotionForLearning({ status: "paused", stepIndex: 1, predictionLocked: true }), "encouraging");
+  assert.equal(pipEmotionForLearning({ status: "paused", stepIndex: 2, cue: "aha" }), "aha");
+  assert.equal(pipEmotionForLearning({ status: "playing", stepIndex: 2, cue: "cool" }), "cool");
+  assert.equal(pipEmotionForLearning({ status: "complete", stepIndex: 8, cue: "cool" }), "celebrating");
+  assert.equal(pipEmotionForLearning({ status: "paused", stepIndex: 2, cue: "aha", hasError: true }), "caution");
+  assert.equal(pipEmotionLabel("encouraging"), "You’ve got this");
+  assert.equal(pipEmotionLabel("invented"), "Ready");
+});
+
+test("lessons reserve Pip reactions for meaningful algorithm moments", () => {
+  const expectations = [
+    ["arrays/find-largest", "compare", "aha"],
+    ["searching/binary-search", "found", "aha"],
+    ["stacks/valid-parentheses", "match", "encouraging"],
+    ["dynamic-programming/memoized-fibonacci", "cache-hit", "cool"],
+    ["graphs/unweighted-shortest-path", "discover-target", "aha"]
+  ];
+
+  for (const [lessonId, phase, cue] of expectations) {
+    const currentLesson = getLesson(lessonId);
+    const trace = currentLesson.buildTrace(structuredClone(currentLesson.input.defaultValue));
+    assert.ok(trace.some((step) => step.phase === phase && step.pipCue === cue), `${lessonId} should include ${cue} at ${phase}`);
+  }
 });
 
 test("Pip mounts an idempotent decorative structure and supports observer fallback", () => {
@@ -958,7 +994,7 @@ test("Pip mounts an idempotent decorative structure and supports observer fallba
 
   assert.equal(mountPips(root)[0], element);
   assert.equal(element.replaceCount, 1);
-  assert.equal(element.children.length, 5);
+  assert.equal(element.children.length, 6);
   assert.equal(element.children[0].className, "pip-body");
   assert.deepEqual(
     element.children[0].children.map(({ className }) => className),
@@ -966,9 +1002,17 @@ test("Pip mounts an idempotent decorative structure and supports observer fallba
   );
   assert.deepEqual(
     element.children[0].children[0].children.map(({ className }) => className),
-    ["pip-eye pip-eye--left", "pip-eye pip-eye--right"]
+    [
+      "pip-brow pip-brow--left",
+      "pip-brow pip-brow--right",
+      "pip-eye pip-eye--left",
+      "pip-eye pip-eye--right",
+      "pip-mouth",
+      "pip-glasses"
+    ]
   );
   assert.equal(element.children[1].children[0].className, "pip-orbit-dot");
+  assert.equal(element.children[2].className, "pip-emotion-mark");
   assert.equal(attributes["aria-hidden"], "true");
   assert.equal(element.dataset.visible, "true");
 
