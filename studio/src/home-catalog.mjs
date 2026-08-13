@@ -1,3 +1,5 @@
+import { learningProgressSummary, lessonProgressState } from "./learning-progress.mjs";
+
 export function groupCurriculumByTopic(lessons) {
   if (!Array.isArray(lessons)) {
     throw new TypeError("Curriculum lessons must be an array.");
@@ -34,7 +36,7 @@ export function curriculumTopicId(topic) {
   return `curriculum-topic-${slug || "topic"}`;
 }
 
-export function renderCurriculumCatalog(documentRoot, lessons) {
+export function renderCurriculumCatalog(documentRoot, lessons, progress = null) {
   const container = documentRoot.querySelector("#home-lessons");
   const navigation = documentRoot.querySelector("#home-topic-nav");
   const count = documentRoot.querySelector("#home-curriculum-count");
@@ -42,8 +44,10 @@ export function renderCurriculumCatalog(documentRoot, lessons) {
   if (!container || !navigation || !count || !summary) return [];
 
   const groups = groupCurriculumByTopic(lessons);
+  const progressSummary = learningProgressSummary(progress, lessons);
   count.textContent = `CURRICULUM · ${groups.length} ${groups.length === 1 ? "TOPIC" : "TOPICS"}`;
   summary.textContent = `${lessons.length} focused lessons grouped by topic. Lesson numbers preserve the recommended L01-L${String(lessons.length).padStart(2, "0")} path.`;
+  renderHomeProgress(documentRoot, lessons, progressSummary);
 
   const navigationList = documentRoot.createElement("ul");
   for (const [groupIndex, group] of groups.entries()) {
@@ -70,13 +74,14 @@ export function renderCurriculumCatalog(documentRoot, lessons) {
     documentRoot,
     group,
     groupIndex,
-    groups.length
+    groups.length,
+    progress
   ));
   container.replaceChildren(...sections);
   return groups;
 }
 
-function createTopicSection(documentRoot, group, groupIndex, groupCount) {
+function createTopicSection(documentRoot, group, groupIndex, groupCount, progress) {
   const topicId = curriculumTopicId(group.topic);
   const headingId = `${topicId}-title`;
   const section = documentRoot.createElement("section");
@@ -99,7 +104,8 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount) {
   const headingActions = documentRoot.createElement("div");
   headingActions.className = "home-lesson-topic-actions";
   const lessonCount = documentRoot.createElement("span");
-  lessonCount.textContent = `${group.lessons.length} ${group.lessons.length === 1 ? "lesson" : "lessons"}`;
+  const completed = group.lessons.filter(({ id }) => lessonProgressState(progress, id).status === "complete").length;
+  lessonCount.textContent = `${completed} of ${group.lessons.length} complete`;
   const backLink = documentRoot.createElement("a");
   backLink.href = "#home-topic-nav";
   backLink.textContent = "Back to topics ↑";
@@ -113,7 +119,7 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount) {
   for (const lesson of group.lessons) {
     const item = documentRoot.createElement("li");
     item.dataset.reveal = "";
-    item.append(createLessonCard(documentRoot, lesson));
+    item.append(createLessonCard(documentRoot, lesson, progress));
     lessonList.append(item);
   }
 
@@ -121,7 +127,7 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount) {
   return section;
 }
 
-function createLessonCard(documentRoot, lesson) {
+function createLessonCard(documentRoot, lesson, progress) {
   const card = documentRoot.createElement("a");
   card.className = "home-lesson-card";
   card.href = `./studio/#lesson=${encodeURIComponent(lesson.id)}`;
@@ -138,7 +144,12 @@ function createLessonCard(documentRoot, lesson) {
   title.textContent = lesson.catalogLabel;
   const description = documentRoot.createElement("span");
   description.textContent = lesson.catalogDescription;
-  copy.append(pattern, title, description);
+  const state = lessonProgressState(progress, lesson.id);
+  const progressLabel = documentRoot.createElement("span");
+  progressLabel.className = "home-lesson-progress";
+  progressLabel.textContent = state.status === "complete" ? "✓ Complete" : state.label;
+  card.dataset.progress = state.status;
+  copy.append(pattern, title, description, progressLabel);
 
   const arrow = documentRoot.createElement("span");
   arrow.className = "lesson-card-arrow";
@@ -146,4 +157,25 @@ function createLessonCard(documentRoot, lesson) {
   arrow.textContent = "↗";
   card.append(index, copy, arrow);
   return card;
+}
+
+function renderHomeProgress(documentRoot, lessons, summary) {
+  const panel = documentRoot.querySelector("#home-progress");
+  const text = documentRoot.querySelector("#home-progress-summary");
+  const meter = documentRoot.querySelector("#home-progress-meter");
+  const fill = documentRoot.querySelector("#home-progress-meter-fill");
+  const continueLink = documentRoot.querySelector("#home-progress-continue");
+  if (!panel || !text || !meter || !fill || !continueLink) return;
+
+  panel.hidden = false;
+  text.textContent = `${summary.completed} of ${summary.total} lessons complete · ${summary.percent}%`;
+  meter.setAttribute("aria-valuemax", String(summary.total));
+  meter.setAttribute("aria-valuenow", String(summary.completed));
+  fill.style.width = `${summary.percent}%`;
+  const lastLesson = lessons.find(({ id }) => id === summary.lastLessonId) ?? null;
+  continueLink.hidden = lastLesson === null;
+  if (lastLesson) {
+    continueLink.href = `./studio/#lesson=${encodeURIComponent(lastLesson.id)}`;
+    continueLink.textContent = `Continue ${lastLesson.catalogLabel} →`;
+  }
 }

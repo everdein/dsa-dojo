@@ -231,6 +231,39 @@ test("a learner can commit a prediction before revealing the next state", async 
   await expect(page.locator("#step-count")).toHaveText("1 / 5");
 });
 
+test("learning progress survives reloads, appears across pages, and can be reset", async ({ page }) => {
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+  const values = page.locator('[data-field-id="values"]');
+  await values.fill("4, 1, 7, 3");
+  await page.locator("#apply-button").click();
+  await page.locator("#next-button").click();
+  await page.locator("#next-button").click();
+  await expect(page.locator("#step-count")).toHaveText("2 / 4");
+
+  await page.reload();
+  await expect(values).toHaveValue("4, 1, 7, 3");
+  await expect(page.locator("#step-count")).toHaveText("2 / 4");
+  await expect(page.locator('[data-lesson-id="arrays/find-largest"] .lesson-card-progress')).toHaveText("Step 2 of 4");
+
+  await page.locator("#next-button").click();
+  await page.locator("#next-button").click();
+  await expect(page.locator("#progress-summary")).toContainText("1 of 55 lessons complete");
+  await expect(page.locator('[data-lesson-id="arrays/find-largest"]')).toHaveAttribute("data-progress", "complete");
+
+  await page.goto("./");
+  await expect(page.locator("#home-progress-summary")).toContainText("1 of 55 lessons complete");
+  await expect(page.locator('.home-lesson-card[href*="find-largest"]')).toHaveAttribute("data-progress", "complete");
+  await expect(page.locator("#home-progress-continue")).toContainText("Continue Find Largest");
+
+  await page.goto("./studio/");
+  await expect(page.locator("#step-count")).toHaveText("4 / 4");
+  await page.locator("#reset-progress-button").click();
+  await expect(page.locator("#progress-reset-confirmation")).toBeVisible();
+  await page.locator("#confirm-reset-progress-button").click();
+  await expect(page.locator("#progress-summary")).toContainText("0 of 55 lessons complete");
+  await expect(page.locator('[data-lesson-id="arrays/find-largest"]')).not.toHaveAttribute("data-progress", "complete");
+});
+
 test("landing catalog groups every manifest lesson under accessible topic navigation", async ({ page }) => {
   await page.emulateMedia({ reducedMotion: "reduce" });
   await page.goto("./");

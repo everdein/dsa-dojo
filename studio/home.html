@@ -235,6 +235,18 @@
           <p id="home-curriculum-summary">55 focused lessons grouped by topic. Lesson numbers preserve the recommended L01-L55 path.</p>
         </div>
 
+        <section class="home-progress" id="home-progress" aria-labelledby="home-progress-title" hidden>
+          <div>
+            <p class="home-eyebrow">SAVED ON THIS DEVICE</p>
+            <h3 id="home-progress-title">Your learning progress</h3>
+            <p id="home-progress-summary">0 of 55 lessons complete.</p>
+          </div>
+          <div class="home-progress-meter" role="progressbar" aria-labelledby="home-progress-title" aria-valuemin="0" aria-valuemax="55" aria-valuenow="0" id="home-progress-meter">
+            <span id="home-progress-meter-fill"></span>
+          </div>
+          <a class="home-button home-button--primary" id="home-progress-continue" href="./studio/" hidden>Continue learning →</a>
+        </section>
+
         <nav class="home-topic-nav" id="home-topic-nav" aria-label="Curriculum topics" tabindex="-1">
           <p>Topic navigation loads from the curriculum manifest when JavaScript is available.</p>
         </nav>

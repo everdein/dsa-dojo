@@ -45,6 +45,20 @@ Every interactive lesson should follow the same basic loop:
 
 The learner should remain an active participant. The studio should not immediately reveal every answer.
 
+## Local Learning Continuity
+
+The studio remembers completed lessons, the most recently visited lesson,
+custom input, and the learner's last visible step in browser-local storage. The
+landing page and studio both summarize overall and topic progress, while a
+continue action restores the saved execution rather than merely reopening the
+lesson.
+
+This persistence is deliberately account-free and device-local. The interface
+states that boundary plainly, validates stored lesson ids against the current
+curriculum manifest, falls back safely when storage is unavailable or stale,
+and provides an explicit two-step reset. Completion remains durable when a
+learner replays or revisits an earlier step.
+
 ## The Guide Companion
 
 - **Working name:** Pip

@@ -235,6 +235,21 @@ The player reducer is the single source of truth for:
 Browser timers dispatch player actions; they do not maintain a second playback
 state. Switching lessons stops the current timer before loading the new trace.
 
+### Local learning progress
+
+`studio/src/learning-progress.mjs` owns the versioned, browser-local progress
+schema and has no DOM dependency. It records only curriculum lesson ids,
+completion, bounded trace position, lesson input, and an update timestamp. All
+reads sanitize ids against the manifest, clamp trace positions, discard stale
+lessons, and tolerate unavailable storage.
+
+The browser controller records the active session after player transitions and
+restores it through the normal lesson parser and validated trace builder. An
+invalid or obsolete saved input therefore falls back to the lesson default
+instead of bypassing the lesson contract. Completion is monotonic until the
+learner uses the explicit reset flow. Both catalogs derive percentages, topic
+totals, continue links, and card badges from this one local model.
+
 ### Array renderer
 
 The pure array projection supports:

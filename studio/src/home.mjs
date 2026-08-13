@@ -3,8 +3,9 @@ import { buildFindLargestTrace } from "./find-largest.mjs";
 import { buildSlidingWindowTrace } from "./sliding-window.mjs";
 import { curriculumLessons } from "./curriculum-manifest.mjs";
 import { renderCurriculumCatalog } from "./home-catalog.mjs";
+import { readLearningProgress } from "./learning-progress.mjs";
 
-renderCurriculumCatalog(document, curriculumLessons);
+renderCurriculumCatalog(document, curriculumLessons, readLearningProgress(getBrowserStorage(), curriculumLessons));
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const header = document.querySelector("[data-home-header]");
@@ -84,6 +85,14 @@ document.addEventListener("visibilitychange", () => {
 });
 reducedMotion.addEventListener?.("change", () => window.location.reload());
 updateHeader();
+
+function getBrowserStorage() {
+  try {
+    return window.localStorage;
+  } catch {
+    return null;
+  }
+}
 
 function activateStoryChapter(chapter) {
   if (!chapter) return;
