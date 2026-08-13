@@ -2,7 +2,7 @@
 
 - **Status:** Living product direction
 - **Implemented foundation:** 55 lessons across 20 topics
-- **Current checkpoint:** Core curriculum delivered; verification and pipeline hardening next
+- **Current checkpoint:** Core curriculum and release hardening delivered; architectural stabilization next
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -385,14 +385,13 @@ Prerequisite metadata connects those topics into a progression, while pattern
 tags make repeated ideas such as breadth-first search, memoization, and top-k
 selection visible across category boundaries.
 
-The repository includes a GitHub Pages release workflow, a dependency-free
-static build, CI on supported Node.js versions, hundreds of focused Node
-unit/integration tests, coverage collection, desktop/mobile Playwright checks,
-axe accessibility checks, prediction-before-reveal, and explicit
-lesson-completion actions. The core curriculum is complete. The next phase
-consolidates fixtures, fills branch gaps, broadens per-renderer browser
-assertions, establishes justified coverage thresholds, and makes the fully
-verified artifact the deployment gate.
+The repository includes a dependency-free static build, CI on supported Node.js
+versions, hundreds of focused Node unit/integration tests, enforced coverage
+floors, desktop/mobile Playwright checks, axe accessibility checks,
+prediction-before-reveal, and explicit lesson-completion actions. Pages deploys
+from that CI workflow only after browser verification succeeds. The next phase
+consolidates browser orchestration, reduces runtime validation and loading cost,
+and broadens targeted renderer assertions.
 
 ## Introductory story checkpoint
 

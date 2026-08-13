@@ -10,7 +10,7 @@
     "check": "npm run check:syntax && npm run test:unit && npm run build",
     "check:release": "npm run check && npm run test:e2e",
     "check:syntax": "node scripts/check-syntax.mjs",
-    "coverage": "node --test --experimental-test-coverage",
+    "coverage": "node --test --experimental-test-coverage --test-coverage-lines=95 --test-coverage-branches=90 --test-coverage-functions=70",
     "preview": "node scripts/preview-static.mjs",
     "studio": "node studio/server.mjs",
     "test": "npm run test:unit",

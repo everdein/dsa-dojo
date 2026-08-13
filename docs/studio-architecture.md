@@ -452,6 +452,7 @@ The current automated suite checks:
 - server routes, methods, status codes, static assets, and security headers
 - desktop and mobile lesson deep links, input validation, keyboard controls,
   prediction/reveal, document overflow, console errors, and serious WCAG issues
+- global coverage floors of 95% lines, 90% branches, and 70% functions
 
 Before publishing a substantial visual change, also perform a short human pass
 to confirm:
@@ -473,9 +474,8 @@ The local server is a development tool, not a production application server.
 `npm run build` creates a dependency-free `dist/` directory whose relative
 asset links work from a domain root or project subpath. `npm run preview` serves
 a fresh build through the `/dsa-dojo/` URL shape used by the browser suite and
-GitHub Pages. The Pages workflow independently runs the fast syntax, unit, and
-build checks before uploading its freshly built `dist/`; it does not yet depend
-on the separate browser-smoke job.
+GitHub Pages. The CI workflow builds and deploys Pages only after its supported
+Node matrix, enforced coverage floors, and browser-smoke job all succeed.
 The studio currently has no accounts, saved progress, backend, analytics, or
 framework dependency. Those concerns should only be introduced when a proven
 learning requirement needs them.
@@ -483,7 +483,7 @@ learning requirement needs them.
 The 55-lesson core curriculum now spans 20 topics and nine renderer families.
 Every lesson shares the validated registry, deterministic traces, player, code
 mapping, Pip guidance, and accessibility model. The next checkpoint is the
-post-curriculum verification phase: consolidate fixtures, measure and fill
-coverage gaps, broaden per-renderer browser assertions, and gate Pages on the
-fully verified artifact. That work is tracked in
+post-curriculum stabilization phase: consolidate fixtures, fill targeted
+coverage gaps, broaden per-renderer browser assertions, and reduce central
+browser-controller and runtime pressure. That work is tracked in
 [`curriculum-roadmap.md`](curriculum-roadmap.md).

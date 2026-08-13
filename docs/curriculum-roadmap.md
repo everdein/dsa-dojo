@@ -232,26 +232,26 @@ Every lecture is a vertical slice and is complete when it has:
 7. for a new renderer family, focused projection/contract tests plus one
    desktop and mobile interaction/accessibility path at its debut.
 
-Focused tests shipped with every lecture and renderer. Comprehensive coverage
-measurement, fixture consolidation, broader per-renderer browser assertions,
-and release-pipeline hardening are now the active phase.
+Focused tests shipped with every lecture and renderer. Coverage thresholds and
+browser-gated deployment are now complete; fixture consolidation, broader
+per-renderer browser assertions, and architectural stabilization remain active.
 
 ## Current Post-Curriculum Verification Phase
 
 DSA Dojo already has hundreds of focused Node unit/integration tests, Playwright
-and axe browser checks, coverage collection, a GitHub Actions CI workflow, and a
-GitHub Pages deployment workflow. This phase therefore strengthens an existing
-safety net rather than creating one from scratch:
+and axe browser checks, enforced coverage floors, and one GitHub Actions CI
+workflow that gates GitHub Pages deployment. This phase therefore strengthens
+an existing safety net rather than creating one from scratch:
 
 1. Migrate the remaining legacy studio tests into contract, player, renderer,
    and topic suites; add reusable fixtures and property-oriented boundary cases.
-2. Fill algorithm and trace branch gaps across every lecture, then set justified
-   line/branch/function coverage thresholds.
+2. **Complete:** enforce justified global floors of 95% lines, 90% branches,
+   and 70% functions while continuing to fill targeted gaps.
 3. Derive the existing all-lesson, desktop/mobile deep-link matrix from the
    curriculum manifest and broaden interaction/accessibility assertions per
    renderer family.
-4. Gate Pages deployment on the full verified artifact, including browser tests,
-   instead of independently rebuilding after only the fast checks.
+4. **Complete:** gate Pages deployment on the full CI sequence, including browser
+   tests, instead of independently publishing after only the fast checks.
 5. Add release artifacts, dependency review, branch protection, and documented
    failure/recovery procedures only where they provide concrete operational
    value.
@@ -260,12 +260,11 @@ safety net rather than creating one from scratch:
 
 The next three implementation slices are:
 
-1. **Consolidate tests and measure coverage** - extract remaining legacy cases
-   into focused suites, add reusable fixtures, and establish justified line,
-   branch, and function thresholds.
+1. **Consolidate tests** - extract remaining legacy cases into focused suites
+   and add reusable fixtures while maintaining the enforced coverage floors.
 2. **Broaden browser verification** - derive the existing all-lesson deep-link
    matrix from the manifest and add interaction/accessibility assertions per
    renderer family without duplicating every unit branch in Playwright.
-3. **Harden release gating** - make Pages consume or depend on the fully
-   verified artifact, then document failure/recovery procedures and add only
-   the operational checks that provide concrete value.
+3. **Complete release gating** - Pages now depends on the full verified CI
+   sequence; document failure/recovery procedures and add only operational
+   checks that provide concrete value.
