@@ -57,6 +57,7 @@ studio/
   server.mjs                Manifest-aware local static-file server
   src/
     app.mjs                 Browser adapter and event wiring
+    curriculum-map.mjs      Pure prerequisite graph and selection projection
     curriculum-manifest.mjs Authoritative catalog and runtime-module data
     renderer-registry.mjs   Adapters and composite-panel resolution
     *-renderer.mjs          Validation, ownership, and accessible projection
@@ -147,8 +148,8 @@ Pip is a shared, code-native companion with nine emotions:
 - `caution`
 - `cool`
 
-Every instance mounts the same body, brows, eyes, mouth, two arms, orbit marker,
-emotion mark, optional glasses, and sparks.
+Every instance mounts the same body, gold headband with two cloth tails, brows,
+eyes, mouth, two arms, orbit marker, emotion mark, optional glasses, and sparks.
 Placement poses give the landing hero, story guide, finale, studio intro, and
 lesson guide different arm rhythms; learning context then layers on a readable
 expression, accessory, motion, and text label. The arms remain visible in every
@@ -159,8 +160,10 @@ ready is curious, a locked prediction is thinking, the first reveal is
 encouraging, playback is guiding, completion is celebrating, and an input error
 is caution. Trace steps may opt into a validated `pipCue` for a genuinely useful
 `aha`, `cool`, encouraging, or caution moment; most steps intentionally do not.
-Pip's artwork remains decorative, while the current emotion, narration,
-prompts, and player status are available as semantic text. An observer pauses
+Pip's artwork remains decorative, while the current emotion, mentor aside,
+narration, prompts, and player status are available as semantic text. The aside
+comes from the shared emotion vocabulary and may name the lesson's primary
+pattern; lesson narration remains authoritative. An observer pauses
 Pip whenever it leaves the viewport. Reduced-motion preferences remove travel,
 bouncing, and continuous motion while preserving every expression and label.
 
@@ -262,6 +265,21 @@ pattern, and progress constraints compose with text search. The browser layers
 only synchronize form controls, visibility, live counts, and empty states;
 query parameters preserve the view while the hash continues to identify the
 active Studio lesson.
+
+### Curriculum map
+
+`studio/src/curriculum-map.mjs` projects the data-only manifest into an acyclic
+prerequisite graph. It validates every link, calculates each lesson's longest
+prerequisite depth, derives immediate dependents, and exposes pattern counts and
+selection neighborhoods without importing the lesson registry or browser DOM.
+
+The Studio renders those depths as horizontally scrollable learning stages and
+draws decorative SVG connectors from measured node positions. Lesson buttons,
+relationship chips, the detail panel, and pattern selector remain semantic HTML;
+the lines are never the only way a relationship is communicated. Selection
+highlights prerequisites and lessons unlocked next, pattern filtering dims
+unrelated nodes without hiding the selected path, and progress badges reuse the
+existing device-local model. Direct lesson entry returns to the normal player.
 
 ### Challenge Mode
 

@@ -28,6 +28,7 @@ import {
   observePipVisibility,
   pipEmotionForLearning,
   pipEmotionLabel,
+  pipSenseiLine,
   pipStateForPlayer
 } from "../studio/src/pip.mjs";
 import { createPlayerState, playerReducer } from "../studio/src/player.mjs";
@@ -951,6 +952,9 @@ test("Pip maps player and learning states to an expressive, resilient emotion vo
   assert.equal(pipEmotionForLearning({ status: "paused", stepIndex: 2, cue: "aha", hasError: true }), "caution");
   assert.equal(pipEmotionLabel("encouraging"), "You’ve got this");
   assert.equal(pipEmotionLabel("invented"), "Ready");
+  assert.equal(pipSenseiLine("thinking"), "Pause. Name what must remain true.");
+  assert.equal(pipSenseiLine("cool", "two-pointers"), "You recognize two pointers. Reuse the pattern.");
+  assert.equal(pipSenseiLine("invented"), "Settle in. Precision before speed.");
 });
 
 test("lessons reserve Pip reactions for meaningful algorithm moments", () => {
@@ -996,12 +1000,19 @@ test("Pip mounts an idempotent decorative structure and supports observer fallba
   assert.equal(element.replaceCount, 1);
   assert.equal(element.children.length, 6);
   assert.equal(element.children[0].className, "pip-body");
+  assert.deepEqual(element.children[0].children.map(({ className }) => className), [
+    "pip-headband",
+    "pip-face",
+    "pip-arm pip-arm--left",
+    "pip-arm pip-arm--right"
+  ]);
+  assert.deepEqual(element.children[0].children[0].children.map(({ className }) => className), [
+    "pip-headband-knot",
+    "pip-headband-tail pip-headband-tail--one",
+    "pip-headband-tail pip-headband-tail--two"
+  ]);
   assert.deepEqual(
-    element.children[0].children.map(({ className }) => className),
-    ["pip-face", "pip-arm pip-arm--left", "pip-arm pip-arm--right"]
-  );
-  assert.deepEqual(
-    element.children[0].children[0].children.map(({ className }) => className),
+    element.children[0].children[1].children.map(({ className }) => className),
     [
       "pip-brow pip-brow--left",
       "pip-brow pip-brow--right",
@@ -1016,12 +1027,12 @@ test("Pip mounts an idempotent decorative structure and supports observer fallba
   assert.equal(attributes["aria-hidden"], "true");
   assert.equal(element.dataset.visible, "true");
 
-  const originalLeftArm = element.children[0].children[1];
-  const originalRightArm = element.children[0].children[2];
+  const originalLeftArm = element.children[0].children[2];
+  const originalRightArm = element.children[0].children[3];
   mountPips(root);
   assert.equal(element.replaceCount, 1);
-  assert.equal(element.children[0].children[1], originalLeftArm);
-  assert.equal(element.children[0].children[2], originalRightArm);
+  assert.equal(element.children[0].children[2], originalLeftArm);
+  assert.equal(element.children[0].children[3], originalRightArm);
   assert.equal(observePipVisibility(root), null);
   assert.equal(element.dataset.visible, "true");
 });
