@@ -1,7 +1,8 @@
 import { buildTrace } from "./lesson-contract.mjs";
 import { buildCurriculumMap, curriculumMapSelection } from "./curriculum-map.mjs";
+import { curriculumLessons, getCurriculumLesson } from "./curriculum-manifest.mjs";
 import { groupCurriculumByTopic } from "./home-catalog.mjs";
-import { getLesson, listLessons } from "./lessons/index.mjs";
+import { loadLesson as loadLessonDefinition, preloadLessons } from "./lesson-loader.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
 import {
   catalogFilterOptions,
@@ -53,6 +54,7 @@ import {
 import { playerReducer } from "./player.mjs";
 import { renderLessonVisualization } from "./visualization-view.mjs";
 import { createShareController } from "./share-controller.mjs";
+import { hydrateLessonSource } from "./source-pane.mjs";
 import {
   createComparisonShareState,
   createLessonShareState,
@@ -65,7 +67,7 @@ import {
   playbackSpeedLabel
 } from "./speed.mjs";
 
-const lessons = listLessons();
+const lessons = curriculumLessons;
 const lessonIds = lessons.map((item) => item.id);
 const topicCount = new Set(lessons.map((item) => item.topic)).size;
 const curriculumMap = buildCurriculumMap(lessons);
@@ -79,7 +81,9 @@ const initialSharedLessonId = initialShared.state?.kind === "lesson" && lessonId
   ? initialShared.state.lessonId
   : null;
 const initialLessonId = initialSharedLessonId ?? initialLessonIdFromHash ?? progress.lastLessonId ?? lessons[0].id;
-let lesson = getLesson(initialLessonId);
+let lesson = await hydrateLessonSource(await loadLessonDefinition(initialLessonId));
+const activeLessons = new Map([[lesson.id, lesson]]);
+let lessonLoadToken = 0;
 const sharedLessonRestore = initialSharedLessonId ? restoreSharedLessonPlayer(lesson, initialShared.state) : null;
 let shareRestoreError = initialShared.error
   ?? (initialShared.state?.kind === "lesson" && !initialSharedLessonId ? "The shared lesson is not in this curriculum." : null)
@@ -514,7 +518,7 @@ function renderCatalogState() {
   elements.progressMeter.setAttribute("aria-valuemax", String(summary.total));
   elements.progressMeter.setAttribute("aria-valuenow", String(summary.completed));
   elements.progressMeterFill.style.width = `${summary.percent}%`;
-  const continuedLesson = summary.lastLessonId ? getLesson(summary.lastLessonId) : null;
+  const continuedLesson = summary.lastLessonId ? getCurriculumLesson(summary.lastLessonId) : null;
   elements.continueLearning.hidden = continuedLesson === null;
   if (continuedLesson) elements.continueLearning.textContent = `Continue ${continuedLesson.catalogLabel} →`;
   elements.catalogResultsSummary.textContent = visibleIds.size === lessons.length
@@ -760,9 +764,10 @@ function initializeComparisonMode() {
   }));
 }
 
-function openComparison(familyId = null, preferredLessonId = null) {
+async function openComparison(familyId = null, preferredLessonId = null) {
   stopTimer();
   clearSharedUrlState();
+  elements.comparisonWorkspace.setAttribute("aria-busy", "true");
   comparisonFamily = getComparisonFamily(
     familyId ?? comparisonFamilyForLesson(preferredLessonId ?? lesson.id)?.id ?? "sorting-strategies"
   );
@@ -772,7 +777,14 @@ function openComparison(familyId = null, preferredLessonId = null) {
   const other = comparisonFamily.defaultPair.find((id) => id !== preferred)
     ?? comparisonFamily.lessonIds.find((id) => id !== preferred);
   populateComparisonAlgorithms(preferred, other);
-  comparisonRun = buildComparisonRun(comparisonInputForLaunch(preferredLessonId));
+  try {
+    comparisonRun = await buildComparisonRun(comparisonInputForLaunch(preferredLessonId));
+  } catch (error) {
+    elements.comparisonError.textContent = `Could not load this comparison. ${error.message}`;
+    return;
+  } finally {
+    elements.comparisonWorkspace.removeAttribute("aria-busy");
+  }
   renderComparisonFields();
   renderComparison();
   elements.lessonSection.scrollIntoView({
@@ -782,7 +794,7 @@ function openComparison(familyId = null, preferredLessonId = null) {
   elements.comparisonTitle.focus?.({ preventScroll: true });
 }
 
-function restoreSharedComparison(state) {
+async function restoreSharedComparison(state) {
   try {
     comparisonFamily = getComparisonFamily(state.familyId);
     if (!comparisonFamily.lessonIds.includes(state.leftLessonId)
@@ -791,7 +803,7 @@ function restoreSharedComparison(state) {
     }
     populateComparisonAlgorithms(state.leftLessonId, state.rightLessonId);
     const input = comparisonFamily.input.parse(state.fields);
-    comparisonRun = buildComparisonRun(input);
+    comparisonRun = await buildComparisonRun(input);
     if (state.leftIndex >= comparisonRun.left.trace.length || state.rightIndex >= comparisonRun.right.trace.length) {
       throw new Error("A shared comparison step is outside its trace.");
     }
@@ -837,7 +849,7 @@ function populateComparisonAlgorithms(leftId, rightId) {
   const createOptions = () => comparisonFamily.lessonIds.map((id) => {
     const option = document.createElement("option");
     option.value = id;
-    option.textContent = getLesson(id).catalogLabel;
+    option.textContent = getCurriculumLesson(id).catalogLabel;
     return option;
   });
   elements.comparisonLeft.replaceChildren(...createOptions());
@@ -887,27 +899,34 @@ function collectComparisonFields() {
   );
 }
 
-function buildComparisonRun(input) {
+async function buildComparisonRun(input) {
+  const [leftLesson, rightLesson] = await Promise.all([
+    resolveLesson(elements.comparisonLeft.value),
+    resolveLesson(elements.comparisonRight.value)
+  ]);
   return createComparisonRun({
     family: comparisonFamily,
-    leftLesson: getLesson(elements.comparisonLeft.value),
-    rightLesson: getLesson(elements.comparisonRight.value),
+    leftLesson,
+    rightLesson,
     input,
     speed: comparisonRun?.speed ?? player.speed
   });
 }
 
-function rebuildComparison(input = comparisonRun.input) {
+async function rebuildComparison(input = comparisonRun.input) {
   stopTimer();
   clearSharedUrlState();
+  elements.comparisonWorkspace.setAttribute("aria-busy", "true");
   try {
-    comparisonRun = buildComparisonRun(structuredClone(input));
+    comparisonRun = await buildComparisonRun(structuredClone(input));
     elements.comparisonError.textContent = "";
     syncComparisonAlgorithmOptions();
     renderComparisonFields();
     renderComparison();
   } catch (error) {
     elements.comparisonError.textContent = error.message;
+  } finally {
+    elements.comparisonWorkspace.removeAttribute("aria-busy");
   }
 }
 
@@ -958,7 +977,8 @@ function renderComparisonResult(summary) {
 
 function renderComparisonLane(side) {
   const state = comparisonRun[side];
-  const currentLesson = getLesson(state.lessonId);
+  const currentLesson = activeLessons.get(state.lessonId);
+  if (!currentLesson) throw new Error(`Comparison lesson is not loaded: ${state.lessonId}`);
   const step = state.trace[state.index];
   const lastIndex = state.trace.length - 1;
   comparisonElement(side, "topic").textContent = `${currentLesson.topic.toUpperCase()} · ${currentLesson.complexity.chip}`;
@@ -1170,7 +1190,8 @@ function renderPrediction() {
     : "Now compare your prediction with the state change and Pip’s explanation.";
 }
 
-function loadLesson(id, { enter = true } = {}) {
+async function loadLesson(id, { enter = true } = {}) {
+  const loadToken = ++lessonLoadToken;
   clearSharedUrlState();
   if (comparisonRun) {
     stopTimer();
@@ -1182,7 +1203,18 @@ function loadLesson(id, { enter = true } = {}) {
   }
   if (id !== lesson.id) {
     stopTimer();
-    lesson = getLesson(id);
+    elements.lessonSection.setAttribute("aria-busy", "true");
+    try {
+      const nextLesson = await resolveLesson(id);
+      if (loadToken !== lessonLoadToken) return;
+      lesson = nextLesson;
+    } catch (error) {
+      elements.error.textContent = `Could not load this lesson. ${error.message}`;
+      elements.error.focus?.();
+      return;
+    } finally {
+      elements.lessonSection.removeAttribute("aria-busy");
+    }
     selectedMapLessonId = id;
     const restored = restoreLessonState(lesson);
     player = playerReducer(player, {
@@ -1200,8 +1232,27 @@ function loadLesson(id, { enter = true } = {}) {
     replaceLessonUrl(lesson.id);
     renderLessonChrome();
     render();
+    scheduleAdjacentPreload();
   }
   if (enter) enterLesson();
+}
+
+async function resolveLesson(id) {
+  const existing = activeLessons.get(id);
+  if (existing) return existing;
+  const resolved = await hydrateLessonSource(await loadLessonDefinition(id));
+  activeLessons.set(id, resolved);
+  return resolved;
+}
+
+function scheduleAdjacentPreload() {
+  const index = lessons.findIndex(({ id }) => id === lesson.id);
+  const ids = [lessons[index - 1]?.id, lessons[index + 1]?.id].filter(Boolean);
+  const preload = () => preloadLessons(ids).catch(() => {
+    // Navigation remains responsible for surfacing an actual load failure.
+  });
+  if (typeof window.requestIdleCallback === "function") window.requestIdleCallback(preload, { timeout: 1500 });
+  else window.setTimeout(preload, 0);
 }
 
 function enterLesson() {
@@ -1559,7 +1610,7 @@ initializeCatalog();
 initializeComparisonMode();
 renderLessonChrome();
 if (initialShared.state?.kind === "comparison") {
-  shareRestoreError = restoreSharedComparison(initialShared.state) ?? shareRestoreError;
+  shareRestoreError = await restoreSharedComparison(initialShared.state) ?? shareRestoreError;
   if (!comparisonRun) render();
 } else {
   render();
@@ -1575,3 +1626,4 @@ if (initialLessonIdFromHash || initialSharedLessonId) {
 } else if (!comparisonRun && !initialShared.error) {
   replaceLessonUrl(lesson.id);
 }
+scheduleAdjacentPreload();

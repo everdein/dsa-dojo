@@ -82,6 +82,20 @@ test("landing and studio are accessible, quiet, and free of page overflow", asyn
   expect(errors).toEqual([]);
 });
 
+test("studio loads the selected lesson without importing the eager curriculum registry", async ({ page }) => {
+  const lessonModules = new Set();
+  page.on("request", (request) => {
+    const pathname = new URL(request.url()).pathname;
+    if (pathname.includes("/studio/src/lessons/")) lessonModules.add(pathname);
+  });
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+  await expect(page.getByRole("heading", { level: 2, name: "Find the largest value" })).toBeVisible();
+  await page.waitForTimeout(100);
+  expect([...lessonModules].some((path) => path.endsWith("/lessons/index.mjs"))).toBe(false);
+  expect([...lessonModules].some((path) => path.endsWith("/lessons/find-largest.mjs"))).toBe(true);
+  expect(lessonModules.size).toBeLessThanOrEqual(3);
+});
+
 test("every Pip has two visible animated arms and a distinct placement pose", async ({ page }) => {
   for (const [path, expectedCount] of [["./", 3], ["./studio/#lesson=arrays%2Ffind-largest", 2]]) {
     await page.goto(path);
