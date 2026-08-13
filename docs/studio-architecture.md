@@ -62,6 +62,7 @@ studio/
     *-renderer.mjs          Validation, ownership, and accessible projection
     lesson-contract.mjs     Lesson and deterministic trace validation
     player.mjs              Framework-free player state machine
+    challenge-mode.mjs      Trace-derived questions, scoring, and local bests
     *.mjs                   Lesson-specific deterministic trace builders
     lessons/
       index.mjs             Validated lesson registry
@@ -260,6 +261,29 @@ pattern, and progress constraints compose with text search. The browser layers
 only synchronize form controls, visibility, live counts, and empty states;
 query parameters preserve the view while the hash continues to identify the
 active Studio lesson.
+
+### Challenge Mode
+
+`studio/src/challenge-mode.mjs` is a pure, DOM-independent layer over validated
+lesson traces. For each current trace index it builds a deterministic
+three-option question whose correct outcome is the next step's narration.
+Nearby trace outcomes provide lesson-specific distractors; bounded generic
+fallbacks cover unusually short or repetitive traces. Tests require every
+transition in every registered lesson to produce three unique options with one
+identifiable answer.
+
+The browser controller owns only presentation and coordination. Enabling the
+mode restarts the current trace, disables autoplay and speed controls, hides
+the redundant free-form prediction checkpoint, and gates `NEXT` until the
+current question is answered or revealed. Answer records are immutable within
+a round, so navigating backward cannot improve a first-attempt score.
+
+Challenge preferences and personal bests use a separate versioned local-storage
+key from lesson progress. Stored lesson ids are sanitized against the current
+curriculum; scores, totals, and streaks are bounded; unavailable storage falls
+back to an in-memory round. A personal best is recorded only after all trace
+transitions have been answered or deliberately skipped and the lesson reaches
+its final state.
 
 ### Array renderer
 

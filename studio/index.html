@@ -129,10 +129,17 @@
             <h2 id="lesson-title" tabindex="-1"></h2>
             <p class="lesson-summary" id="lesson-summary"></p>
           </div>
-          <div class="lesson-meta">
-            <span id="step-label">READY</span>
-            <span class="meta-divider" aria-hidden="true"></span>
-            <span id="step-count">0 / 0</span>
+          <div class="lesson-heading-actions">
+            <div class="lesson-meta">
+              <span id="step-label">READY</span>
+              <span class="meta-divider" aria-hidden="true"></span>
+              <span id="step-count">0 / 0</span>
+            </div>
+            <button class="challenge-toggle" id="challenge-toggle" type="button" aria-pressed="false">
+              <span aria-hidden="true">◆</span>
+              <span>Challenge mode</span>
+              <strong id="challenge-toggle-status">Off</strong>
+            </button>
           </div>
         </div>
 
@@ -158,6 +165,35 @@
               </div>
 
               <div class="stat-grid" id="stat-grid"></div>
+            </section>
+
+            <section class="challenge-card" id="challenge-card" aria-labelledby="challenge-title" hidden>
+              <div class="challenge-card-header">
+                <div>
+                  <p class="eyebrow">CHALLENGE MODE</p>
+                  <h3 id="challenge-title">Predict the next state.</h3>
+                </div>
+                <span class="challenge-progress" id="challenge-progress"></span>
+              </div>
+              <p class="challenge-prompt" id="challenge-prompt"></p>
+              <form id="challenge-form">
+                <fieldset class="challenge-options" id="challenge-options"></fieldset>
+                <p class="field-error" id="challenge-error" role="alert"></p>
+                <div class="challenge-actions">
+                  <button class="primary-button" type="submit">Check answer</button>
+                  <button class="quiet-button" id="challenge-skip" type="button">Reveal answer</button>
+                </div>
+              </form>
+              <div class="challenge-feedback" id="challenge-feedback" role="status" hidden>
+                <p class="eyebrow" id="challenge-feedback-label"></p>
+                <h4 id="challenge-feedback-title"></h4>
+                <p id="challenge-feedback-copy"></p>
+              </div>
+              <div class="challenge-score" aria-label="Challenge score">
+                <span><strong id="challenge-score">0 / 0</strong> correct</span>
+                <span><strong id="challenge-streak">0</strong> streak</span>
+                <span><strong id="challenge-best">—</strong> personal best</span>
+              </div>
             </section>
 
             <div class="player-controls" aria-label="Lesson controls">
