@@ -31,9 +31,9 @@ device's native share sheet.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. Coverage floors, browser-gated deployment, focused
-browser controllers, and single-pass runtime traces now protect releases and
-maintenance; the next stabilization work focuses on curriculum loading and
-source-pane scalability rather than another core lecture.
+browser controllers, single-pass runtime traces, on-demand lesson loading, and
+source-derived code panes now protect releases and maintenance. The four-phase
+architecture stabilization milestone is complete.
 
 ## Try It Locally
 

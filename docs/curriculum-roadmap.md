@@ -79,6 +79,10 @@ Remaining architecture work belongs to the verification phase:
   visualization presentation, lesson sessions, sharing, storage, and playback
   timing. Continue migrating the monolithic legacy suite into focused contract,
   player, renderer, and topic files.
+- **Complete:** the browser uses manifest-driven dynamic lesson imports, cached
+  comparison pairs, and adjacent idle preloading while CI retains the eager
+  registry. Source panes derive current physical locations from semantic source
+  anchors, so unrelated line shifts no longer require mapping rewrites.
 
 ## Wave 1: Sequences, Lookup State, and Grids
 

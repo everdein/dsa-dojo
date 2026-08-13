@@ -2,7 +2,7 @@
 
 - **Status:** Living product direction
 - **Implemented foundation:** 55 lessons across 20 topics
-- **Current checkpoint:** Runtime trace verification separated; loading and source-pane scalability next
+- **Current checkpoint:** Four-phase architecture stabilization delivered
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -393,7 +393,9 @@ from that CI workflow only after browser verification succeeds. Browser
 orchestration is now split across focused session, sharing, timing, and
 visualization modules. Production traces build once with structural validation,
 while CI retains repeated determinism, mutation, and solver-agreement proofs.
-The next phase improves lesson loading and source-pane scalability.
+The browser now imports lessons on demand from the manifest and derives current
+code-pane locations from physical source modules. Future work should be driven
+by learner evidence and measured performance rather than structural urgency.
 
 ## Introductory story checkpoint
 

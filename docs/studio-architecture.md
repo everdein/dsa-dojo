@@ -59,7 +59,9 @@ studio/
     app.mjs                 Composition root and feature event wiring
     browser-runtime.mjs     Storage boundary and single playback clock
     lesson-session.mjs      Lesson restore, fallback, and persistence controller
+    lesson-loader.mjs       Manifest-driven cached dynamic lesson imports
     share-controller.mjs    URL/native-share browser controller
+    source-pane.mjs         Physical source-line derivation from stable anchors
     visualization-view.mjs  Renderer model to semantic DOM presentation
     curriculum-map.mjs      Pure prerequisite graph and selection projection
     curriculum-manifest.mjs Authoritative catalog and runtime-module data
@@ -94,8 +96,9 @@ scripts/
 ## Runtime Data Flow
 
 ```text
-lesson registry
-  -> selected lesson definition
+lightweight curriculum manifest
+  -> dynamic import of the selected lesson definition
+  -> source-pane hydration from its physical domain module
   -> parsed learner input
   -> pure algorithm + deterministic trace builder
   -> validated trace
@@ -114,6 +117,24 @@ the renderer registry. A lesson declares either one legacy
 keyed snapshot for every declared panel. The built-in adapters are `array`,
 `sequence`, `lookup`, `grid`, `stack`, `queue`, `branching`, `graph`, and
 `linked-list`.
+
+### Lesson loading and source panes
+
+The browser catalog, filters, progress summary, and prerequisite map import only
+the lightweight curriculum manifest. `lesson-loader.mjs` dynamically imports
+the selected lesson definition, validates it, and caches its promise. Comparison
+mode requests only its selected pair. After a lesson settles, the browser uses
+idle time to preload its immediate neighbors; it does not import the eager
+55-lesson test registry. `lessons/index.mjs` intentionally remains eager in Node
+so CI verifies the complete ordered curriculum.
+
+`source-pane.mjs` fetches the selected lesson's already-allowlisted domain
+module and derives current physical line numbers from the lesson's semantic
+source anchors. Exact-text anchors are resolved to the nearest physical match,
+so unrelated inserted or removed lines no longer stale every downstream line
+number. Missing anchors fail focused source-pane tests instead of presenting
+the wrong code. The resolved physical text and locations drive both the main
+code pane and comparison lanes.
 
 ### Runtime construction and CI verification
 
