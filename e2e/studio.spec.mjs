@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import AxeBuilder from "@axe-core/playwright";
+import { curriculumLessons } from "../studio/src/curriculum-manifest.mjs";
 
 const lessons = [
   ["arrays%2Ffind-largest", "Find the largest value"],
@@ -190,6 +191,37 @@ test("a learner can commit a prediction before revealing the next state", async 
   await expect(page.locator("#step-count")).toHaveText("1 / 5");
 });
 
+test("landing catalog groups every manifest lesson under accessible topic navigation", async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  await page.goto("./");
+
+  const expectedTopics = [...new Set(curriculumLessons.map(({ topic }) => topic))];
+  const navigation = page.getByRole("navigation", { name: "Curriculum topics" });
+  const topicLinks = navigation.getByRole("link");
+  const topicSections = page.locator(".home-lesson-topic");
+
+  await expect(topicLinks).toHaveCount(expectedTopics.length);
+  await expect(topicSections).toHaveCount(expectedTopics.length);
+  await expect(page.locator(".home-lesson-card")).toHaveCount(curriculumLessons.length);
+  await expect(topicLinks.first()).toHaveAccessibleName("Arrays, 7 lessons");
+
+  const rendered = await topicSections.evaluateAll((sections) => sections.map((section) => ({
+    topic: section.querySelector("h3")?.textContent,
+    lessonHrefs: [...section.querySelectorAll(".home-lesson-card")]
+      .map((card) => card.getAttribute("href"))
+  })));
+  assertCatalogMatchesManifest(rendered);
+
+  await topicLinks.first().focus();
+  await expect(topicLinks.first()).toBeFocused();
+  await topicLinks.first().press("Enter");
+  await expect(page).toHaveURL(/#curriculum-topic-arrays$/);
+  await expect(page.locator("#curriculum-topic-arrays")).toHaveAttribute(
+    "aria-labelledby",
+    "curriculum-topic-arrays-title"
+  );
+});
+
 test("the sequence renderer supports custom text and accessible stepping", async ({ page }) => {
   const errors = collectPageErrors(page);
   await page.emulateMedia({ reducedMotion: "reduce" });
@@ -235,4 +267,16 @@ function formatViolations(violations) {
     const targets = violation.nodes.flatMap((node) => node.target).join(", ");
     return `${violation.id}: ${violation.help} (${targets})`;
   }).join("\n");
+}
+
+function assertCatalogMatchesManifest(rendered) {
+  const expectedTopics = [...new Set(curriculumLessons.map(({ topic }) => topic))];
+  expect(rendered.map(({ topic }) => topic)).toEqual(expectedTopics);
+
+  for (const group of rendered) {
+    const expectedHrefs = curriculumLessons
+      .filter(({ topic }) => topic === group.topic)
+      .map(({ id }) => `./studio/#lesson=${encodeURIComponent(id)}`);
+    expect(group.lessonHrefs).toEqual(expectedHrefs);
+  }
 }

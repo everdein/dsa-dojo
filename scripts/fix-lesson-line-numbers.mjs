@@ -125,11 +125,6 @@ for (const lessonFile of lessonFiles) {
     functionLines.push({ number: lineNum, text: line });
   }
 
-  // Build the new lines array for the lesson
-  const newLinesArray = functionLines
-    .map(({ number, text }) => `      { number: ${number}, text: "${escapeQuotes(text)}", steps: [...] }`)
-    .join(",\n");
-
   // Find and replace the lines array in the lesson
   const linesArrayRegex = /lines:\s*\[\s*[^[\]]*\{[^}]*\}[^[\]]*\]/s;
   const linesArrayMatch = lessonContent.match(linesArrayRegex);
@@ -142,7 +137,6 @@ for (const lessonFile of lessonFiles) {
 
   // For now, just update the line numbers and keep the steps
   // We'll preserve the steps array as-is and only fix line numbers and text
-  const oldLinesArray = linesArrayMatch[0];
   const lineObjects = lessonContent.match(/\{\s*number:\s*\d+,\s*text:\s*"[^"]*",\s*steps:\s*\[[^\]]*\]\s*\}/g);
 
   if (!lineObjects) {

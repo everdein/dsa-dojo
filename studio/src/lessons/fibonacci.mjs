@@ -34,9 +34,8 @@ export const recursiveFibonacciLesson = {
       { number: 17, text: "export function recursiveFibonacci(value) {", steps: ["call-function"] },
       { number: 18, text: "  validateRecursiveFibonacciInput(value);", steps: ["call-function"] },
       { number: 19, text: "  if (value <= 1) return value;", steps: ["check-base", "return-base"] },
-      { number: 13, text: "  return recursiveFibonacci(value - 1)", steps: ["recurse"] },
-      { number: 14, text: "    + recursiveFibonacci(value - 2);", steps: ["recurse", "combine-return"] },
-      { number: 15, text: "}", steps: ["combine-return"] }
+      { number: 20, text: "  return recursiveFibonacci(value - 1) + recursiveFibonacci(value - 2);", steps: ["recurse", "combine-return"] },
+      { number: 21, text: "}", steps: ["combine-return"] }
     ]
   },
   stats: [

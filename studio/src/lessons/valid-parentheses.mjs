@@ -49,7 +49,7 @@ export const validParenthesesLesson = {
       { number: 24, text: "  validateParenthesesInput(text);", steps: ["initialize"] },
       { number: 25, text: "  const stack = [];", steps: ["initialize"] },
       { number: 26, text: "  for (const character of Array.from(text)) {", steps: ["scan"] },
-      { number: 27, text: "    if (/^\s$/u.test(character)) continue;", steps: ["skip-space"] },
+      { number: 27, text: "    if (/^\\s$/u.test(character)) continue;", steps: ["skip-space"] },
       { number: 28, text: "    if (!matchingOpener.has(character)) {", steps: ["scan"] },
       { number: 29, text: "      stack.push(character);", steps: ["push-opener"] },
       { number: 30, text: "      continue;", steps: ["push-opener"] },
