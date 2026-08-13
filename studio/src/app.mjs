@@ -1,4 +1,5 @@
 import { buildValidatedTrace } from "./lesson-contract.mjs";
+import { buildCurriculumMap, curriculumMapSelection } from "./curriculum-map.mjs";
 import { groupCurriculumByTopic } from "./home-catalog.mjs";
 import { getLesson, listLessons } from "./lessons/index.mjs";
 import { lessonHash, readLessonIdFromHash } from "./navigation.mjs";
@@ -41,6 +42,7 @@ import {
   observePipVisibility,
   pipEmotionForLearning,
   pipEmotionLabel,
+  pipSenseiLine,
   setPipState
 } from "./pip.mjs";
 import { createPlayerState, playerReducer } from "./player.mjs";
@@ -54,6 +56,7 @@ import {
 const lessons = listLessons();
 const lessonIds = lessons.map((item) => item.id);
 const topicCount = new Set(lessons.map((item) => item.topic)).size;
+const curriculumMap = buildCurriculumMap(lessons);
 const progressStorage = getBrowserStorage();
 let progress = readLearningProgress(progressStorage, lessons);
 let challengePreferences = readChallengePreferences(progressStorage, lessons);
@@ -68,17 +71,25 @@ let comparisonFamily = getComparisonFamily("sorting-strategies");
 let comparisonRun = null;
 let timerId = null;
 let prediction = createPredictionState(lesson.id);
+let selectedMapLessonId = lesson.id;
+let selectedMapPattern = "all";
+let catalogView = "list";
+const mapNodeElements = new Map();
 
 const elements = {
   headerStatus: document.querySelector("#header-status"),
   catalogCount: document.querySelector("#catalog-count"),
   catalogSummary: document.querySelector("#catalog-summary"),
+  catalogListView: document.querySelector("#catalog-list-view"),
+  catalogMapView: document.querySelector("#catalog-map-view"),
+  catalogTools: document.querySelector("#catalog-tools"),
   catalogSearch: document.querySelector("#catalog-search"),
   catalogTopicFilter: document.querySelector("#catalog-topic-filter"),
   catalogPatternFilter: document.querySelector("#catalog-pattern-filter"),
   catalogProgressFilter: document.querySelector("#catalog-progress-filter"),
   clearCatalogFilters: document.querySelector("#clear-catalog-filters"),
   catalogResultsSummary: document.querySelector("#catalog-results-summary"),
+  catalogResults: document.querySelector(".catalog-results"),
   catalogEmpty: document.querySelector("#catalog-empty"),
   catalogEmptyClear: document.querySelector("#catalog-empty-clear"),
   progressSummary: document.querySelector("#progress-summary"),
@@ -90,6 +101,13 @@ const elements = {
   cancelResetProgress: document.querySelector("#cancel-reset-progress-button"),
   confirmResetProgress: document.querySelector("#confirm-reset-progress-button"),
   lessonList: document.querySelector("#lesson-list"),
+  curriculumMap: document.querySelector("#curriculum-map"),
+  curriculumMapPattern: document.querySelector("#curriculum-map-pattern"),
+  curriculumMapScroll: document.querySelector("#curriculum-map-scroll"),
+  curriculumMapCanvas: document.querySelector("#curriculum-map-canvas"),
+  curriculumMapEdges: document.querySelector("#curriculum-map-edges"),
+  curriculumMapColumns: document.querySelector("#curriculum-map-columns"),
+  curriculumMapDetail: document.querySelector("#curriculum-map-detail"),
   lessonSection: document.querySelector("#lesson"),
   lessonEyebrow: document.querySelector("#lesson-eyebrow"),
   lessonTitle: document.querySelector("#lesson-title"),
@@ -162,6 +180,7 @@ const elements = {
   pipToggle: document.querySelector("#pip-toggle"),
   pipHeading: document.querySelector("#pip-heading"),
   pipEmotionLabel: document.querySelector("#pip-emotion-label"),
+  pipSenseiLine: document.querySelector("#pip-sensei-line"),
   pipMessage: document.querySelector("#pip-message"),
   pipPrompt: document.querySelector("#pip-prompt"),
   prediction: document.querySelector("#prediction-checkpoint"),
@@ -190,6 +209,7 @@ const elements = {
 
 function initializeCatalog() {
   initializeCatalogFilters();
+  initializeCurriculumMap();
   const groups = groupCurriculumByTopic(lessons);
   elements.lessonList.replaceChildren(...groups.map((group, groupIndex) => {
     const topicId = `studio-topic-${String(groupIndex + 1).padStart(2, "0")}`;
@@ -219,6 +239,183 @@ function initializeCatalog() {
     section.append(heading, cards);
     return section;
   }));
+}
+
+function initializeCurriculumMap() {
+  elements.curriculumMapPattern.append(...curriculumMap.patterns.map(({ id, count }) => (
+    createFilterOption(id, `${id.replaceAll("-", " ")} (${count})`)
+  )));
+
+  const columns = curriculumMap.columns.map((nodes, depth) => {
+    const column = document.createElement("section");
+    column.className = "curriculum-map-column";
+    column.setAttribute("aria-label", `Learning stage ${depth + 1}`);
+    const heading = document.createElement("p");
+    heading.className = "curriculum-map-column-heading";
+    heading.textContent = depth === 0 ? "Start here" : `Stage ${depth + 1}`;
+    column.append(heading, ...nodes.map(createCurriculumMapNode));
+    return column;
+  });
+  elements.curriculumMapColumns.replaceChildren(...columns);
+  renderCurriculumMapSelection();
+}
+
+function createCurriculumMapNode(node) {
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "curriculum-map-node";
+  button.dataset.mapLessonId = node.id;
+  button.setAttribute("aria-pressed", "false");
+  const eyebrow = document.createElement("small");
+  eyebrow.textContent = `L${String(node.order).padStart(2, "0")} · ${node.topic}`;
+  const title = document.createElement("strong");
+  title.textContent = node.label;
+  const pattern = document.createElement("span");
+  pattern.textContent = node.patterns.slice(0, 2).join(" · ").replaceAll("-", " ");
+  button.append(eyebrow, title, pattern);
+  button.addEventListener("click", () => selectCurriculumMapLesson(node.id));
+  mapNodeElements.set(node.id, button);
+  return button;
+}
+
+function setCatalogView(view) {
+  catalogView = view === "map" ? "map" : "list";
+  const mapIsOpen = catalogView === "map";
+  elements.catalogListView.setAttribute("aria-pressed", String(!mapIsOpen));
+  elements.catalogMapView.setAttribute("aria-pressed", String(mapIsOpen));
+  elements.curriculumMap.hidden = !mapIsOpen;
+  elements.catalogTools.hidden = mapIsOpen;
+  elements.catalogResults.hidden = mapIsOpen;
+  elements.catalogEmpty.hidden = mapIsOpen || !elements.catalogEmpty.dataset.empty;
+  elements.lessonList.hidden = mapIsOpen;
+  if (mapIsOpen) {
+    renderCurriculumMapSelection();
+    requestAnimationFrame(renderCurriculumMapEdges);
+  }
+}
+
+function selectCurriculumMapLesson(id, { focus = false } = {}) {
+  selectedMapLessonId = id;
+  renderCurriculumMapSelection();
+  if (focus) mapNodeElements.get(id)?.focus();
+}
+
+function renderCurriculumMapSelection() {
+  const selection = curriculumMapSelection(curriculumMap, selectedMapLessonId, selectedMapPattern);
+  const matching = new Set(selection.matchingPatternIds);
+  const prerequisites = new Set(selection.prerequisiteIds);
+  const dependents = new Set(selection.dependentIds);
+  for (const [id, button] of mapNodeElements) {
+    const onSelectedPath = id === selectedMapLessonId || prerequisites.has(id) || dependents.has(id);
+    button.classList.toggle("is-selected", id === selectedMapLessonId);
+    button.classList.toggle("is-prerequisite", prerequisites.has(id));
+    button.classList.toggle("is-dependent", dependents.has(id));
+    button.classList.toggle("is-dimmed", selectedMapPattern !== "all" && !matching.has(id) && !onSelectedPath);
+    button.setAttribute("aria-pressed", String(id === selectedMapLessonId));
+  }
+  renderCurriculumMapDetail(curriculumMap.nodeById.get(selectedMapLessonId));
+  for (const path of elements.curriculumMapEdges.querySelectorAll(".curriculum-map-edge")) {
+    path.classList.toggle("is-active", selection.activeEdgeIds.includes(path.dataset.edgeId));
+  }
+}
+
+function renderCurriculumMapDetail(node) {
+  const copy = document.createElement("div");
+  copy.className = "curriculum-map-detail-copy";
+  const eyebrow = document.createElement("small");
+  eyebrow.textContent = `L${String(node.order).padStart(2, "0")} · ${node.topic.toUpperCase()}`;
+  const title = document.createElement("h4");
+  title.textContent = node.label;
+  const description = document.createElement("p");
+  description.textContent = node.description;
+  copy.append(eyebrow, title, description);
+
+  const relations = document.createElement("div");
+  relations.className = "curriculum-map-relations";
+  relations.append(
+    createMapRelation("Needs", node.prerequisites, "Start of path"),
+    createMapRelation("Unlocks", node.dependents, "End of path"),
+    createMapPatternRelation(node.patterns)
+  );
+
+  const open = document.createElement("button");
+  open.type = "button";
+  open.className = "primary-button";
+  open.textContent = "Open lesson →";
+  open.addEventListener("click", () => loadLesson(node.id));
+  elements.curriculumMapDetail.replaceChildren(copy, relations, open);
+}
+
+function createMapRelation(label, ids, emptyLabel) {
+  const row = document.createElement("div");
+  row.className = "curriculum-map-relation";
+  const heading = document.createElement("strong");
+  heading.textContent = label;
+  row.append(heading);
+  if (ids.length === 0) {
+    const empty = document.createElement("span");
+    empty.className = "curriculum-map-chip";
+    empty.textContent = emptyLabel;
+    row.append(empty);
+    return row;
+  }
+  for (const id of ids) {
+    const related = curriculumMap.nodeById.get(id);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "curriculum-map-chip";
+    button.textContent = `L${String(related.order).padStart(2, "0")} ${related.label}`;
+    button.addEventListener("click", () => selectCurriculumMapLesson(id, { focus: true }));
+    row.append(button);
+  }
+  return row;
+}
+
+function createMapPatternRelation(patterns) {
+  const row = document.createElement("div");
+  row.className = "curriculum-map-relation";
+  const heading = document.createElement("strong");
+  heading.textContent = "Patterns";
+  row.append(heading);
+  for (const pattern of patterns) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "curriculum-map-chip";
+    button.textContent = pattern.replaceAll("-", " ");
+    button.addEventListener("click", () => {
+      selectedMapPattern = pattern;
+      elements.curriculumMapPattern.value = pattern;
+      renderCurriculumMapSelection();
+    });
+    row.append(button);
+  }
+  return row;
+}
+
+function renderCurriculumMapEdges() {
+  if (elements.curriculumMap.hidden) return;
+  const canvasRect = elements.curriculumMapCanvas.getBoundingClientRect();
+  const width = elements.curriculumMapCanvas.scrollWidth;
+  const height = elements.curriculumMapCanvas.scrollHeight;
+  elements.curriculumMapEdges.setAttribute("viewBox", `0 0 ${width} ${height}`);
+  elements.curriculumMapEdges.setAttribute("width", String(width));
+  elements.curriculumMapEdges.setAttribute("height", String(height));
+  const paths = curriculumMap.edges.map((edge) => {
+    const source = mapNodeElements.get(edge.source).getBoundingClientRect();
+    const target = mapNodeElements.get(edge.target).getBoundingClientRect();
+    const startX = source.right - canvasRect.left;
+    const startY = source.top + source.height / 2 - canvasRect.top;
+    const endX = target.left - canvasRect.left;
+    const endY = target.top + target.height / 2 - canvasRect.top;
+    const bend = Math.max(24, (endX - startX) * 0.45);
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.classList.add("curriculum-map-edge");
+    path.dataset.edgeId = edge.id;
+    path.setAttribute("d", `M ${startX} ${startY} C ${startX + bend} ${startY}, ${endX - bend} ${endY}, ${endX} ${endY}`);
+    return path;
+  });
+  elements.curriculumMapEdges.replaceChildren(...paths);
+  renderCurriculumMapSelection();
 }
 
 function createLessonButton(item) {
@@ -284,8 +481,12 @@ function renderCatalogState() {
   elements.catalogResultsSummary.textContent = visibleIds.size === lessons.length
     ? `Showing all ${lessons.length} lessons.`
     : `Showing ${visibleIds.size} of ${lessons.length} lessons.`;
-  elements.catalogEmpty.hidden = visibleIds.size !== 0;
+  elements.catalogEmpty.dataset.empty = String(visibleIds.size === 0);
+  elements.catalogEmpty.hidden = catalogView === "map" || visibleIds.size !== 0;
   elements.clearCatalogFilters.hidden = !hasActiveCatalogFilters(catalogFilters);
+  for (const [id, button] of mapNodeElements) {
+    button.dataset.progress = lessonProgressState(progress, id).status;
+  }
 }
 
 function initializeCatalogFilters() {
@@ -1441,6 +1642,7 @@ function renderPip(step) {
   setPipState(elements.pipAvatar, emotion);
   elements.pipEmotionLabel.textContent = pipEmotionLabel(emotion);
   elements.pipEmotionLabel.dataset.emotion = emotion;
+  elements.pipSenseiLine.textContent = pipSenseiLine(emotion, lesson.patterns[0]);
   elements.pipMessage.textContent = step.narration;
   elements.pipPrompt.textContent = step.prompt;
 }
@@ -1483,6 +1685,7 @@ function loadLesson(id, { enter = true } = {}) {
   if (id !== lesson.id) {
     stopTimer();
     lesson = getLesson(id);
+    selectedMapLessonId = id;
     const restored = restoreLessonState(lesson);
     player = playerReducer(player, {
       type: "LOAD_LESSON",
@@ -1705,6 +1908,12 @@ elements.comparisonWorkspace.addEventListener("click", (event) => {
   });
 });
 elements.catalogSearch.addEventListener("input", updateCatalogFilters);
+elements.catalogListView.addEventListener("click", () => setCatalogView("list"));
+elements.catalogMapView.addEventListener("click", () => setCatalogView("map"));
+elements.curriculumMapPattern.addEventListener("change", () => {
+  selectedMapPattern = elements.curriculumMapPattern.value;
+  renderCurriculumMapSelection();
+});
 elements.catalogTopicFilter.addEventListener("change", updateCatalogFilters);
 elements.catalogPatternFilter.addEventListener("change", updateCatalogFilters);
 elements.catalogProgressFilter.addEventListener("change", updateCatalogFilters);
@@ -1838,6 +2047,7 @@ window.addEventListener("hashchange", () => {
   const id = readLessonIdFromHash(window.location.hash, lessonIds);
   if (id && id !== lesson.id) loadLesson(id);
 });
+window.addEventListener("resize", () => requestAnimationFrame(renderCurriculumMapEdges));
 
 mountPips();
 observePipVisibility();

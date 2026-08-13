@@ -11,8 +11,8 @@
 DSA Dojo is a framework-free learning product that makes data structures and
 algorithms visible, inspectable, and explainable with JavaScript. Learners can
 move through an execution one decision at a time, connect each state change to
-the code that caused it, and use Pip, an emotionally responsive original guide
-companion, to reinforce predictions, discoveries, and reusable patterns.
+the code that caused it, and use Sensei Pip, an emotionally responsive original
+guide companion, to reinforce predictions, discoveries, and reusable patterns.
 Lesson completion, custom input, and the last visible step are saved locally so
 learners can continue where they stopped without creating an account.
 Both catalogs can be searched and narrowed by topic, reusable pattern, and
@@ -23,6 +23,8 @@ personal best.
 Algorithm Comparison Mode runs compatible lessons on shared input with
 synchronized or independent stepping, projected visual state, active source
 lines, complexity labels, and matching-result verification.
+The Learning Map turns manifest prerequisites into an explorable left-to-right
+path with pattern highlighting, local progress, and direct lesson entry.
 
 **Current status:** The complete core curriculum is implemented: 55 interactive
 lessons across 20 topics. The next phase strengthens coverage, browser
@@ -65,7 +67,9 @@ builds the static site and runs Playwright browser and accessibility tests.
 1. Start with **Find Largest** and predict when the best value will change.
 2. Apply `-4, 8, 8, 3`, step forward twice, then rewind one decision.
 3. Open **Detect a Cycle** to see the same player drive a connected-node renderer.
-4. Finish either lesson to reveal replay, sample, and next-lesson actions.
+4. Open the **Learning map**, select Sliding Window Maximum, and inspect the two
+   earlier ideas that unlock it.
+5. Finish either lesson to reveal replay, sample, and next-lesson actions.
 
 ## Interactive Curriculum
 
@@ -90,7 +94,8 @@ prerequisite, reasoning pattern, and module path.
 Each lesson supports editable input, Previous, Next, Play/Pause, Reset, playback
 speed, source highlighting, plain-language explanations, time and space
 complexity, an optional scored Challenge Mode, and side-by-side comparison for
-the sorting and Fibonacci strategy families.
+the sorting and Fibonacci strategy families. The catalog can switch between a
+grouped lesson list and an interactive prerequisite/pattern map.
 
 ## How It Works
 

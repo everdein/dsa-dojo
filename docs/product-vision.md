@@ -67,6 +67,12 @@ lesson numbers, names, descriptions, topics, and reusable pattern tags. Active
 filters produce a live result count, a useful empty state, and URL parameters
 that survive reloads without interfering with Studio lesson deep links.
 
+The same manifest powers a second discovery surface: an interactive Learning
+Map. Prerequisite depth determines each left-to-right stage, lines show which
+lessons unlock later work, and selecting a node isolates its immediate
+prerequisites and dependents. Pattern highlighting and local completion state
+remain available without turning the graph into a separate curriculum source.
+
 ## Challenge Mode
 
 Challenge Mode converts deterministic lesson traces into active-recall rounds
@@ -103,7 +109,7 @@ added only when the input and result semantics are honestly compatible.
 
 ## The Guide Companion
 
-- **Working name:** Pip
+- **Name:** Sensei Pip
 - **Concept:** A small, friendly data-node companion derived from the shapes of array cells, cursors, and connected nodes.
 
 Pip gives the studio warmth and continuity without becoming the product itself.
@@ -113,7 +119,9 @@ while keeping one recognizable identity.
 Pip's persistent base silhouette is a rounded data cell with two short,
 expressive arms and one small orbiting index marker. Arm poses, expressions,
 colors, and topic-specific accessories can change, but the recognizable
-cell-and-marker shape remains consistent.
+cell-and-marker shape remains consistent. A warm gold headband is now the
+standard identity marker; its restrained cloth motion reinforces the dojo theme
+without implying combat or borrowing a familiar mascot silhouette.
 
 The implemented emotion system gives that silhouette nine readable modes:
 ready, curious, thinking, encouraging, guiding, aha, celebrating, caution, and
@@ -121,6 +129,11 @@ pattern-spotted cool. Player and prediction state choose the everyday modes;
 lesson traces reserve stronger reactions for meaningful discoveries. Each
 visual expression is paired with a short visible text label and remains legible
 without motion.
+
+Every emotion also has a compact mentor aside: observe before rushing, name the
+invariant, test the edge case, reuse a recognized pattern, and value a clear
+explanation over speed. These lines complement lesson-authored narration rather
+than replacing or paraphrasing it.
 
 ### Responsibilities
 
@@ -381,7 +394,7 @@ The story proves five ideas in order:
 4. one deterministic trace synchronizes every explanation surface
 5. direct lesson links preserve a short path into practice
 
-Pip now has a reusable motion vocabulary across the landing page and studio.
+Sensei Pip now has a reusable motion vocabulary across the landing page and studio.
 The states communicate curiosity, thinking, guidance, completion, and caution
 without carrying essential information on their own. Ordinary scrolling,
 observer fallbacks, reduced-motion behavior, and mobile-specific layout rules

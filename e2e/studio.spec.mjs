@@ -90,6 +90,8 @@ test("every Pip has two visible animated arms and a distinct placement pose", as
 
     const appearances = await pips.evaluateAll((elements) => elements.map((element) => ({
       pose: element.dataset.pipPose,
+      headbands: element.querySelectorAll(".pip-headband").length,
+      tails: element.querySelectorAll(".pip-headband-tail").length,
       arms: [...element.querySelectorAll(".pip-arm")].map((arm) => {
         const style = getComputedStyle(arm);
         return {
@@ -103,6 +105,8 @@ test("every Pip has two visible animated arms and a distinct placement pose", as
     expect(new Set(appearances.map(({ pose }) => pose)).size).toBe(expectedCount);
     for (const appearance of appearances) {
       expect(appearance.pose).toBeTruthy();
+      expect(appearance.headbands).toBe(1);
+      expect(appearance.tails).toBe(2);
       expect(appearance.arms).toHaveLength(2);
       expect(appearance.arms.map(({ animationName }) => animationName)).toEqual([
         "pip-arm-left",
@@ -137,8 +141,10 @@ test("lesson Pip responds to prediction, insight, validation, and completion mom
 
   const avatar = page.locator(".pip-card .pip-avatar");
   const emotion = page.locator("#pip-emotion-label");
+  const senseiLine = page.locator("#pip-sensei-line");
   await expect(avatar).toHaveAttribute("data-state", "curious");
   await expect(emotion).toHaveText("Curious");
+  await expect(senseiLine).toHaveText("First, observe without rushing.");
 
   const values = page.locator('[data-field-id="values"]');
   await values.fill("4, 1, 7, 3");
@@ -147,6 +153,7 @@ test("lesson Pip responds to prediction, insight, validation, and completion mom
   await page.locator("#prediction-form button[type=submit]").click();
   await expect(avatar).toHaveAttribute("data-state", "thinking");
   await expect(emotion).toHaveText("Thinking");
+  await expect(senseiLine).toHaveText("Pause. Name what must remain true.");
 
   await page.locator("#next-button").click();
   await expect(avatar).toHaveAttribute("data-state", "encouraging");
@@ -170,6 +177,7 @@ test("lesson Pip responds to prediction, insight, validation, and completion mom
   }
   await expect(avatar).toHaveAttribute("data-state", "celebrating");
   await expect(emotion).toHaveText("Celebrating");
+  await expect(senseiLine).toHaveText("A clear explanation is the real victory.");
 });
 
 test("every lesson deep link renders its expected interactive surface", async ({ page }) => {
@@ -402,6 +410,35 @@ test("studio catalog groups every lesson by topic while preserving lesson number
       curriculumLessons.filter(({ topic }) => topic === group.topic).map(({ id }) => id)
     );
   }
+});
+
+test("learning map exposes prerequisite paths, pattern highlights, progress, and lesson entry", async ({ page }) => {
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+  await page.getByRole("button", { name: "Learning map" }).click();
+
+  const expectedEdges = curriculumLessons.reduce((total, lesson) => total + lesson.prerequisites.length, 0);
+  await expect(page.locator(".curriculum-map-node")).toHaveCount(curriculumLessons.length);
+  await expect(page.locator(".curriculum-map-edge")).toHaveCount(expectedEdges);
+  await expect(page.locator('[data-map-lesson-id="arrays/find-largest"]')).toHaveAttribute("aria-pressed", "true");
+  await expect(page.locator('[data-map-lesson-id="arrays/find-largest"]')).toHaveAttribute("data-progress", "visited");
+
+  await page.locator('[data-map-lesson-id="queues/sliding-window-maximum"]').click();
+  await expect(page.locator("#curriculum-map-detail")).toContainText("Sliding Window Maximum");
+  await expect(page.locator("#curriculum-map-detail")).toContainText("L02 Sliding Window");
+  await expect(page.locator("#curriculum-map-detail")).toContainText("L20 Queue Operations");
+  await expect(page.locator(".curriculum-map-node.is-prerequisite")).toHaveCount(2);
+  await expect(page.locator(".curriculum-map-edge.is-active")).toHaveCount(2);
+
+  await page.locator("#curriculum-map-pattern").selectOption("sliding-window");
+  await expect(page.locator('[data-map-lesson-id="arrays/sliding-window"]')).not.toHaveClass(/is-dimmed/);
+  await expect(page.locator('[data-map-lesson-id="queues/queue-operations"]')).not.toHaveClass(/is-dimmed/);
+  expect(await page.locator(".curriculum-map-node.is-dimmed").count()).toBeGreaterThan(40);
+
+  await page.getByRole("button", { name: "Open lesson →" }).click();
+  await expect(page).toHaveURL(/lesson=queues%2Fsliding-window-maximum/);
+  await expect(page.getByRole("heading", { level: 2, name: "Emit every window maximum" })).toBeVisible();
+  await expectNoDocumentOverflow(page);
+  await expectNoSeriousAccessibilityViolations(page);
 });
 
 test("catalog search and filters compose, persist in the URL, and recover from empty results", async ({ page }) => {

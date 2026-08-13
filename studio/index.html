@@ -53,12 +53,12 @@
             <button class="text-link text-link-button" id="open-comparison-button" type="button">Compare algorithms <span aria-hidden="true">↔</span></button>
           </div>
         </div>
-        <aside class="pip-intro" aria-label="Meet Pip">
+        <aside class="pip-intro" aria-label="Meet Sensei Pip">
           <div class="pip-avatar pip-avatar--large" data-pip data-pip-pose="intro" data-state="curious"></div>
           <div>
-            <p class="eyebrow">MEET PIP</p>
-            <p class="pip-title">Your little data guide.</p>
-            <p class="pip-copy">I’ll ask what you expect to happen, then help you connect the change to the code.</p>
+            <p class="eyebrow">MEET SENSEI PIP</p>
+            <p class="pip-title">Your calm coding guide.</p>
+            <p class="pip-copy">I’ll help you slow down, name the invariant, and connect each state change to the code.</p>
           </div>
         </aside>
       </section>
@@ -69,7 +69,13 @@
             <p class="eyebrow" id="catalog-count">CURRICULUM · 20 TOPICS</p>
             <h2 id="catalog-title">Choose a lesson</h2>
           </div>
-          <p id="catalog-summary">55 focused lessons build reusable reasoning patterns one state change at a time.</p>
+          <div class="catalog-heading-aside">
+            <p id="catalog-summary">55 focused lessons build reusable reasoning patterns one state change at a time.</p>
+            <div class="catalog-view-toggle" role="group" aria-label="Curriculum view">
+              <button id="catalog-list-view" type="button" aria-pressed="true">Lesson list</button>
+              <button id="catalog-map-view" type="button" aria-pressed="false">Learning map</button>
+            </div>
+          </div>
         </div>
         <section class="progress-dashboard" aria-labelledby="progress-title">
           <div class="progress-dashboard-copy">
@@ -89,6 +95,32 @@
             <button class="quiet-button" id="cancel-reset-progress-button" type="button">Keep progress</button>
             <button class="quiet-button quiet-button--danger" id="confirm-reset-progress-button" type="button">Reset everything</button>
           </div>
+        </section>
+        <section class="curriculum-map" id="curriculum-map" aria-labelledby="curriculum-map-title" hidden>
+          <div class="curriculum-map-header">
+            <div>
+              <p class="eyebrow">PATTERNS &amp; PREREQUISITES</p>
+              <h3 id="curriculum-map-title" tabindex="-1">Follow the learning path.</h3>
+              <p>Lessons move left to right as earlier ideas unlock new ones. Select any lesson to inspect its path.</p>
+            </div>
+            <label class="curriculum-map-filter">
+              <span>Highlight a pattern</span>
+              <select id="curriculum-map-pattern"><option value="all">All patterns</option></select>
+            </label>
+          </div>
+          <div class="curriculum-map-legend" aria-label="Map legend">
+            <span><i class="map-key map-key--selected" aria-hidden="true"></i> Selected</span>
+            <span><i class="map-key map-key--before" aria-hidden="true"></i> Prerequisite</span>
+            <span><i class="map-key map-key--after" aria-hidden="true"></i> Unlocked next</span>
+            <span><i class="map-key map-key--complete" aria-hidden="true"></i> Complete</span>
+          </div>
+          <div class="curriculum-map-scroll" id="curriculum-map-scroll" tabindex="0" aria-label="Scrollable prerequisite map">
+            <div class="curriculum-map-canvas" id="curriculum-map-canvas">
+              <svg class="curriculum-map-edges" id="curriculum-map-edges" aria-hidden="true"></svg>
+              <div class="curriculum-map-columns" id="curriculum-map-columns"></div>
+            </div>
+          </div>
+          <article class="curriculum-map-detail" id="curriculum-map-detail" aria-live="polite"></article>
         </section>
         <form class="catalog-tools" id="catalog-tools" role="search" aria-label="Filter lessons">
           <label class="catalog-search">
@@ -321,13 +353,14 @@
               <div class="pip-card-header">
                 <div class="pip-avatar" data-pip data-pip-pose="lesson" data-state="curious"></div>
                 <div>
-                  <p class="eyebrow">PIP’S NOTE</p>
+                  <p class="eyebrow">SENSEI PIP’S NOTE</p>
                   <h3 id="pip-heading"></h3>
                   <p class="pip-emotion-label" id="pip-emotion-label" data-emotion="curious">Curious</p>
                 </div>
                 <button class="icon-button icon-button--light" id="pip-toggle" type="button" aria-label="Minimize Pip" aria-expanded="true" aria-controls="pip-content">−</button>
               </div>
               <div id="pip-content">
+                <p class="pip-sensei-line" id="pip-sensei-line"></p>
                 <div id="pip-message" class="pip-message"></div>
                 <div class="pip-prompt" id="pip-prompt"></div>
                 <section class="prediction-checkpoint" id="prediction-checkpoint" aria-labelledby="prediction-title">

@@ -22,6 +22,18 @@ export const PIP_EMOTION_LABELS = Object.freeze({
   cool: "Pattern spotted"
 });
 
+export const PIP_SENSEI_LINES = Object.freeze({
+  idle: "Settle in. Precision before speed.",
+  curious: "First, observe without rushing.",
+  thinking: "Pause. Name what must remain true.",
+  encouraging: "Your reasoning is taking shape. Trust the structure.",
+  guiding: "Follow the state; let each decision earn the next.",
+  aha: "There it is—the pattern beneath the steps.",
+  celebrating: "A clear explanation is the real victory.",
+  caution: "A useful mistake. Test the edge, then adjust.",
+  cool: "You have seen this shape before. Reuse it."
+});
+
 const pipStates = new Set(PIP_STATES);
 
 export function isPipEmotion(state) {
@@ -68,6 +80,14 @@ export function pipEmotionForLearning({
 
 export function pipEmotionLabel(state) {
   return PIP_EMOTION_LABELS[normalizePipState(state)];
+}
+
+export function pipSenseiLine(state, pattern = "") {
+  const normalized = normalizePipState(state);
+  if (normalized === "cool" && typeof pattern === "string" && pattern.trim()) {
+    return `You recognize ${pattern.trim().replaceAll("-", " ")}. Reuse the pattern.`;
+  }
+  return PIP_SENSEI_LINES[normalized];
 }
 
 export function setPipState(element, state) {
@@ -130,7 +150,15 @@ function createPipParts(document) {
     makePart(document, "pip-glasses")
   );
 
+  const headband = makePart(document, "pip-headband");
+  headband.append(
+    makePart(document, "pip-headband-knot"),
+    makePart(document, "pip-headband-tail pip-headband-tail--one"),
+    makePart(document, "pip-headband-tail pip-headband-tail--two")
+  );
+
   body.append(
+    headband,
     face,
     makePart(document, "pip-arm pip-arm--left"),
     makePart(document, "pip-arm pip-arm--right")
