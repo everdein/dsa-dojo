@@ -48,8 +48,9 @@ The platform pass delivered with the curriculum established these seams:
 
 1. Renderer selection lives in a renderer registry. Each renderer adapter owns
    view validation, snapshot-ownership checks, accessible projection, and
-   descriptions. The browser controller still contains renderer-id DOM
-   dispatch, which remains a possible extraction boundary.
+   descriptions. Renderer-id DOM dispatch now lives in the focused
+   `visualization-view.mjs` presentation boundary rather than the application
+   composition root.
 2. The string/sequence renderer preserves Unicode-aware sequence state without
    weakening the numeric guarantees of the existing array contract. It shares
    cell primitives with the array
@@ -75,9 +76,10 @@ Remaining architecture work belongs to the verification phase:
   input, and sample input, not only startup. Enforce input, step-count, and
   snapshot-size budgets at runtime. Full fresh snapshots remain the default
   until profiling demonstrates that patch-based history is necessary.
-- Split the central browser controller where profiling or maintenance pressure
-  justifies smaller boundaries, and finish migrating the monolithic legacy
-  suite into focused contract, player, renderer, and topic files.
+- The central browser controller has been split at its highest-pressure seams:
+  visualization presentation, lesson sessions, sharing, storage, and playback
+  timing. Continue migrating the monolithic legacy suite into focused contract,
+  player, renderer, and topic files.
 
 ## Wave 1: Sequences, Lookup State, and Grids
 

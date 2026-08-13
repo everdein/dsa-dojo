@@ -2,7 +2,7 @@
 
 - **Status:** Living product direction
 - **Implemented foundation:** 55 lessons across 20 topics
-- **Current checkpoint:** Core curriculum and release hardening delivered; architectural stabilization next
+- **Current checkpoint:** Release hardening and browser decomposition delivered; runtime efficiency next
 - **Core promise:** See the algorithm think.
 
 ## Vision
@@ -389,9 +389,10 @@ The repository includes a dependency-free static build, CI on supported Node.js
 versions, hundreds of focused Node unit/integration tests, enforced coverage
 floors, desktop/mobile Playwright checks, axe accessibility checks,
 prediction-before-reveal, and explicit lesson-completion actions. Pages deploys
-from that CI workflow only after browser verification succeeds. The next phase
-consolidates browser orchestration, reduces runtime validation and loading cost,
-and broadens targeted renderer assertions.
+from that CI workflow only after browser verification succeeds. Browser
+orchestration is now split across focused session, sharing, timing, and
+visualization modules. The next phase reduces runtime validation and loading
+cost and broadens targeted renderer assertions.
 
 ## Introductory story checkpoint
 
