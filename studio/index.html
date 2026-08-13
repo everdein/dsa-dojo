@@ -179,7 +179,17 @@
               <span aria-hidden="true">↔</span>
               Compare with another algorithm
             </button>
+            <button class="share-state-button" id="share-state-button" type="button" aria-describedby="share-state-status">
+              <span aria-hidden="true">↗</span>
+              Share this state
+            </button>
+            <p class="share-state-status" id="share-state-status" aria-live="polite"></p>
           </div>
+        </div>
+        <div class="share-state-notice" id="share-state-notice" role="alert" hidden>
+          <strong>This shared state could not be restored.</strong>
+          <span id="share-state-notice-copy"></span>
+          <button class="quiet-button" id="dismiss-share-state-notice" type="button">Dismiss</button>
         </div>
 
         <section class="comparison-workspace" id="comparison-workspace" aria-labelledby="comparison-title" hidden>

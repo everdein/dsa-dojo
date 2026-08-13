@@ -324,6 +324,54 @@ test("Algorithm Comparison Mode synchronizes compatible lessons without hiding t
   expect(errors).toEqual([]);
 });
 
+test("share links restore exact lesson and comparison states without local scores", async ({ page, context }) => {
+  await context.grantPermissions(["clipboard-read", "clipboard-write"]);
+  await page.addInitScript(() => Object.defineProperty(navigator, "share", { configurable: true, value: undefined }));
+  await page.goto("./studio/#lesson=arrays%2Ffind-largest");
+  await page.locator('[data-field-id="values"]').fill("4, 1, 9, 3");
+  await page.getByRole("button", { name: "Apply input" }).click();
+  await page.locator("#next-button").click();
+  await page.locator("#next-button").click();
+  await page.getByRole("button", { name: "Share this state" }).click();
+  await expect(page.locator("#share-state-status")).toHaveText("Link copied — input and step included.");
+  const lessonUrl = await page.evaluate(() => navigator.clipboard.readText());
+  expect(lessonUrl).toMatch(/share=.*#lesson=arrays%2Ffind-largest$/);
+
+  await page.goto(lessonUrl);
+  await expect(page.locator('[data-field-id="values"]')).toHaveValue("4, 1, 9, 3");
+  await expect(page.locator("#step-count")).toHaveText(/2 \/ \d+/);
+  await expect(page.locator("#share-state-status")).toHaveText("Shared input and step restored.");
+  await expect(page.locator("#challenge-toggle-status")).toHaveText("Off");
+
+  await page.getByRole("button", { name: "Compare algorithms" }).click();
+  await page.locator('[data-comparison-field="values"]').fill("8, 3, 5, 1");
+  await page.getByRole("button", { name: "Apply shared input" }).click();
+  await page.getByRole("button", { name: "Left forward →" }).click();
+  await page.getByRole("button", { name: "Next beat →" }).click();
+  await page.getByRole("button", { name: "Share this state" }).click();
+  const comparisonUrl = await page.evaluate(() => navigator.clipboard.readText());
+  expect(comparisonUrl).toMatch(/share=.*#comparison$/);
+
+  await page.goto(comparisonUrl);
+  await expect(page.locator("#comparison-workspace")).toBeVisible();
+  await expect(page.locator('[data-comparison-field="values"]')).toHaveValue("8, 3, 5, 1");
+  await expect(page.locator("#comparison-left-step")).toHaveText(/2 \/ \d+/);
+  await expect(page.locator("#comparison-right-step")).toHaveText(/1 \/ \d+/);
+  await expect(page.locator("#share-state-status")).toHaveText("Shared comparison restored.");
+  await expectNoDocumentOverflow(page);
+  await expectNoSeriousAccessibilityViolations(page);
+});
+
+test("malformed share links fail safely and leave a usable default lesson", async ({ page }) => {
+  await page.goto("./studio/?share=not_valid!#lesson=arrays%2Ffind-largest");
+  await expect(page.locator("#share-state-notice")).toBeVisible();
+  await expect(page.locator("#share-state-notice")).toContainText("invalid format");
+  await expect(page.getByRole("heading", { level: 2, name: "Find the largest value" })).toBeVisible();
+  await page.getByRole("button", { name: "Dismiss" }).click();
+  await expect(page.locator("#share-state-notice")).toBeHidden();
+  await expect(page).not.toHaveURL(/share=/);
+});
+
 test("learning progress survives reloads, appears across pages, and can be reset", async ({ page }) => {
   await page.goto("./studio/#lesson=arrays%2Ffind-largest");
   const values = page.locator('[data-field-id="values"]');
