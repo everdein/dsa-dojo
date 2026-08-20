@@ -735,7 +735,6 @@ h3 {
 
 .window-demo .demo-array > span.is-leaving {
   border-color: var(--coral);
-  opacity: 0.55;
 }
 
 .window-demo .demo-array > span.is-entering {
