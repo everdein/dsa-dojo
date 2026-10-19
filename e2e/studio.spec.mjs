@@ -259,7 +259,7 @@ test("Challenge Mode gates each reveal, scores predictions, and remembers a pers
 
   await expect(page.locator("#challenge-toggle")).toHaveAttribute("aria-pressed", "true");
   await expect(page.locator("#challenge-card")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Autoplay unavailable in Challenge Mode" })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Play unavailable in Challenge Mode" })).toBeDisabled();
   await expect(page.locator("#prediction-checkpoint")).toBeHidden();
   await expect(page.locator("#next-button")).toBeDisabled();
   await expect(page.locator('.challenge-option input[type="radio"]')).toHaveCount(3);
@@ -318,9 +318,9 @@ test("Algorithm Comparison Mode synchronizes compatible lessons without hiding t
   await page.getByRole("button", { name: "Next beat →" }).click();
   await expect(page.locator("#comparison-left-step")).toHaveText("2 / 17");
   await expect(page.locator("#comparison-right-step")).toHaveText("1 / 29");
-  await page.getByRole("button", { name: "Play comparison" }).click();
-  await expect(page.getByRole("button", { name: "Pause comparison" })).toBeVisible();
-  await page.getByRole("button", { name: "Pause comparison" }).click();
+  await page.getByRole("button", { name: "Play together comparison" }).click();
+  await expect(page.getByRole("button", { name: "Pause together comparison" })).toBeVisible();
+  await page.getByRole("button", { name: "Pause together comparison" }).click();
 
   await page.locator("#comparison-family").selectOption("fibonacci-strategies");
   await expect(page.getByLabel("Left algorithm")).toHaveValue("recursion/recursive-fibonacci");
@@ -431,7 +431,7 @@ test("landing catalog groups every manifest lesson under accessible topic naviga
   await expect(topicLinks).toHaveCount(expectedTopics.length);
   await expect(topicSections).toHaveCount(expectedTopics.length);
   await expect(page.locator(".home-lesson-card")).toHaveCount(curriculumLessons.length);
-  await expect(topicLinks.first()).toHaveAccessibleName("Arrays, 7 lessons");
+  await expect(topicLinks.first()).toHaveAccessibleName("Arrays 7 lessons");
 
   const rendered = await topicSections.evaluateAll((sections) => sections.map((section) => ({
     topic: section.querySelector("h3")?.textContent,
