@@ -692,7 +692,7 @@ function render() {
   elements.play.innerHTML = playing ? "Ⅱ <span>Pause</span>" : "▶ <span>Play</span>";
   elements.play.disabled = challengePreferences.enabled;
   elements.play.setAttribute("aria-label", challengePreferences.enabled
-    ? "Autoplay unavailable in Challenge Mode"
+    ? "Play unavailable in Challenge Mode"
     : playing ? "Pause lesson" : "Play lesson");
   const speedText = playbackSpeedLabel(player.speed);
   elements.speed.value = String(playbackDelayToControlValue(player.speed));
@@ -956,7 +956,7 @@ function renderComparison() {
   elements.comparisonNext.disabled = summary.bothComplete;
   const playing = comparisonRun.status === "playing";
   elements.comparisonPlay.innerHTML = playing ? "Ⅱ <span>Pause together</span>" : "▶ <span>Play together</span>";
-  elements.comparisonPlay.setAttribute("aria-label", playing ? "Pause comparison" : "Play comparison");
+  elements.comparisonPlay.setAttribute("aria-label", playing ? "Pause together comparison" : "Play together comparison");
   const speedText = playbackSpeedLabel(comparisonRun.speed);
   elements.comparisonSpeed.value = String(playbackDelayToControlValue(comparisonRun.speed));
   elements.comparisonSpeedLabel.textContent = speedText;

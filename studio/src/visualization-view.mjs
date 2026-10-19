@@ -430,7 +430,6 @@ function renderBranchingModel(model, root) {
       const node = document.createElement("div");
       node.className = "branching-node";
       node.setAttribute("role", "treeitem");
-      node.setAttribute("aria-label", nodeModel.ariaLabel);
       node.setAttribute("aria-level", String(levelIndex + 1));
       if (nodeModel.active) node.classList.add("branching-node--active");
       if (nodeModel.changed) node.classList.add("branching-node--changed");
@@ -448,6 +447,7 @@ function renderBranchingModel(model, root) {
         ...nodeModel.annotations.map(({ label }) => label)
       ].join(" · ");
       node.append(pointers, value, details);
+      node.setAttribute("aria-label", `${node.textContent}. ${nodeModel.ariaLabel}`);
       level.append(node);
     }
     region.append(level);

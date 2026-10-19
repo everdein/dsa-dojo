@@ -58,14 +58,14 @@ export function renderCurriculumCatalog(documentRoot, lessons, progress = null) 
     navigationLink.href = `#${topicId}`;
     navigationLink.setAttribute(
       "aria-label",
-      `${group.topic}, ${group.lessons.length} ${group.lessons.length === 1 ? "lesson" : "lessons"}`
+      `${group.topic} ${group.lessons.length} ${group.lessons.length === 1 ? "lesson" : "lessons"}`
     );
     const topicName = documentRoot.createElement("span");
     topicName.textContent = group.topic;
     const topicCount = documentRoot.createElement("small");
     topicCount.setAttribute("aria-hidden", "true");
     topicCount.textContent = String(group.lessons.length);
-    navigationLink.append(topicName, topicCount);
+    navigationLink.append(topicName, documentRoot.createTextNode(" "), topicCount);
     navigationItem.append(navigationLink);
     navigationList.append(navigationItem);
   }
@@ -111,7 +111,7 @@ function createTopicSection(documentRoot, group, groupIndex, groupCount, progres
   const backLink = documentRoot.createElement("a");
   backLink.href = "#home-topic-nav";
   backLink.textContent = "Back to topics ↑";
-  backLink.setAttribute("aria-label", `Back to curriculum topics from ${group.topic}`);
+  backLink.setAttribute("aria-label", `Back to topics ↑ from ${group.topic}`);
   headingActions.append(lessonCount, backLink);
   heading.append(headingCopy, headingActions);
 
