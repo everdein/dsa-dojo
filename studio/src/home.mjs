@@ -120,6 +120,7 @@ function initializeHomeFilters() {
   document.querySelector("#home-progress-filter").addEventListener("change", updateHomeFilters);
   document.querySelector("#home-clear-filters").addEventListener("click", clearHomeFilters);
   document.querySelector("#home-empty-clear").addEventListener("click", clearHomeFilters);
+  for (const control of document.querySelector("#home-catalog-tools").elements) control.disabled = false;
 }
 
 function createOption(value, label) {

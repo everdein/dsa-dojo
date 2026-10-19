@@ -503,6 +503,32 @@ test("learning map exposes prerequisite paths, pattern highlights, progress, and
   await expectNoSeriousAccessibilityViolations(page);
 });
 
+for (const catalog of [
+  { path: "./studio/#catalog", form: "#catalog-tools", search: "#catalog-search", cards: ".lesson-card:visible" },
+  { path: "./", form: "#home-catalog-tools", search: "#home-catalog-search", cards: ".home-lesson-card:visible" }
+]) {
+  test(`catalog controls wait for initialization at ${catalog.path}`, async ({ page }) => {
+    let release;
+    const moduleReady = new Promise((resolve) => { release = resolve; });
+    await page.route("**/src/catalog-filters.mjs", async (route) => {
+      await moduleReady;
+      await route.continue();
+    });
+    try {
+      await page.goto(catalog.path, { waitUntil: "commit" });
+      const controls = page.locator(`${catalog.form} input, ${catalog.form} select, ${catalog.form} button`);
+      await expect(controls).toHaveCount(5);
+      for (const control of await controls.all()) await expect(control).toBeDisabled();
+      release();
+      await page.locator(catalog.search).fill("L24");
+      await expect(page.locator(catalog.cards)).toHaveCount(1);
+      await expect(page.locator(catalog.cards)).toContainText("Binary Search");
+    } finally {
+      release();
+    }
+  });
+}
+
 test("catalog search and filters compose, persist in the URL, and recover from empty results", async ({ page }) => {
   await page.goto("./studio/#catalog");
   const search = page.locator("#catalog-search");

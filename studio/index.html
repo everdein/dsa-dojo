@@ -125,26 +125,26 @@
         <form class="catalog-tools" id="catalog-tools" role="search" aria-label="Filter lessons">
           <label class="catalog-search">
             <span>Search lessons</span>
-            <input id="catalog-search" type="search" maxlength="80" autocomplete="off" placeholder="Try binary search, graphs, or L24" />
+            <input id="catalog-search" type="search" maxlength="80" autocomplete="off" placeholder="Try binary search, graphs, or L24" disabled />
           </label>
           <label>
             <span>Topic</span>
-            <select id="catalog-topic-filter"><option value="all">All topics</option></select>
+            <select id="catalog-topic-filter" disabled><option value="all">All topics</option></select>
           </label>
           <label>
             <span>Pattern</span>
-            <select id="catalog-pattern-filter"><option value="all">All patterns</option></select>
+            <select id="catalog-pattern-filter" disabled><option value="all">All patterns</option></select>
           </label>
           <label>
             <span>Progress</span>
-            <select id="catalog-progress-filter">
+            <select id="catalog-progress-filter" disabled>
               <option value="all">Any progress</option>
               <option value="not-started">Not started</option>
               <option value="started">Started</option>
               <option value="complete">Complete</option>
             </select>
           </label>
-          <button class="quiet-button" id="clear-catalog-filters" type="button">Clear filters</button>
+          <button class="quiet-button" id="clear-catalog-filters" type="button" disabled>Clear filters</button>
         </form>
         <div class="catalog-results" aria-live="polite">
           <p id="catalog-results-summary">Showing all 55 lessons.</p>
