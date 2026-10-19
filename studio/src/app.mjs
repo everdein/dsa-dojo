@@ -539,6 +539,7 @@ function initializeCatalogFilters() {
   if (!options.topics.includes(catalogFilters.topic)) catalogFilters.topic = "all";
   if (!options.patterns.includes(catalogFilters.pattern)) catalogFilters.pattern = "all";
   syncCatalogFilterControls();
+  for (const control of elements.catalogTools.elements) control.disabled = false;
 }
 
 function createFilterOption(value, label) {
