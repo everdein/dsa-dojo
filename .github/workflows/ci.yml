@@ -49,7 +49,9 @@ jobs:
   browser-smoke:
     name: Browser smoke tests
     needs: verify
-    runs-on: ubuntu-latest
+    # Keep browser dependencies stable across ubuntu-latest image migrations.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
 
     steps:
       - name: Check out repository
