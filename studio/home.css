@@ -1189,7 +1189,7 @@ h3 {
   min-height: 250px;
   height: 100%;
   padding: clamp(24px, 4vw, 38px);
-  border: 1px solid #b3c9bb;
+  border: 1px solid #6B6B6B;
   border-radius: 30px;
   background: var(--surface);
   color: var(--ink);
@@ -1299,7 +1299,7 @@ h3 {
 
 .home-footer p {
   margin-bottom: 0;
-  color: #8da198;
+  color: #C8C8C8;
   font-size: 0.72rem;
   text-align: center;
 }
