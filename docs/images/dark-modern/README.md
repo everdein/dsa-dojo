@@ -8,5 +8,5 @@ Real browser captures of the Dark Modern application on October 23, 2026:
 
 Use these files for project media rather than earlier light-theme screenshots.
 
-The current captures use the shared Arial/Georgia font system. mobile.png records the 390px landing view.
+The current captures use the shared bold Arial font system. mobile.png records the 390px landing view.
 
