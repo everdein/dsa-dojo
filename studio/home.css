@@ -1,6 +1,6 @@
 :root {
   --font-ui: Arial, Helvetica, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  --font-display: Georgia, "Times New Roman", serif;
+  --font-display: var(--font-ui);
   --font-code: Consolas, "Courier New", monospace;
 
   color-scheme: dark;
@@ -9,12 +9,12 @@
   --ink-soft: #C8C8C8;
   --paper: #1F1F1F;
   --surface: #252526;
-  --accent-surface: #203448;
+  --accent-surface: #252526;
   --accent-bright: #9CDCFE;
   --accent: #9CDCFE;
   --action: #0078D4;
   --blue: #C586C0;
-  --blue-soft: #332D38;
+  --blue-soft: #252526;
   --sun: #DCDCAA;
   --coral: #CE9178;
   --line: #454545;
@@ -1697,6 +1697,15 @@ button[data-scan-replay] { color: #9CDCFE; }
 .home-button--outline { color: #CCCCCC; }
 
 /* Shared portfolio typography: editorial headings, quiet interface text. */
-h1, h2 { font-family: var(--font-display); font-weight: 500; letter-spacing: 0; }
-.home-hero h1 { font-weight: 500; letter-spacing: -0.025em; line-height: 0.98; }
+h1, h2 { font-family: var(--font-display); font-weight: 700; letter-spacing: 0; }
+.home-hero h1 { font-weight: 700; letter-spacing: -0.025em; line-height: 0.98; }
 pre, code, kbd, samp { font-family: var(--font-code); }
+
+.home-hero h1 em { font-style: normal; font-weight: 700; color: #C586C0; }
+.home-eyebrow, .home-hero .home-eyebrow, .final-section .home-eyebrow { color: #C586C0; }
+.home-button:not(.home-button--primary):not(.home-button--ghost):not(.home-button--outline) { background: #252526; color: #DCDCAA; border-color: #454545; }
+.home-lesson-topic:nth-of-type(3n + 2) h2 { color: #DCDCAA; }
+.home-lesson-topic:nth-of-type(3n) h2 { color: #CE9178; }
+
+.home-hero .home-button--outline { color: #CE9178; }
+.header-cta { color: #9CDCFE; }

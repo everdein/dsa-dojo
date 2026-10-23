@@ -1,8 +1,8 @@
 .pip-avatar {
   --pip-size: 3.5rem;
-  --pip-color: var(--accent, #0078D4);
-  --pip-eye-color: var(--paper, #f7f5ef);
-  --pip-orbit-color: var(--sun, #f5c96b);
+  --pip-color: #454545;
+  --pip-eye-color: #CCCCCC;
+  --pip-orbit-color: #C586C0;
   --pip-arm-duration: 2.2s;
   --pip-arm-left-rest: 10deg;
   --pip-arm-left-peak: 26deg;

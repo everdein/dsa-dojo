@@ -6,7 +6,7 @@
 
 [Open the live DSA Dojo](https://everdein.github.io/dsa-dojo/)
 
-![DSA Dojo — See the algorithm think, with shared portfolio typography](studio/social-preview.jpg)
+[![DSA Dojo — See the algorithm think, with shared portfolio typography](studio/social-preview.jpg)](https://everdein.github.io/dsa-dojo/)
 
 DSA Dojo is a framework-free learning product that makes data structures and
 algorithms visible, inspectable, and explainable with JavaScript. Learners can
