@@ -624,3 +624,20 @@ function assertCatalogMatchesManifest(rendered) {
     expect(group.lessonHrefs).toEqual(expectedHrefs);
   }
 }
+
+test("stepped lesson accents retain accessible text contrast", async ({ page }) => {
+  test.setTimeout(60_000);
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  for (const [id, title] of [
+    ["arrays/find-largest", "Find the largest value"],
+    ["arrays/sliding-window", "Find the best fixed window"],
+    ["trees/level-order-traversal", "Traverse a tree breadth first"]
+  ]) {
+    await page.goto("./studio/#lesson=" + encodeURIComponent(id));
+    await expect(page.getByRole("heading", { level: 2, name: title, exact: true })).toBeVisible();
+    for (let beat = 0; beat < 4; beat += 1) {
+      await page.locator("#next-button").click();
+      await expectNoSeriousAccessibilityViolations(page);
+    }
+  }
+});
