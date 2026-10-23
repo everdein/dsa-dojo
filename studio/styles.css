@@ -1,4 +1,8 @@
 :root {
+  --font-ui: Arial, Helvetica, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-display: Georgia, "Times New Roman", serif;
+  --font-code: Consolas, "Courier New", monospace;
+
   color-scheme: dark;
   --ink: #CCCCCC;
   --ink-soft: #C8C8C8;
@@ -12,7 +16,7 @@
   --sun: #DCDCAA;
   --line: #454545;
   --shadow: 0 18px 50px rgba(0, 0, 0, 0.08);
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-family: var(--font-ui);
   background: var(--paper);
   color: var(--ink);
 }
@@ -47,7 +51,7 @@ main { overflow: hidden; }
 h1, h2, h3, p { margin-top: 0; }
 h1, h2 { letter-spacing: -0.055em; }
 h1 { max-width: 760px; margin-bottom: 28px; font-size: clamp(3.8rem, 9vw, 8rem); line-height: 0.91; font-weight: 700; }
-.hero h1 em { display: block; color: var(--accent); font-family: Georgia, "Times New Roman", serif; font-weight: 500; }
+.hero h1 em { display: block; color: var(--accent); font-family: var(--font-display); font-weight: 500; }
 h2 { margin-bottom: 16px; font-size: clamp(2rem, 4vw, 4rem); line-height: 0.98; }
 h3 { margin-bottom: 0; font-size: 1.05rem; }
 .hero-lede { max-width: 590px; color: var(--ink-soft); font-size: clamp(1.05rem, 1.8vw, 1.35rem); line-height: 1.55; }
@@ -202,7 +206,7 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .comparison-visual .lookup-empty { color: var(--ink-soft); }
 .comparison-visual .branching-view, .comparison-visual .graph-view { min-height: 210px; }
 .comparison-narration { min-height: 68px; margin: 16px 0 10px; color: var(--ink-soft); font-size: 0.8rem; line-height: 1.5; }
-.comparison-code { margin-top: auto; padding: 12px 14px; overflow: hidden; border-radius: 13px; background: #181818; color: #CCCCCC; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; font-size: 0.7rem; text-overflow: ellipsis; white-space: nowrap; }
+.comparison-code { margin-top: auto; padding: 12px 14px; overflow: hidden; border-radius: 13px; background: #181818; color: #CCCCCC; font-family: var(--font-code); font-size: 0.7rem; text-overflow: ellipsis; white-space: nowrap; }
 .comparison-code strong { margin-right: 9px; color: var(--sun); font-weight: 700; }
 .comparison-side-controls { display: flex; gap: 8px; justify-content: space-between; margin-top: 12px; }
 .comparison-side-controls .quiet-button { font-size: 0.68rem; }
@@ -432,7 +436,7 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 .pip-emotion-label[data-emotion="caution"] { border-color: rgba(140,48,36,0.24); background: #30201F; color: #F85149; }
 .pip-emotion-label[data-emotion="cool"] { border-color: #181818; background: #181818; color: #DCDCAA; }
 .icon-button--light { border-color: rgba(16,37,31,0.18); background: #252526; }
-.pip-sensei-line { margin: 22px 0 0; color: #9CDCFE; font-family: Georgia, "Times New Roman", serif; font-size: 1.03rem; font-style: italic; line-height: 1.45; }
+.pip-sensei-line { margin: 22px 0 0; color: #9CDCFE; font-family: var(--font-display); font-size: 1.03rem; font-style: italic; line-height: 1.45; }
 .pip-message { margin-top: 12px; color: var(--ink); font-size: 1.05rem; line-height: 1.5; }
 .pip-prompt { margin-top: 18px; padding: 15px; border-left: 3px solid var(--accent); color: #9CDCFE; font-size: 0.84rem; font-weight: 700; line-height: 1.45; }
 .prediction-checkpoint { margin-top: 20px; padding-top: 20px; border-top: 1px solid rgba(16,37,31,0.14); }
@@ -559,3 +563,8 @@ h3 { margin-bottom: 0; font-size: 1.05rem; }
 
 .challenge-toggle[aria-pressed='true'] strong { color: #ffffff; }
 .primary-button:hover { background: #0069B9; }
+
+/* Shared portfolio typography: editorial headings, quiet interface text. */
+h1, h2 { font-family: var(--font-display); font-weight: 500; letter-spacing: 0; }
+.home-hero h1 { font-weight: 500; letter-spacing: -0.025em; line-height: 0.98; }
+pre, code, kbd, samp { font-family: var(--font-code); }

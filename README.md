@@ -6,7 +6,7 @@
 
 [Open the live DSA Dojo](https://everdein.github.io/dsa-dojo/)
 
-![DSA Dojo curriculum map showing the 55-lesson learning path](studio/social-preview.jpg)
+![DSA Dojo — See the algorithm think, with shared portfolio typography](studio/social-preview.jpg)
 
 DSA Dojo is a framework-free learning product that makes data structures and
 algorithms visible, inspectable, and explainable with JavaScript. Learners can
@@ -197,3 +197,7 @@ Pushes to `main` run CI across Node.js 22 and 24, including unit/integration
 tests, enforced coverage floors, a static build, and a separate Playwright
 browser smoke job. GitHub Pages is built and deployed by that same workflow
 only after the browser job succeeds, so a browser regression cannot publish.
+
+## Visual identity
+
+See [the shared visual system](docs/visual-system.md) for the font pairing, Dark Modern palette and screenshot policy.
