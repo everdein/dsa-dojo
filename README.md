@@ -2,6 +2,9 @@
 
 **See the algorithm think.**
 
+[Read the engineering case study](docs/portfolio-case-study.md) for the execution
+model, design tradeoffs, verification evidence, and limits of the product claims.
+
 [![CI](https://github.com/everdein/dsa-dojo/actions/workflows/ci.yml/badge.svg)](https://github.com/everdein/dsa-dojo/actions/workflows/ci.yml)
 
 [Open the live DSA Dojo](https://everdein.github.io/dsa-dojo/)
