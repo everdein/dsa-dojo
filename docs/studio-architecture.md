@@ -22,7 +22,7 @@ npm run studio
 
 Open `http://127.0.0.1:4173`.
 
-The repository requires Node.js 22 or newer.
+The repository recommends Node.js 24.22.1 LTS and also verifies patched Node 22.23.4 and 26.12.1.
 
 Run the complete release suite with:
 

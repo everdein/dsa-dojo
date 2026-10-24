@@ -37,7 +37,7 @@ architecture stabilization milestone is complete.
 
 ## Try It Locally
 
-DSA Dojo requires Node.js 22 or newer.
+DSA Dojo recommends Node.js 24.22.1 LTS and also supports patched Node 22.23.4 and 26.12.1.
 
 ```bash
 npm install
@@ -140,7 +140,7 @@ flowchart LR
 | --- | --- |
 | Interface | Semantic HTML, modern CSS, and browser-native JavaScript |
 | Modules | Native ES modules |
-| Runtime | Node.js 22+ |
+| Runtime | Node.js 24.22.1 LTS recommended; 22.23.4 / 26.12.1 also verified |
 | Local server | Small Node.js static-file server |
 | Testing | Node.js test runner, Playwright, and axe-core |
 | Architecture | Pure algorithms, deterministic traces, validated lesson registry, and renderer-specific view models |
@@ -193,7 +193,7 @@ project subpath. `npm run preview` rebuilds and serves that release locally;
 the Playwright suite exercises it at the same `/dsa-dojo/` subpath used by
 GitHub Pages.
 
-Pushes to `main` run CI across Node.js 22 and 24, including unit/integration
+Pushes to `main` run CI across Node.js 22.23.4, 24.22.1 and 26.12.1, including unit/integration
 tests, enforced coverage floors, a static build, and a separate Playwright
 browser smoke job. GitHub Pages is built and deployed by that same workflow
 only after the browser job succeeds, so a browser regression cannot publish.
@@ -201,3 +201,7 @@ only after the browser job succeeds, so a browser regression cannot publish.
 ## Visual identity
 
 See [the shared visual system](docs/visual-system.md) for the font pairing, Dark Modern palette and screenshot policy.
+
+## Dependency maintenance
+
+See [dependency and runtime maintenance](docs/dependency-maintenance.md) for the current package versions, runtime baseline, upgrade constraints, and verification procedure. Last reviewed October 24, 2026.
