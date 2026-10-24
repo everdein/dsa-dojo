@@ -11,6 +11,9 @@ The implementation is intentionally dependency-free. It uses browser-native
 ES modules, semantic HTML, CSS, and a small Node.js static server. This keeps
 the learning code visible across the complete 55-lesson curriculum.
 
+[Architecture diagrams](diagrams/README.md) show the release topology, execution
+model, and learner workflow with editable sources and implementation references.
+
 ## Running the Studio
 
 From the repository root:
