@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        node-version: [22.x, 24.x]
+        node-version: [24.22.1, 26.12.1]
 
     steps:
       - name: Check out repository
@@ -57,10 +57,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Use Node.js 24.x
+      - name: Use recommended Node.js LTS
         uses: actions/setup-node@v7
         with:
-          node-version: 24.x
+          node-version-file: .node-version
           cache: npm
 
       - name: Install dependencies from lockfile
@@ -92,10 +92,10 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v7
 
-      - name: Use Node.js 24.x
+      - name: Use recommended Node.js LTS
         uses: actions/setup-node@v7
         with:
-          node-version: 24.x
+          node-version-file: .node-version
           cache: npm
 
       - name: Install dependencies from lockfile

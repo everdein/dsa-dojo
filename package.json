@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Interactive JavaScript data structures and algorithms lessons with deterministic traces, visual state, and guided explanations.",
   "engines": {
-    "node": ">=22"
+    "node": "^24.22.1 || ^26.12.1"
   },
   "scripts": {
     "build": "node scripts/build-static.mjs",
