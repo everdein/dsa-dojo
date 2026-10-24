@@ -82,3 +82,9 @@ Supporting sources:
 - [Source-pane mapping](../studio/src/source-pane.mjs)
 - [Release workflow](../.github/workflows/ci.yml)
 - [Browser verification](../e2e/studio.spec.mjs)
+
+## Architecture and workflow diagrams
+
+[Inspect the reviewed diagram set](diagrams/README.md) for topology, application
+responsibilities, and a detailed workflow sequence. Each diagram includes its
+scope, editable Mermaid source, and implementation evidence.

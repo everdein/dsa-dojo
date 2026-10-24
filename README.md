@@ -38,6 +38,11 @@ browser controllers, single-pass runtime traces, on-demand lesson loading, and
 source-derived code panes now protect releases and maintenance. The four-phase
 architecture stabilization milestone is complete.
 
+## Architecture diagrams
+
+[Explore topology, architecture, and workflow diagrams](docs/diagrams/README.md),
+with editable Mermaid sources, full-size SVGs, and implementation references.
+
 ## Try It Locally
 
 DSA Dojo recommends Node.js 24.22.1 LTS and also supports patched Node 22.23.4 and 26.12.1.
