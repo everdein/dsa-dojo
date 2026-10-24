@@ -16,3 +16,5 @@ Dependencies, where present, are on the latest stable published versions. Use np
 ## Update procedure
 
 Check current stable releases and peer/runtime requirements, update manifests and lockfiles together, run a clean install, audit dependencies, and run the project verification gate plus applicable browser checks. Keep historical ADRs unchanged and update current requirements when the runtime baseline changes. Record any intentional version constraint here rather than reporting an incompatible major as installed.
+
+DSA additionally supports Node 22.23.4 (maintenance LTS). Its existing protected checks retain the stable names Node 22.x and Node 24.x; they execute the exact patched versions, while the added Node 26.x job covers 26.12.1. Branch-protection rules are unchanged.
