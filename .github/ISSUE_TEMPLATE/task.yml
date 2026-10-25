@@ -1,0 +1,62 @@
+name: Engineering task
+description: Scope an implementation, maintenance change, or investigation.
+title: '[task]: '
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the learner or engineering outcome and identify affected lessons,
+        renderers, or browser behavior. Use synthetic inputs; do not include private
+        progress or challenge answers. Preserve reversible traces and accessibility.
+  - type: dropdown
+    id: work_type
+    attributes:
+      label: Work type
+      options:
+        - Implementation
+        - Maintenance
+        - Investigation
+    validations:
+      required: true
+  - type: textarea
+    id: objective
+    attributes:
+      label: Objective and context
+      description: What outcome or bounded question matters? Link current source or canonical docs.
+      placeholder: Identify the affected lesson, interaction, or maintenance gap and its source context.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and non-goals
+      description: State what may change and what should remain outside this task.
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: List observable results; for an investigation, define its evidence and output.
+      placeholder: Include relevant trace, keyboard, focus, reduced-motion, or responsive behavior.
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification
+      description: Select applicable checks from AGENTS.md and record actual results before Done.
+      placeholder: |
+        npm run check:release
+        npm run coverage
+        Verify main CI, applicable Pages deployment, and affected live routes after merge.
+        Record unavailable checks explicitly; do not weaken coverage or accessibility gates.
+    validations:
+      required: true
+  - type: textarea
+    id: dependencies_owner
+    attributes:
+      label: Dependencies and owner
+      description: Name one owner, linked prerequisites, and any blocker or decision; write none when clear.
+    validations:
+      required: true
