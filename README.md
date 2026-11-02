@@ -45,7 +45,7 @@ with editable Mermaid sources, full-size SVGs, and implementation references.
 
 ## Try It Locally
 
-DSA Dojo recommends Node.js 24.22.1 LTS and also supports patched Node 22.23.4 and 26.12.1.
+DSA Dojo recommends Node.js 24.22.2 LTS and also supports patched Node 22.23.4 and 26.13.0.
 
 ```bash
 npm install
@@ -148,7 +148,7 @@ flowchart LR
 | --- | --- |
 | Interface | Semantic HTML, modern CSS, and browser-native JavaScript |
 | Modules | Native ES modules |
-| Runtime | Node.js 24.22.1 LTS recommended; 22.23.4 / 26.12.1 also verified |
+| Runtime | Node.js 24.22.2 LTS recommended; 22.23.4 / 26.13.0 also verified |
 | Local server | Small Node.js static-file server |
 | Testing | Node.js test runner, Playwright, and axe-core |
 | Architecture | Pure algorithms, deterministic traces, validated lesson registry, and renderer-specific view models |
@@ -201,7 +201,7 @@ project subpath. `npm run preview` rebuilds and serves that release locally;
 the Playwright suite exercises it at the same `/dsa-dojo/` subpath used by
 GitHub Pages.
 
-Pushes to `main` run CI across Node.js 22.23.4, 24.22.1 and 26.12.1, including unit/integration
+Pushes to `main` run CI across Node.js 22.23.4, 24.22.2 and 26.13.0, including unit/integration
 tests, enforced coverage floors, a static build, and a separate Playwright
 browser smoke job. GitHub Pages is built and deployed by that same workflow
 only after the browser job succeeds, so a browser regression cannot publish.
