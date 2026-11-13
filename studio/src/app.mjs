@@ -1579,7 +1579,8 @@ elements.pipToggle.addEventListener("click", () => {
   render();
 });
 document.addEventListener("keydown", (event) => {
-  if (event.defaultPrevented || event.target.matches("input, button, textarea, select, a[href], [contenteditable='true']")) return;
+  if (event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
+  if (event.target.matches("input, button, textarea, select, a[href], [contenteditable='true']")) return;
   if (comparisonRun) {
     if (event.key === "ArrowRight") moveComparison({ type: "NEXT" });
     if (event.key === "ArrowLeft") moveComparison({ type: "PREVIOUS" });

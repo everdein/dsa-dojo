@@ -174,6 +174,11 @@ test("custom input, validation, stepping, playback, and keyboard controls stay c
   await page.locator("#lesson-title").focus();
   await page.keyboard.press("ArrowRight");
   await expect(page.locator("#step-count")).toHaveText("2 / 4");
+  await page.keyboard.press("Alt+ArrowLeft");
+  await page.keyboard.press("Control+r");
+  await page.keyboard.press("Shift+Space");
+  await expect(page.locator("#step-count")).toHaveText("2 / 4");
+  await expect(page.getByRole("button", { name: "Play lesson" })).toBeVisible();
   await page.keyboard.press("r");
   await expect(page.locator("#step-count")).toHaveText("0 / 4");
 
@@ -261,6 +266,12 @@ test("Algorithm Comparison Mode synchronizes compatible lessons without hiding t
   await expect(page.locator("#comparison-left-step")).toHaveText("1 / 17");
   await expect(page.locator("#comparison-right-step")).toHaveText("0 / 29");
   await page.getByRole("button", { name: "Next beat →" }).click();
+  await expect(page.locator("#comparison-left-step")).toHaveText("2 / 17");
+  await expect(page.locator("#comparison-right-step")).toHaveText("1 / 29");
+  await page.locator("#comparison-title").focus();
+  await page.keyboard.press("Alt+ArrowLeft");
+  await page.keyboard.press("Control+r");
+  await page.keyboard.press("Shift+Space");
   await expect(page.locator("#comparison-left-step")).toHaveText("2 / 17");
   await expect(page.locator("#comparison-right-step")).toHaveText("1 / 29");
   await page.getByRole("button", { name: "Play together comparison" }).click();
